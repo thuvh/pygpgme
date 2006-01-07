@@ -7,7 +7,8 @@ gpgme = Extension(
     ['src/gpgme.c',
      'src/pygpgme-error.c',
      'src/pygpgme-data.c',
-     'src/pygpgme-context.c'],
+     'src/pygpgme-context.c',
+     'src/pygpgme-key.c'],
     libraries=['gpgme'])
 
 setup(name='pygpgme',
