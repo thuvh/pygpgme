@@ -33,21 +33,25 @@ set_errno(void)
 static ssize_t
 read_cb(void *handle, void *buffer, size_t size)
 {
+    PyGILState_STATE state;
     PyObject *fp = handle;
     PyObject *result;
     int result_size;
 
+    state = PyGILState_Ensure();
     result = PyObject_CallMethod(fp, "read", "l", (long)size);
     /* check for exceptions or non-string return values */
     if (result == NULL) {
         set_errno();
-        return -1;
+        result_size = -1;
+        goto end;
     }
     /* if we don't have a string return value, consider that an error too */
     if (!PyString_Check(result)) {
         Py_DECREF(result);
         errno = EINVAL;
-        return -1;
+        result_size = -1;
+        goto end;
     }
     /* copy the result into the given buffer */
     result_size = PyString_Size(result);
@@ -55,34 +59,46 @@ read_cb(void *handle, void *buffer, size_t size)
         result_size = size;
     memcpy(buffer, PyString_AsString(result), result_size);
     Py_DECREF(result);
+ end:
+    PyGILState_Release(state);
     return result_size;
 }
 
 static ssize_t
 write_cb(void *handle, const void *buffer, size_t size)
 {
+    PyGILState_STATE state;
     PyObject *fp = handle;
     PyObject *result;
+    ssize_t bytes_written = 0;
 
+    state = PyGILState_Ensure();
     result = PyObject_CallMethod(fp, "write", "s#", buffer, (int)size);
     if (result == NULL) {
         set_errno();
-        return -1;
+        bytes_written = -1;
+        goto end;
     }
     Py_DECREF(result);
-    return size;
+    bytes_written = size;
+ end:
+    PyGILState_Release(state);
+    return bytes_written;
 }
 
 static off_t
 seek_cb(void *handle, off_t offset, int whence)
 {
+    PyGILState_STATE state;
     PyObject *fp = handle;
     PyObject *result;
 
+    state = PyGILState_Ensure();
     result = PyObject_CallMethod(fp, "seek", "li", (long)offset, whence);
     if (result == NULL) {
         set_errno();
-        return -1;
+        offset = -1;
+        goto end;
     }
     Py_DECREF(result);
 
@@ -90,24 +106,31 @@ seek_cb(void *handle, off_t offset, int whence)
     result = PyObject_CallMethod(fp, "tell", NULL);
     if (result == NULL) {
         set_errno();
-        return -1;
+        offset = -1;
+        goto end;
     }
     if (!PyInt_Check(result)) {
         Py_DECREF(result);
         errno = EINVAL;
-        return -1;
+        offset = -1;
+        goto end;
     }
     offset = PyInt_AsLong(result);
     Py_DECREF(result);
+ end:
+    PyGILState_Release(state);
     return offset;
 }
 
 static void
 release_cb(void *handle)
 {
+    PyGILState_STATE state;
     PyObject *fp = handle;
 
+    state = PyGILState_Ensure();
     Py_DECREF(fp);
+    PyGILState_Release(state);
 }
 
 static struct gpgme_data_cbs python_data_cbs = {

@@ -146,12 +146,202 @@ static PyGetSetDef pygpgme_context_getsets[] = {
 };
 
 /* XXX: set_locale */
+static PyObject *
+pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
+{
+    int category;
+    const char *value;
+
+    if (!PyArg_ParseTuple(args, "iz", &category, &value))
+        return NULL;
+
+    if (pygpgme_check_error(gpgme_set_locale(self->ctx, category, value)))
+        return NULL;
+
+    Py_RETURN_NONE;
+}
+
+/* the following don't seem to be used */
 /* XXX: signers_clear */
 /* XXX: signers_add */
 /* XXX: signers_enum */
 
-/* XXX: get_key */
-/* XXX: cancel */
+static PyObject *
+pygpgme_context_get_key(PyGpgmeContext *self, PyObject *args)
+{
+    const char *fpr;
+    int secret = 0;
+    gpgme_error_t err;
+    gpgme_key_t key;
+    PyObject *ret;
+
+    if (!PyArg_ParseTuple(args, "s|i", &fpr, &secret))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_get_key(self->ctx, fpr, &key, secret);
+    Py_END_ALLOW_THREADS;
+
+    if (pygpgme_check_error(err))
+        return NULL;
+
+    ret = pygpgme_key_new(key);
+    gpgme_key_unref(key);
+    return ret;
+}
+
+/* XXX: cancel -- not needed unless we wrap the async calls */
+
+static PyObject *
+decode_encrypt_result(PyGpgmeContext *self)
+{
+    gpgme_encrypt_result_t res;
+    gpgme_invalid_key_t key;
+    PyObject *list;
+
+    list = PyList_New(0);
+    res = gpgme_op_encrypt_result(self->ctx);
+    if (res == NULL)
+        return list;
+
+    for (key = res->invalid_recipients; key != NULL; key = key->next) {
+        PyObject *item, *err;
+
+        err = pygpgme_error_object(key->reason);
+        item = Py_BuildValue("(zN)", key->fpr, err);
+        PyList_Append(list, item);
+        Py_DECREF(item);
+    }
+    return list;
+}
+
+static PyObject *
+pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_recp, *py_plain, *py_cipher;
+    int flags, i, length;
+    gpgme_key_t *recp;
+    gpgme_data_t plain, cipher;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "OiOO", &py_recp, &flags,
+                          &py_plain, &py_cipher))
+        return NULL;
+
+    py_recp = PySequence_Fast(py_recp, "first argument must be a sequence");
+    if (py_recp == NULL)
+        return NULL;
+
+    length = PySequence_Fast_GET_SIZE(py_recp);
+    recp = malloc((length + 1) * sizeof (gpgme_key_t));
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(py_recp, i);
+
+        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+            free(recp);
+            Py_DECREF(py_recp);
+            PyErr_SetString(PyExc_TypeError, "items in first argument must "
+                            "be gpgme.Key objects");
+            return NULL;
+        }
+        recp[i] = ((PyGpgmeKey *)item)->key;
+    }
+    recp[i] = NULL;
+
+    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+        free(recp);
+        Py_DECREF(py_recp);
+        return NULL;    
+    }
+    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher))) {
+        free(recp);
+        Py_DECREF(py_recp);
+        gpgme_data_release(plain);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_encrypt(self->ctx, recp, flags, plain, cipher);
+    Py_END_ALLOW_THREADS;
+
+    free(recp);
+    Py_DECREF(py_recp);
+    gpgme_data_release(plain);
+    gpgme_data_release(cipher);
+
+    if (pygpgme_check_error(err))
+        return NULL;
+
+    return decode_encrypt_result(self);
+}
+
+static PyObject *
+pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_recp, *py_plain, *py_cipher;
+    int flags, i, length;
+    gpgme_key_t *recp;
+    gpgme_data_t plain, cipher;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "OiOO", &py_recp, &flags,
+                          &py_plain, &py_cipher))
+        return NULL;
+
+    py_recp = PySequence_Fast(py_recp, "first argument must be a sequence");
+    if (py_recp == NULL)
+        return NULL;
+
+    length = PySequence_Fast_GET_SIZE(py_recp);
+    recp = malloc((length + 1) * sizeof (gpgme_key_t));
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(py_recp, i);
+
+        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+            free(recp);
+            Py_DECREF(py_recp);
+            PyErr_SetString(PyExc_TypeError, "items in first argument must "
+                            "be gpgme.Key objects");
+            return NULL;
+        }
+        recp[i] = ((PyGpgmeKey *)item)->key;
+    }
+    recp[i] = NULL;
+
+    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+        free(recp);
+        Py_DECREF(py_recp);
+        return NULL;    
+    }
+    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher))) {
+        free(recp);
+        Py_DECREF(py_recp);
+        gpgme_data_release(plain);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_encrypt_sign(self->ctx, recp, flags, plain, cipher);
+    Py_END_ALLOW_THREADS;
+
+    free(recp);
+    Py_DECREF(py_recp);
+    gpgme_data_release(plain);
+    gpgme_data_release(cipher);
+
+    if (pygpgme_check_error(err))
+        return NULL;
+
+    return decode_encrypt_result(self);
+}
+
+static PyMethodDef pygpgme_context_methods[] = {
+    { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
+    { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
+    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS },
+    { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
+    { NULL, 0, 0 }
+};
 
 PyTypeObject PyGpgmeContext_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -162,4 +352,5 @@ PyTypeObject PyGpgmeContext_Type = {
     .tp_dealloc = (destructor)pygpgme_context_dealloc,
     .tp_init = (initproc)pygpgme_context_init,
     .tp_getset = pygpgme_context_getsets,
+    .tp_methods = pygpgme_context_methods,
 };
