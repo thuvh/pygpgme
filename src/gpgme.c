@@ -26,7 +26,7 @@ init_gpgme(void)
     INIT_TYPE(PyGpgmeUserId_Type);
     INIT_TYPE(PyGpgmeKeySig_Type);
 
-    mod = Py_InitModule("_gpgme", NULL);
+    mod = Py_InitModule("gpgme._gpgme", NULL);
 
     Py_INCREF(&PyGpgmeContext_Type);
     PyModule_AddObject(mod, "Context", (PyObject *)&PyGpgmeContext_Type);

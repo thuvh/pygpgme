@@ -3,7 +3,7 @@
 from distutils.core import setup, Extension
 
 gpgme = Extension(
-    '_gpgme',
+    'gpgme._gpgme',
     ['src/gpgme.c',
      'src/pygpgme-error.c',
      'src/pygpgme-data.c',
