@@ -192,17 +192,24 @@ pygpgme_context_get_key(PyGpgmeContext *self, PyObject *args)
 
 /* XXX: cancel -- not needed unless we wrap the async calls */
 
-static PyObject *
+/* annotate exception with encrypt_result data */
+static void
 decode_encrypt_result(PyGpgmeContext *self)
 {
+    PyObject *err_type, *err_value, *err_traceback;
     gpgme_encrypt_result_t res;
     gpgme_invalid_key_t key;
     PyObject *list;
 
+    PyErr_Fetch(&err_type, &err_value, &err_traceback);
+
+    if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+        goto end;
+
     list = PyList_New(0);
     res = gpgme_op_encrypt_result(self->ctx);
     if (res == NULL)
-        return list;
+        goto end;
 
     for (key = res->invalid_recipients; key != NULL; key = key->next) {
         PyObject *item, *err;
@@ -212,7 +219,12 @@ decode_encrypt_result(PyGpgmeContext *self)
         PyList_Append(list, item);
         Py_DECREF(item);
     }
-    return list;
+
+    PyObject_SetAttrString(err_value, "invalid_recipients", list);
+    Py_DECREF(list);
+
+ end:
+    PyErr_Restore(err_type, err_value, err_traceback);
 }
 
 static PyObject *
@@ -269,10 +281,12 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
     gpgme_data_release(plain);
     gpgme_data_release(cipher);
 
-    if (pygpgme_check_error(err))
+    if (pygpgme_check_error(err)) {
+        decode_encrypt_result(self);
         return NULL;
+    }
 
-    return decode_encrypt_result(self);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -329,10 +343,12 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
     gpgme_data_release(plain);
     gpgme_data_release(cipher);
 
-    if (pygpgme_check_error(err))
+    if (pygpgme_check_error(err)) {
+        decode_encrypt_result(self);
         return NULL;
+    }
 
-    return decode_encrypt_result(self);
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef pygpgme_context_methods[] = {
