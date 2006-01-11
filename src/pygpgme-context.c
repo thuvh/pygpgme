@@ -131,6 +131,63 @@ pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
 /* XXX: passphrase_cb */
 /* XXX: progress_cb */
 
+static PyObject *
+pygpgme_context_get_signers(PyGpgmeContext *self)
+{
+    PyObject *list, *tuple;
+    gpgme_key_t key;
+    int i;
+
+    list = PyList_New(0);
+    for (i = 0, key = gpgme_signers_enum(self->ctx, 0);
+         key != NULL; key = gpgme_signers_enum(self->ctx, ++i)) {
+        PyObject *item;
+
+        item = pygpgme_key_new(key);
+        gpgme_key_unref(key);
+        if (item == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_Append(list, item);
+        Py_DECREF(item);
+    }
+    tuple = PySequence_Tuple(list);
+    Py_DECREF(list);
+    return tuple;
+}
+
+static int
+pygpgme_context_set_signers(PyGpgmeContext *self, PyObject *value)
+{
+    PyObject *signers = NULL;
+    int i, length, ret = 0;
+
+    signers = PySequence_Fast(value, "signers must be a sequence of keys");
+    if (!signers) {
+        ret = -1;
+        goto end;
+    }
+
+    gpgme_signers_clear(self->ctx);
+    length = PySequence_Fast_GET_SIZE(signers);
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(signers, i);
+
+        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "signers must be a sequence of keys");
+            ret = -1;
+            goto end;
+        }
+        gpgme_signers_add(self->ctx, ((PyGpgmeKey *)item)->key);
+    }
+
+ end:
+    Py_XDECREF(signers);
+    return ret;
+}
+
 static PyGetSetDef pygpgme_context_getsets[] = {
     { "protocol", (getter)pygpgme_context_get_protocol,
       (setter)pygpgme_context_set_protocol },
@@ -142,6 +199,8 @@ static PyGetSetDef pygpgme_context_getsets[] = {
       (setter)pygpgme_context_set_include_certs },
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
       (setter)pygpgme_context_set_keylist_mode },
+    { "signers", (getter)pygpgme_context_get_signers,
+      (setter)pygpgme_context_set_signers },
     { NULL, (getter)0, (setter)0 }
 };
 
@@ -351,11 +410,116 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static void
+decode_decrypt_result(PyGpgmeContext *self)
+{
+    PyObject *err_type, *err_value, *err_traceback;
+    PyObject *value;
+    gpgme_decrypt_result_t res;
+
+    PyErr_Fetch(&err_type, &err_value, &err_traceback);
+
+    if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+        goto end;
+
+    res = gpgme_op_decrypt_result(self->ctx);
+    if (res == NULL)
+        goto end;
+
+    if (res->unsupported_algorithm) {
+        value = PyString_FromString(res->unsupported_algorithm);
+    } else {
+        Py_INCREF(Py_None);
+        value = Py_None;
+    }
+    if (value) {
+        PyObject_SetAttrString(err_value, "unsupported_algorithm", value);
+        Py_DECREF(value);
+    }
+
+    value = PyBool_FromLong(res->wrong_key_usage);
+    if (value) {
+        PyObject_SetAttrString(err_value, "wrong_key_usage", value);
+        Py_DECREF(value);
+    }
+
+ end:
+    PyErr_Restore(err_type, err_value, err_traceback);
+}
+
+static PyObject *
+pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_cipher, *py_plain;
+    gpgme_data_t cipher, plain;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "OO", &py_cipher, &py_plain))
+        return NULL;
+
+    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher)))
+        return NULL;    
+
+    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+        gpgme_data_release(cipher);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_decrypt(self->ctx, cipher, plain);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(cipher);
+    gpgme_data_release(plain);
+
+    if (pygpgme_check_error(err)) {
+        decode_decrypt_result(self);
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_cipher, *py_plain;
+    gpgme_data_t cipher, plain;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "OO", &py_cipher, &py_plain))
+        return NULL;
+
+    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher)))
+        return NULL;    
+
+    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+        gpgme_data_release(cipher);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_decrypt_verify(self->ctx, cipher, plain);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(cipher);
+    gpgme_data_release(plain);
+
+    if (pygpgme_check_error(err)) {
+        decode_decrypt_result(self);
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef pygpgme_context_methods[] = {
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
     { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS },
     { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
+    { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS },
+    { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
     { NULL, 0, 0 }
 };
 
