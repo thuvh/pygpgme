@@ -44,6 +44,7 @@ extern HIDDEN PyTypeObject PyGpgmeKeySig_Type;
 
 HIDDEN int           pygpgme_check_error  (gpgme_error_t err);
 HIDDEN PyObject *    pygpgme_error_object (gpgme_error_t err);
+HIDDEN gpgme_error_t pygpgme_check_pyerror(void);
 HIDDEN gpgme_error_t pygpgme_data_new     (gpgme_data_t *dh, PyObject *fp);
 HIDDEN PyObject *    pygpgme_key_new      (gpgme_key_t key);
 

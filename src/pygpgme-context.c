@@ -1,11 +1,56 @@
 /* -*- mode: C; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "pygpgme.h"
 
+static gpgme_error_t
+pygpgme_passphrase_cb(void *hook, const char *uid_hint,
+                      const char *passphrase_info, int prev_was_bad,
+                      int fd)
+{
+    PyObject *callback, *ret;
+    gpgme_error_t err;
+
+    callback = (PyObject *)hook;
+    ret = PyObject_CallFunction(callback, "zzii", uid_hint, passphrase_info,
+                                prev_was_bad, fd);
+    err = pygpgme_check_pyerror();
+    Py_XDECREF(ret);
+    return err;
+}
+
+static void
+pygpgme_progress_cb(void *hook, const char *what, int type,
+                    int current, int total)
+{
+    PyObject *callback, *ret;
+
+    callback = (PyObject *)hook;
+    ret = PyObject_CallFunction(callback, "ziii", what, type, current, total);
+    PyErr_Clear();
+    Py_XDECREF(ret);
+}
+
 static void
 pygpgme_context_dealloc(PyGpgmeContext *self)
 {
-    if (self->ctx)
+    gpgme_passphrase_cb_t passphrase_cb;
+    gpgme_progress_cb_t progress_cb;
+    PyObject *callback;
+
+    if (self->ctx) {
+        /* free the passphrase callback */
+        gpgme_get_passphrase_cb(self->ctx, &passphrase_cb, (void **)&callback);
+        if (passphrase_cb == pygpgme_passphrase_cb) {
+            Py_DECREF(callback);
+        }
+
+        /* free the progress callback */
+        gpgme_get_progress_cb(self->ctx, &progress_cb, (void **)&callback);
+        if (progress_cb == pygpgme_progress_cb) {
+            Py_DECREF(callback);
+        }
+
         gpgme_release(self->ctx);
+    }
     self->ctx = NULL;
     PyObject_Del(self);
 }
@@ -128,8 +173,77 @@ pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
     return 0;
 }
 
-/* XXX: passphrase_cb */
-/* XXX: progress_cb */
+static PyObject *
+pygpgme_context_get_passphrase_cb(PyGpgmeContext *self)
+{
+    gpgme_passphrase_cb_t passphrase_cb;
+    PyObject *callback;
+
+    /* free the passphrase callback */
+    gpgme_get_passphrase_cb(self->ctx, &passphrase_cb, (void **)&callback);
+    if (passphrase_cb == pygpgme_passphrase_cb) {
+        Py_INCREF(callback);
+        return callback;
+    } else {
+        Py_RETURN_NONE;
+    }
+}
+
+static int
+pygpgme_context_set_passphrase_cb(PyGpgmeContext *self, PyObject *value)
+{
+    gpgme_passphrase_cb_t passphrase_cb;
+    PyObject *callback;
+
+    /* free the passphrase callback */
+    gpgme_get_passphrase_cb(self->ctx, &passphrase_cb, (void **)&callback);
+    if (passphrase_cb == pygpgme_passphrase_cb) {
+        Py_DECREF(callback);
+    }
+
+    /* callback of None == unset */
+    if (value == Py_None)
+        value = NULL;
+
+    gpgme_set_passphrase_cb(self->ctx, pygpgme_passphrase_cb, value);
+    return 0;
+}
+
+static PyObject *
+pygpgme_context_get_progress_cb(PyGpgmeContext *self)
+{
+    gpgme_progress_cb_t progress_cb;
+    PyObject *callback;
+
+    /* free the progress callback */
+    gpgme_get_progress_cb(self->ctx, &progress_cb, (void **)&callback);
+    if (progress_cb == pygpgme_progress_cb) {
+        Py_INCREF(callback);
+        return callback;
+    } else {
+        Py_RETURN_NONE;
+    }
+}
+
+static int
+pygpgme_context_set_progress_cb(PyGpgmeContext *self, PyObject *value)
+{
+    gpgme_progress_cb_t progress_cb;
+    PyObject *callback;
+
+    /* free the progress callback */
+    gpgme_get_progress_cb(self->ctx, &progress_cb, (void **)&callback);
+    if (progress_cb == pygpgme_progress_cb) {
+        Py_DECREF(callback);
+    }
+
+    /* callback of None == unset */
+    if (value == Py_None)
+        value = NULL;
+
+    gpgme_set_progress_cb(self->ctx, pygpgme_progress_cb, value);
+    return 0;
+}
 
 static PyObject *
 pygpgme_context_get_signers(PyGpgmeContext *self)
@@ -199,6 +313,10 @@ static PyGetSetDef pygpgme_context_getsets[] = {
       (setter)pygpgme_context_set_include_certs },
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
       (setter)pygpgme_context_set_keylist_mode },
+    { "passphrase_cb", (getter)pygpgme_context_get_passphrase_cb,
+      (setter)pygpgme_context_set_passphrase_cb },
+    { "progress_cb", (getter)pygpgme_context_get_progress_cb,
+      (setter)pygpgme_context_set_progress_cb },
     { "signers", (getter)pygpgme_context_get_signers,
       (setter)pygpgme_context_set_signers },
     { NULL, (getter)0, (setter)0 }
@@ -261,6 +379,7 @@ decode_encrypt_result(PyGpgmeContext *self)
     PyObject *list;
 
     PyErr_Fetch(&err_type, &err_value, &err_traceback);
+    PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
 
     if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
         goto end;
@@ -418,6 +537,7 @@ decode_decrypt_result(PyGpgmeContext *self)
     gpgme_decrypt_result_t res;
 
     PyErr_Fetch(&err_type, &err_value, &err_traceback);
+    PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
 
     if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
         goto end;

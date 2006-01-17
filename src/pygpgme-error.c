@@ -50,3 +50,44 @@ pygpgme_check_error(gpgme_error_t err)
 
     return 1;
 }
+
+gpgme_error_t
+pygpgme_check_pyerror(void)
+{
+    PyObject *err_type, *err_value, *err_traceback;
+    gpgme_error_t err;
+    PyObject *args = NULL, *code = NULL;
+
+    if (!PyErr_Occurred())
+        return GPG_ERR_NO_ERROR;
+
+    PyErr_Fetch(&err_type, &err_value, &err_traceback);
+    PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+    err = gpgme_error(GPG_ERR_GENERAL);
+
+    /* get the first argument of the exception */
+    args = PyObject_GetAttrString(err_value, "args");
+    if (args == NULL)
+        goto end;
+    code = PyTuple_GetItem(args, 0);
+    if (code == NULL)
+        goto end;
+
+    if (PyErr_GivenExceptionMatches(err_type, pygpgme_error)) {
+        if (PyInt_Check(code))
+            err = PyInt_AsLong(code);
+    } else if (PyErr_GivenExceptionMatches(err_type, PyExc_IOError) ||
+               PyErr_GivenExceptionMatches(err_type, PyExc_OSError)) {
+        if (PyInt_Check(code))
+            err = gpgme_err_code_from_errno(PyInt_AsLong(code));
+    }
+
+ end:
+    Py_XDECREF(err_type);
+    Py_XDECREF(err_value);
+    Py_XDECREF(err_traceback);
+    Py_XDECREF(args);
+    PyErr_Clear();
+
+    return err;
+}
