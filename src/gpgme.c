@@ -25,6 +25,8 @@ init_gpgme(void)
     INIT_TYPE(PyGpgmeSubkey_Type);
     INIT_TYPE(PyGpgmeUserId_Type);
     INIT_TYPE(PyGpgmeKeySig_Type);
+    INIT_TYPE(PyGpgmeNewSignature_Type);
+    INIT_TYPE(PyGpgmeSignature_Type);
 
     mod = Py_InitModule("gpgme._gpgme", NULL);
 
@@ -38,6 +40,11 @@ init_gpgme(void)
     PyModule_AddObject(mod, "UserId", (PyObject *)&PyGpgmeUserId_Type);
     Py_INCREF(&PyGpgmeKeySig_Type);
     PyModule_AddObject(mod, "KeySig", (PyObject *)&PyGpgmeKeySig_Type);
+    Py_INCREF(&PyGpgmeNewSignature_Type);
+    PyModule_AddObject(mod, "NewSignature",
+                       (PyObject *)&PyGpgmeNewSignature_Type);
+    Py_INCREF(&PyGpgmeSignature_Type);
+    PyModule_AddObject(mod, "Signature", (PyObject *)&PyGpgmeSignature_Type);
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "error", pygpgme_error);
 }

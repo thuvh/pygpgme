@@ -91,3 +91,12 @@ pygpgme_check_pyerror(void)
 
     return err;
 }
+
+int
+pygpgme_no_constructor(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "can not directly create instances of %s",
+                 self->ob_type->tp_name);
+    return -1;
+}

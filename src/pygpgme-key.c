@@ -6,7 +6,7 @@ static void
 pygpgme_subkey_dealloc(PyGpgmeSubkey *self)
 {
     self->subkey = NULL;
-    Py_DECREF(self->parent);
+    Py_XDECREF(self->parent);
     self->parent = NULL;
     PyObject_Del(self);
 }
@@ -132,6 +132,7 @@ PyTypeObject PyGpgmeSubkey_Type = {
     "gpgme.Subkey",
     sizeof(PyGpgmeSubkey),
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_subkey_dealloc,
     .tp_getset = pygpgme_subkey_getsets,
 };
@@ -140,7 +141,7 @@ static void
 pygpgme_key_sig_dealloc(PyGpgmeKeySig *self)
 {
     self->key_sig = NULL;
-    Py_DECREF(self->parent);
+    Py_XDECREF(self->parent);
     self->parent = NULL;
     PyObject_Del(self);
 }
@@ -268,6 +269,7 @@ PyTypeObject PyGpgmeKeySig_Type = {
     "gpgme.KeySig",
     sizeof(PyGpgmeKeySig),
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_key_sig_dealloc,
     .tp_getset = pygpgme_key_sig_getsets,
 };
@@ -276,7 +278,7 @@ static void
 pygpgme_user_id_dealloc(PyGpgmeUserId *self)
 {
     self->user_id = NULL;
-    Py_DECREF(self->parent);
+    Py_XDECREF(self->parent);
     self->parent = NULL;
     PyObject_Del(self);
 }
@@ -379,6 +381,7 @@ PyTypeObject PyGpgmeUserId_Type = {
     "gpgme.UserId",
     sizeof(PyGpgmeUserId),
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_user_id_dealloc,
     .tp_getset = pygpgme_user_id_getsets,
 };
@@ -569,6 +572,7 @@ PyTypeObject PyGpgmeKey_Type = {
     "gpgme.Key",
     sizeof(PyGpgmeKey),
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_key_dealloc,
     .tp_getset = pygpgme_key_getsets,
 };
