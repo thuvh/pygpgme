@@ -390,11 +390,11 @@ decode_encrypt_result(PyGpgmeContext *self)
     if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
         goto end;
 
-    list = PyList_New(0);
     res = gpgme_op_encrypt_result(self->ctx);
     if (res == NULL)
         goto end;
 
+    list = PyList_New(0);
     for (key = res->invalid_recipients; key != NULL; key = key->next) {
         PyObject *item, *err;
 
@@ -444,12 +444,12 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
     }
     recp[i] = NULL;
 
-    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+    if (pygpgme_data_new(&plain, py_plain)) {
         free(recp);
         Py_DECREF(py_recp);
         return NULL;    
     }
-    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher))) {
+    if (pygpgme_data_new(&cipher, py_cipher)) {
         free(recp);
         Py_DECREF(py_recp);
         gpgme_data_release(plain);
@@ -506,12 +506,12 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
     }
     recp[i] = NULL;
 
-    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+    if (pygpgme_data_new(&plain, py_plain)) {
         free(recp);
         Py_DECREF(py_recp);
         return NULL;    
     }
-    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher))) {
+    if (pygpgme_data_new(&cipher, py_cipher)) {
         free(recp);
         Py_DECREF(py_recp);
         gpgme_data_release(plain);
@@ -583,10 +583,11 @@ pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "OO", &py_cipher, &py_plain))
         return NULL;
 
-    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher)))
-        return NULL;    
+    if (pygpgme_data_new(&cipher, py_cipher)) {
+        return NULL;
+    }
 
-    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+    if (pygpgme_data_new(&plain, py_plain)) {
         gpgme_data_release(cipher);
         return NULL;    
     }
@@ -616,10 +617,11 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "OO", &py_cipher, &py_plain))
         return NULL;
 
-    if (pygpgme_check_error(pygpgme_data_new(&cipher, py_cipher)))
-        return NULL;    
+    if (pygpgme_data_new(&cipher, py_cipher)) {
+        return NULL;
+    }
 
-    if (pygpgme_check_error(pygpgme_data_new(&plain, py_plain))) {
+    if (pygpgme_data_new(&plain, py_plain)) {
         gpgme_data_release(cipher);
         return NULL;    
     }
@@ -639,6 +641,139 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+PyObject *
+pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_plain, *py_sig;
+    gpgme_data_t plain, sig;
+    int sig_mode = GPGME_SIG_MODE_NORMAL;
+    gpgme_error_t err;
+    gpgme_sign_result_t result;
+
+    if (!PyArg_ParseTuple(args, "OO|i", &py_plain, &py_sig, &sig_mode))
+        return NULL;
+
+    if (pygpgme_data_new(&plain, py_plain))
+        return NULL;    
+
+    if (pygpgme_data_new(&sig, py_sig)) {
+        gpgme_data_release(plain);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_sign(self->ctx, plain, sig, sig_mode);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(plain);
+    gpgme_data_release(sig);
+
+    result = gpgme_op_sign_result(self->ctx);
+
+    /* annotate exception */
+    if (pygpgme_check_error(err)) {
+        PyObject *err_type, *err_value, *err_traceback;
+        PyObject *list;
+        gpgme_invalid_key_t key;
+
+        PyErr_Fetch(&err_type, &err_value, &err_traceback);
+        PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+
+        if (result == NULL)
+            goto end;
+
+        if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+            goto end;
+
+        list = PyList_New(0);
+        for (key = result->invalid_signers; key != NULL; key = key->next) {
+            PyObject *item, *err;
+
+            err = pygpgme_error_object(key->reason);
+            item = Py_BuildValue("(zN)", key->fpr, err);
+            PyList_Append(list, item);
+            Py_DECREF(item);
+        }
+        PyObject_SetAttrString(err_value, "invalid_signers", list);
+        Py_DECREF(list);
+
+        list = pygpgme_newsiglist_new(result->signatures);
+        PyObject_SetAttrString(err_value, "signatures", list);
+        Py_DECREF(list);
+    end:
+        PyErr_Restore(err_type, err_value, err_traceback);
+        return NULL;
+    }
+
+    if (result)
+        return pygpgme_newsiglist_new(result->signatures);
+    else
+        return PyList_New(0);
+}
+
+PyObject *
+pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_sig, *py_signed_text, *py_plaintext;
+    gpgme_data_t sig, signed_text, plaintext;
+    gpgme_error_t err;
+    gpgme_verify_result_t result;
+
+    if (!PyArg_ParseTuple(args, "OOO", &py_sig, &py_signed_text,
+                          &py_plaintext))
+        return NULL;
+
+    if (pygpgme_data_new(&sig, py_sig)) {
+        return NULL;
+    }
+    if (pygpgme_data_new(&signed_text, py_signed_text)) {
+        gpgme_data_release(sig);
+        return NULL;    
+    }
+    if (pygpgme_data_new(&plaintext, py_plaintext)) {
+        gpgme_data_release(sig);
+        gpgme_data_release(signed_text);
+        return NULL;    
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_verify(self->ctx, sig, signed_text, plaintext);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(sig);
+    gpgme_data_release(signed_text);
+    gpgme_data_release(plaintext);
+
+    result = gpgme_op_verify_result(self->ctx);
+
+    /* annotate exception */
+    if (pygpgme_check_error(err)) {
+        PyObject *err_type, *err_value, *err_traceback;
+        PyObject *list;
+
+        PyErr_Fetch(&err_type, &err_value, &err_traceback);
+        PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+
+        if (result == NULL)
+            goto end;
+
+        if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+            goto end;
+
+        list = pygpgme_siglist_new(result->signatures);
+        PyObject_SetAttrString(err_value, "signatures", list);
+        Py_DECREF(list);
+    end:
+        PyErr_Restore(err_type, err_value, err_traceback);
+        return NULL;
+    }
+
+    if (result)
+        return pygpgme_siglist_new(result->signatures);
+    else
+        return PyList_New(0);
+}
+
 static PyMethodDef pygpgme_context_methods[] = {
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
@@ -646,6 +781,8 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
     { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS },
     { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
+    { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
+    { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
     { NULL, 0, 0 }
 };
 

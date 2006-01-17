@@ -44,11 +44,11 @@ pygpgme_check_error(gpgme_error_t err)
 
     exc = pygpgme_error_object(err);
     if (!exc)
-        return 1;
+        return -1;
 
     PyErr_SetObject(pygpgme_error, exc);
 
-    return 1;
+    return -1;
 }
 
 gpgme_error_t

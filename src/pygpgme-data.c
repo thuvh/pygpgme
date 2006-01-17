@@ -141,17 +141,23 @@ static struct gpgme_data_cbs python_data_cbs = {
 };
 
 /* create a gpgme data object wrapping a Python file like object */
-gpgme_error_t
+int
 pygpgme_data_new(gpgme_data_t *dh, PyObject *fp)
 {
     gpgme_error_t error;
 
+    if (fp == Py_None) {
+        *dh = NULL;
+        return 0;
+    }
+
     error = gpgme_data_new_from_cbs(dh, &python_data_cbs, fp);
+
+    if (pygpgme_check_error(error))
+        return -1;
 
     /* if no error, then the new gpgme_data_t object owns a reference to
      * the python object */
-    if (error == GPG_ERR_NO_ERROR)
-        Py_INCREF(fp);
-
-    return error;
+    Py_INCREF(fp);
+    return 0;
 }
