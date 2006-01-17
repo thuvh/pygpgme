@@ -205,7 +205,10 @@ pygpgme_context_set_passphrase_cb(PyGpgmeContext *self, PyObject *value)
     if (value == Py_None)
         value = NULL;
 
-    gpgme_set_passphrase_cb(self->ctx, pygpgme_passphrase_cb, value);
+    if (value != NULL)
+        gpgme_set_passphrase_cb(self->ctx, pygpgme_passphrase_cb, value);
+    else
+        gpgme_set_passphrase_cb(self->ctx, NULL, NULL);
     return 0;
 }
 
@@ -241,7 +244,10 @@ pygpgme_context_set_progress_cb(PyGpgmeContext *self, PyObject *value)
     if (value == Py_None)
         value = NULL;
 
-    gpgme_set_progress_cb(self->ctx, pygpgme_progress_cb, value);
+    if (value != NULL)
+        gpgme_set_progress_cb(self->ctx, pygpgme_progress_cb, value);
+    else
+        gpgme_set_progress_cb(self->ctx, NULL, NULL);
     return 0;
 }
 
