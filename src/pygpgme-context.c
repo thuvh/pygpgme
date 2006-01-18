@@ -641,7 +641,7 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-PyObject *
+static PyObject *
 pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
 {
     PyObject *py_plain, *py_sig;
@@ -711,7 +711,7 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
         return PyList_New(0);
 }
 
-PyObject *
+static PyObject *
 pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
 {
     PyObject *py_sig, *py_signed_text, *py_plaintext;
