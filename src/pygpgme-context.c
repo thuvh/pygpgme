@@ -774,6 +774,148 @@ pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
         return PyList_New(0);
 }
 
+// pygpgme_context_import
+
+static PyObject *
+pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_pattern, *py_keydata;
+    const char *pattern;
+    const char **patterns;
+    int i, length;
+    gpgme_data_t keydata;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "OO", &py_pattern, &py_keydata))
+        return NULL;
+
+    if (py_pattern == Py_None) {
+        Py_INCREF(py_pattern);
+        pattern = NULL;
+        patterns = NULL;
+    } else if (PyString_Check(py_pattern)) {
+        Py_INCREF(py_pattern);
+        pattern = PyString_AsString(py_pattern);
+        patterns = NULL;
+    } else {
+        py_pattern = PySequence_Fast(py_pattern,
+            "first argument must be a string or sequence of strings");
+        if (py_pattern == NULL)
+            return NULL;
+        length = PySequence_Fast_GET_SIZE(py_pattern);
+        pattern = NULL;
+        patterns = malloc((length + 1) * sizeof(const char *));
+        for (i = 0; i < length; i++) {
+            PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
+
+            if (!PyString_Check(item)) {
+                PyErr_SetString(PyExc_TypeError,
+                    "first argument must be a string or sequence of strings");
+                free(patterns);
+                Py_DECREF(py_pattern);
+                return NULL;
+            }
+            patterns[i] = PyString_AsString(item);
+        }
+        patterns[i] = NULL;
+    }
+
+    if (pygpgme_data_new(&keydata, py_keydata)) {
+        Py_DECREF(py_pattern);
+        if (patterns)
+            free(patterns);
+        return NULL;
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    if (patterns)
+        err = gpgme_op_export_ext(self->ctx, patterns, 0, keydata);
+    else
+        err = gpgme_op_export(self->ctx, pattern, 0, keydata);
+    Py_END_ALLOW_THREADS;
+
+    Py_DECREF(py_pattern);
+    if (patterns)
+        free(patterns);
+    gpgme_data_release(keydata);
+    if (pygpgme_check_error(err))
+        return NULL;
+    Py_RETURN_NONE;
+}
+
+// pygpgme_context_genkey
+// pygpgme_context_delete
+// pygpgme_context_edit
+
+static PyObject *
+pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_pattern = Py_None;
+    const char *pattern;
+    const char **patterns;
+    int secret_only = 0, i, length;
+    gpgme_error_t err;
+    PyGpgmeKeyIter *ret;
+
+    if (!PyArg_ParseTuple(args, "|Oi", &py_pattern, &secret_only))
+        return NULL;
+
+    if (py_pattern == Py_None) {
+        Py_INCREF(py_pattern);
+        pattern = NULL;
+        patterns = NULL;
+    } else if (PyString_Check(py_pattern)) {
+        Py_INCREF(py_pattern);
+        pattern = PyString_AsString(py_pattern);
+        patterns = NULL;
+    } else {
+        py_pattern = PySequence_Fast(py_pattern,
+            "first argument must be a string or sequence of strings");
+        if (py_pattern == NULL)
+            return NULL;
+        length = PySequence_Fast_GET_SIZE(py_pattern);
+        pattern = NULL;
+        patterns = malloc((length + 1) * sizeof(const char *));
+        for (i = 0; i < length; i++) {
+            PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
+
+            if (!PyString_Check(item)) {
+                PyErr_SetString(PyExc_TypeError,
+                    "first argument must be a string or sequence of strings");
+                free(patterns);
+                Py_DECREF(py_pattern);
+                return NULL;
+            }
+            patterns[i] = PyString_AsString(item);
+        }
+        patterns[i] = NULL;
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    if (patterns)
+        err = gpgme_op_keylist_ext_start(self->ctx, patterns, secret_only, 0);
+    else
+        err = gpgme_op_keylist_start(self->ctx, pattern, secret_only);
+    Py_END_ALLOW_THREADS;
+
+    Py_DECREF(py_pattern);
+    if (patterns)
+        free(patterns);
+
+    if (pygpgme_check_error(err))
+        return NULL;
+
+    /* return a KeyIter object */
+    ret = PyObject_New(PyGpgmeKeyIter, &PyGpgmeKeyIter_Type);
+    if (!ret)
+        return NULL;
+    Py_INCREF(self);
+    ret->ctx = self;
+    return (PyObject *)ret;
+}
+
+// pygpgme_context_trustlist
+
 static PyMethodDef pygpgme_context_methods[] = {
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
@@ -783,6 +925,13 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
     { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
     { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
+    // import
+    { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
+    // genkey
+    // delete
+    // edit
+    { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS },
+    // trustlist
     { NULL, 0, 0 }
 };
 

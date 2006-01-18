@@ -58,6 +58,11 @@ typedef struct {
     PyObject *validity_reason;
 } PyGpgmeSignature;
 
+typedef struct {
+    PyObject_HEAD
+    PyGpgmeContext *ctx;
+} PyGpgmeKeyIter;
+
 extern HIDDEN PyObject *pygpgme_error;
 extern HIDDEN PyTypeObject PyGpgmeContext_Type;
 extern HIDDEN PyTypeObject PyGpgmeKey_Type;
@@ -66,6 +71,7 @@ extern HIDDEN PyTypeObject PyGpgmeUserId_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeySig_Type;
 extern HIDDEN PyTypeObject PyGpgmeNewSignature_Type;
 extern HIDDEN PyTypeObject PyGpgmeSignature_Type;
+extern HIDDEN PyTypeObject PyGpgmeKeyIter_Type;
 
 HIDDEN int           pygpgme_check_error    (gpgme_error_t err);
 HIDDEN PyObject     *pygpgme_error_object   (gpgme_error_t err);
