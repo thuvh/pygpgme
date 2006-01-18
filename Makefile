@@ -1,6 +1,9 @@
-PYTHON=python2.4
+PYTHON = python2.4
 
 build:
 	$(PYTHON) setup.py build_ext -i
 
-.PHONY: build
+check: build
+	$(PYTHON) test_all.py
+
+.PHONY: build check
