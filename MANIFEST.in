@@ -1,0 +1,6 @@
+include Makefile
+include test_all.py
+
+recursive-include gpgme *.py
+include src/*.c
+include src/*.h
