@@ -112,6 +112,13 @@ class ImportTestCase(GpgHomeTestCase):
         # can we get the secret key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
+    def test_import_empty(self):
+        fp = StringIO.StringIO('')
+        ctx = gpgme.Context()
+        result = ctx.import_(fp)
+        self.assertEqual(result.considered, 0)
+        self.assertEqual(len(result.imports), 0)
+
 def test_suite():
     loader = unittest.TestLoader()
     return loader.loadTestsFromName(__name__)
