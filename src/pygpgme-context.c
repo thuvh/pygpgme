@@ -778,7 +778,44 @@ pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
         return PyList_New(0);
 }
 
-// pygpgme_context_import
+static PyObject *
+pygpgme_context_import(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_keydata, *result;
+    gpgme_data_t keydata;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "O", &py_keydata))
+        return NULL;
+
+    if (pygpgme_data_new(&keydata, py_keydata))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_import(self->ctx, keydata);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(keydata);
+    result = pygpgme_import_result(self->ctx);
+    if (pygpgme_check_error(err)) {
+        PyObject *err_type, *err_value, *err_traceback;
+
+        PyErr_Fetch(&err_type, &err_value, &err_traceback);
+        PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+
+        if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+            goto end;
+
+        if (result != NULL) {
+            PyObject_SetAttrString(err_value, "result", result);
+            Py_DECREF(result);
+        }
+    end:
+        PyErr_Restore(err_type, err_value, err_traceback);
+        return NULL;
+    }
+    return result;
+}
 
 static PyObject *
 pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
@@ -929,7 +966,7 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
     { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
     { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
-    // import
+    { "import", (PyCFunction)pygpgme_context_import, METH_VARARGS },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
     // genkey
     // delete

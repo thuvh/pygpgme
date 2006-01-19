@@ -60,6 +60,25 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
+    PyObject *considered;
+    PyObject *no_user_id;
+    PyObject *imported;
+    PyObject *imported_rsa;
+    PyObject *unchanged;
+    PyObject *new_user_ids;
+    PyObject *new_sub_keys;
+    PyObject *new_signatures;
+    PyObject *new_revocations;
+    PyObject *secret_read;
+    PyObject *secret_imported;
+    PyObject *secret_unchanged;
+    PyObject *skipped_new_keys;
+    PyObject *not_imported;
+    PyObject *imports;
+} PyGpgmeImportResult;
+
+typedef struct {
+    PyObject_HEAD
     PyGpgmeContext *ctx;
 } PyGpgmeKeyIter;
 
@@ -71,6 +90,7 @@ extern HIDDEN PyTypeObject PyGpgmeUserId_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeySig_Type;
 extern HIDDEN PyTypeObject PyGpgmeNewSignature_Type;
 extern HIDDEN PyTypeObject PyGpgmeSignature_Type;
+extern HIDDEN PyTypeObject PyGpgmeImportResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeyIter_Type;
 
 HIDDEN int           pygpgme_check_error    (gpgme_error_t err);
@@ -83,5 +103,6 @@ HIDDEN int           pygpgme_data_new       (gpgme_data_t *dh, PyObject *fp);
 HIDDEN PyObject     *pygpgme_key_new        (gpgme_key_t key);
 HIDDEN PyObject     *pygpgme_newsiglist_new (gpgme_new_signature_t siglist);
 HIDDEN PyObject     *pygpgme_siglist_new    (gpgme_signature_t siglist);
+HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
 
 #endif

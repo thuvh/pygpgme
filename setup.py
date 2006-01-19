@@ -10,6 +10,7 @@ gpgme = Extension(
      'src/pygpgme-context.c',
      'src/pygpgme-key.c',
      'src/pygpgme-signature.c',
+     'src/pygpgme-import.c',
      'src/pygpgme-keyiter.c',
      ],
     libraries=['gpgme'])
