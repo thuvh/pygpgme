@@ -966,7 +966,7 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
     { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
     { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
-    { "import", (PyCFunction)pygpgme_context_import, METH_VARARGS },
+    { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
     // genkey
     // delete
