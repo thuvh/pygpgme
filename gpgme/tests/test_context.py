@@ -11,11 +11,11 @@ class ContextTestCase(GpgHomeTestCase):
     def test_protocol(self):
         ctx = gpgme.Context()
         # XXX: this should use symbolic constant names
-        self.assertEqual(ctx.protocol, 0) # OpenPGP
-        ctx.protocol = 1 # CMS
-        self.assertEqual(ctx.protocol, 1)
-        ctx.protocol = 0 # CMS
-        self.assertEqual(ctx.protocol, 0)
+        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_OpenPGP)
+        ctx.protocol = gpgme.PROTOCOL_CMS
+        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_CMS)
+        ctx.protocol = gpgme.PROTOCOL_OpenPGP
+        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_OpenPGP)
 
         # check error on setting to invalid protocol value
         def set_protocol(ctx, value):
@@ -62,11 +62,12 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_keylist_mode(self):
         ctx = gpgme.Context()
-        self.assertEqual(ctx.keylist_mode, 1)
-        ctx.keylist_mode = 2
-        self.assertEqual(ctx.keylist_mode, 2)
-        ctx.keylist_mode = 1 | 2
-        self.assertEqual(ctx.keylist_mode, 1 | 2)
+        self.assertEqual(ctx.keylist_mode, gpgme.KEYLIST_MODE_LOCAL)
+        ctx.keylist_mode = gpgme.KEYLIST_MODE_EXTERN
+        self.assertEqual(ctx.keylist_mode, gpgme.KEYLIST_MODE_EXTERN)
+        ctx.keylist_mode = gpgme.KEYLIST_MODE_LOCAL | gpgme.KEYLIST_MODE_EXTERN
+        self.assertEqual(ctx.keylist_mode,
+                         gpgme.KEYLIST_MODE_LOCAL | gpgme.KEYLIST_MODE_EXTERN)
 
         # check error on setting to invalid keylist_mode value
         def set_keylist_mode(ctx, value):

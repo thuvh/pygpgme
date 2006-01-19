@@ -105,4 +105,6 @@ HIDDEN PyObject     *pygpgme_newsiglist_new (gpgme_new_signature_t siglist);
 HIDDEN PyObject     *pygpgme_siglist_new    (gpgme_signature_t siglist);
 HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
 
+HIDDEN PyObject     *pygpgme_make_constants (PyObject *self, PyObject *args);
+
 #endif

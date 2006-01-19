@@ -2,6 +2,11 @@
 #include <Python.h>
 #include "pygpgme.h"
 
+static PyMethodDef pygpgme_functions[] = {
+    { "make_constants", (PyCFunction)pygpgme_make_constants, METH_VARARGS },
+    { NULL, NULL, 0 }
+};
+
 PyMODINIT_FUNC
 init_gpgme(void)
 {
@@ -34,7 +39,7 @@ init_gpgme(void)
     INIT_TYPE(PyGpgmeImportResult_Type);
     INIT_TYPE(PyGpgmeKeyIter_Type);
 
-    mod = Py_InitModule("gpgme._gpgme", NULL);
+    mod = Py_InitModule("gpgme._gpgme", pygpgme_functions);
 
     ADD_TYPE(Context);
     ADD_TYPE(Key);
