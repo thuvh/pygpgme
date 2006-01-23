@@ -33,8 +33,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             '''))
         plaintext = StringIO.StringIO()
         ctx = gpgme.Context()
-        sigs = ctx.decrypt(ciphertext, plaintext)
-
+        ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'hello world\n')
 
     def test_decrypt_verify(self):
@@ -63,9 +62,87 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         plaintext = StringIO.StringIO()
         ctx = gpgme.Context()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
-
         self.assertEqual(plaintext.getvalue(), 'hello world\n')
+        self.assertEqual(len(sigs), 1)
+        self.assertEqual(sigs[0].summary, 0)
+        self.assertEqual(sigs[0].fpr,
+                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        self.assertEqual(sigs[0].status, None)
+        self.assertEqual(sigs[0].notations, [])
+        self.assertEqual(sigs[0].timestamp, 1138049495)
+        self.assertEqual(sigs[0].exp_timestamp, 0)
+        self.assertEqual(sigs[0].wrong_key_usage, False)
+        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity_reason, None)
 
+    def test_encrypt(self):
+        plaintext = StringIO.StringIO('Hello World\n')
+        ciphertext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+                    plaintext, ciphertext)
+
+        # rewind ciphertext buffer, and try to decrypt:
+        ciphertext.seek(0)
+        plaintext = StringIO.StringIO()
+        ctx.decrypt(ciphertext, plaintext)
+        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+
+    def test_encrypt_armor(self):
+        plaintext = StringIO.StringIO('Hello World\n')
+        ciphertext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        ctx.armor = True
+        recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+                    plaintext, ciphertext)
+
+        # rewind ciphertext buffer, and try to decrypt:
+        ciphertext.seek(0)
+        plaintext = StringIO.StringIO()
+        ctx.decrypt(ciphertext, plaintext)
+        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+
+    def test_encrypt_sign(self):
+        plaintext = StringIO.StringIO('Hello World\n')
+        ciphertext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        ctx.armor = True
+        signer = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        ctx.signers = [signer]
+        new_sigs = ctx.encrypt_sign([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+                                    plaintext, ciphertext)
+
+        self.assertEqual(len(new_sigs), 1)
+        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_NORMAL)
+        self.assertEqual(new_sigs[0].fpr,
+                        'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+        # rewind ciphertext buffer, and try to decrypt:
+        ciphertext.seek(0)
+        plaintext = StringIO.StringIO()
+        sigs = ctx.decrypt_verify(ciphertext, plaintext)
+        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(len(sigs), 1)
+        self.assertEqual(sigs[0].summary, 0)
+        self.assertEqual(sigs[0].fpr,
+                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        self.assertEqual(sigs[0].status, None)
+        self.assertEqual(sigs[0].wrong_key_usage, False)
+        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity_reason, None)
+
+    def test_encrypt_to_signonly(self):
+        plaintext = StringIO.StringIO('Hello World\n')
+        ciphertext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        recipient = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
+        self.assertRaises(gpgme.error, ctx.encrypt,
+                          [recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+                          plaintext, ciphertext)
+        
 
 def test_suite():
     loader = unittest.TestLoader()
