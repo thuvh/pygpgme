@@ -139,9 +139,13 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ciphertext = StringIO.StringIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
-        self.assertRaises(gpgme.error, ctx.encrypt,
-                          [recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
-                          plaintext, ciphertext)
+        try:
+            ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+                        plaintext, ciphertext)
+        except gpgme.error, e:
+            self.assertEqual(e[1], 'General Error')
+        else:
+            self.fail('gpgme.error not raised')
         
 
 def test_suite():

@@ -8,6 +8,7 @@ def test_suite():
     import gpgme.tests.test_export
     import gpgme.tests.test_sign_verify
     import gpgme.tests.test_encrypt_decrypt
+    import gpgme.tests.test_passphrase
     suite = unittest.TestSuite()
     suite.addTest(gpgme.tests.test_context.test_suite())
     suite.addTest(gpgme.tests.test_keys.test_suite())
@@ -16,4 +17,5 @@ def test_suite():
     suite.addTest(gpgme.tests.test_export.test_suite())
     suite.addTest(gpgme.tests.test_sign_verify.test_suite())
     suite.addTest(gpgme.tests.test_encrypt_decrypt.test_suite())
+    suite.addTest(gpgme.tests.test_passphrase.test_suite())
     return suite
