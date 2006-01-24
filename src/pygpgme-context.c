@@ -7,13 +7,16 @@ pygpgme_passphrase_cb(void *hook, const char *uid_hint,
                       int fd)
 {
     PyObject *callback, *ret;
+    PyGILState_STATE state;
     gpgme_error_t err;
 
+    state = PyGILState_Ensure();
     callback = (PyObject *)hook;
     ret = PyObject_CallFunction(callback, "zzii", uid_hint, passphrase_info,
                                 prev_was_bad, fd);
     err = pygpgme_check_pyerror();
     Py_XDECREF(ret);
+    PyGILState_Release(state);
     return err;
 }
 
@@ -22,11 +25,14 @@ pygpgme_progress_cb(void *hook, const char *what, int type,
                     int current, int total)
 {
     PyObject *callback, *ret;
+    PyGILState_STATE state;
 
+    state = PyGILState_Ensure();
     callback = (PyObject *)hook;
     ret = PyObject_CallFunction(callback, "ziii", what, type, current, total);
     PyErr_Clear();
     Py_XDECREF(ret);
+    PyGILState_Release(state);
 }
 
 static void

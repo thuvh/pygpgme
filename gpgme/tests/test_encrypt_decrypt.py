@@ -143,7 +143,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
                         plaintext, ciphertext)
         except gpgme.error, e:
-            self.assertEqual(e[1], 'General Error')
+            self.assertEqual(e[1], 'General error')
         else:
             self.fail('gpgme.error not raised')
         
