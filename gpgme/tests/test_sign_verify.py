@@ -148,6 +148,108 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[1].validity, gpgme.VALIDITY_UNKNOWN)
         self.assertEqual(sigs[1].validity_reason, None)
 
+    def test_verify_multiple_clearsigned_sections(self):
+        signature = StringIO.StringIO(dedent('''
+            -----BEGIN PGP SIGNED MESSAGE-----
+            Hash: SHA1
+
+            Hello World
+            -----BEGIN PGP SIGNATURE-----
+            Version: GnuPG v1.4.1 (GNU/Linux)
+
+            iD8DBQFD1tutRrtV8IhcZaQRAgD4AJ9oqVSFt3UW1lUxhnNM9YXh2G09AQCdGxEe
+            zlgLsoU2R8b0RrGZAHb+Dzw=
+            =rTzD
+            -----END PGP SIGNATURE-----
+
+            -----BEGIN PGP SIGNED MESSAGE-----
+            Hash: SHA1
+
+            Hello World
+            -----BEGIN PGP SIGNATURE-----
+            Version: GnuPG v1.4.1 (GNU/Linux)
+
+            iQIVAwUBQ9bbrSz0a3/JfmsPAQIA+A/+I5mr+hlq+keZZqZGGYQ/U9VdYBJHX/mG
+            Rf3KQERuReimE/pYUDmeLAxys9KD5uBwtd4ajhCYalNIsPZB1W3jXxpQWe0A238v
+            zAQD//bpEO8i2LH17IrSd3plAMCvcfR8Fk/CTAERZbQ5/cPc1Wrzt6BI+fQvqwI2
+            aEyi6vYVeYqq7WXdlyfo5WztfL0igGGrPj5Aw0BblyfaQAxkgNeLUXT2wvBNoOGF
+            Nk+hNW4UQiUVAmZX5iHNKD+CGUX2WNCQYwYCETVGa84Ve0wxMbstBnT3eMBczAPD
+            6QESHmm0YtAM1rx1jLH2dehksXhCInvD6AHnmKNkcOk2C1tua5tr2hdbPRRkR4WY
+            9/pAkV0CWVH9xomzLIDAlOlRYE/jsY14qX9iLvahoegORN749pWacMAUfXA+BhOQ
+            6afPtM5tMwzz6Pc/pXTk2WQueWPXDXJ/CjFg6KqtcnXa3wMSi1LoyZosfkZXfIuz
+            wE3SZ2IQUMTQNXfjwyHj6DWPqKzjhlD8VdOvtHmle+eeRpT1xqb910Anfh/2WMY7
+            QxLCvwZcDKkGb8T8Rxc8ajjPUNrhHT6Tawk/msmNDZyWBZDNjXmh5Y/UzfaN77pf
+            47G49HVk0RLx1hsNLVPFpHWsOCrLhbm8CgVNPy/TLtJiDmCHvL3n0KNSnZv5u2oE
+            9mE1kR0aVOM=
+            =3Ryd
+            -----END PGP SIGNATURE-----
+            '''))
+        plaintext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        sigs = ctx.verify(signature, None, plaintext)
+
+        self.assertEqual(plaintext.getvalue(),
+                         'Hello World\nHello World\n')
+        self.assertEqual(len(sigs), 2)
+        self.assertEqual(sigs[0].summary, 0)
+        self.assertEqual(sigs[0].fpr,
+                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        self.assertEqual(sigs[0].status, None)
+        self.assertEqual(sigs[0].notations, [])
+        self.assertEqual(sigs[0].timestamp, 1138154413)
+        self.assertEqual(sigs[0].exp_timestamp, 0)
+        self.assertEqual(sigs[0].wrong_key_usage, False)
+        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity_reason, None)
+
+        self.assertEqual(sigs[1].summary, 0)
+        self.assertEqual(sigs[1].fpr,
+                         '93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        self.assertEqual(sigs[1].status, None)
+        self.assertEqual(sigs[1].notations, [])
+        self.assertEqual(sigs[1].timestamp, 1138154413)
+        self.assertEqual(sigs[1].exp_timestamp, 0)
+        self.assertEqual(sigs[1].wrong_key_usage, False)
+        self.assertEqual(sigs[1].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[1].validity_reason, None)
+
+    def test_verify_no_signature(self):
+        signature = StringIO.StringIO(dedent('''
+            -----BEGIN PGP SIGNED MESSAGE-----
+            Hash: SHA1
+
+            Hello World
+            -----BEGIN PGP SIGNATURE-----
+            -----END PGP SIGNATURE-----
+            '''))
+        plaintext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        sigs = ctx.verify(signature, None, plaintext)
+
+        self.assertEqual(plaintext.getvalue(), '')
+        self.assertEqual(len(sigs), 0)
+
+    def test_verify_bad_signature(self):
+        signature = StringIO.StringIO(dedent('''
+            -----BEGIN PGP SIGNED MESSAGE-----
+            Hash: SHA1
+
+            Hello World
+            -----BEGIN PGP SIGNATURE-----
+            Version: GnuPG v1.4.1 (GNU/Linux)
+
+            iNhhNHx+gzGBUqtIK5LpENTCGgCfV3aO
+            -----END PGP SIGNATURE-----
+            '''))
+        plaintext = StringIO.StringIO()
+        ctx = gpgme.Context()
+        try:
+            ctx.verify(signature, None, plaintext)
+        except gpgme.error, exc:
+            self.assertEqual(exc[1], 'No data')
+        else:
+            self.fail('gpgme.error not raised')
+
     def test_sign_normal(self):
         ctx = gpgme.Context()
         ctx.armor = False
