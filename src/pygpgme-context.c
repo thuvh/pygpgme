@@ -957,7 +957,26 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 }
 
 // pygpgme_context_genkey
-// pygpgme_context_delete
+
+static PyObject *
+pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
+{
+    PyGpgmeKey *key;
+    int allow_secret = 0;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "O!|i", &PyGpgmeKey_Type, &key, &allow_secret))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_delete(self->ctx, key->key, allow_secret);
+    Py_END_ALLOW_THREADS;
+
+    if (pygpgme_check_error(err))
+        return NULL;
+    Py_RETURN_NONE;
+}
+
 // pygpgme_context_edit
 
 static PyObject *
@@ -1041,7 +1060,7 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
     // genkey
-    // delete
+    { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
     // edit
     { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS },
     // trustlist
