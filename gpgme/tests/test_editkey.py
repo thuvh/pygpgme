@@ -3,6 +3,7 @@ import os
 import StringIO
 
 import gpgme
+import gpgme.editutil
 from gpgme.tests.util import GpgHomeTestCase
 
 class EditKeyTestCase(GpgHomeTestCase):
@@ -27,7 +28,21 @@ class EditKeyTestCase(GpgHomeTestCase):
 
         self.assertEqual(self.status, gpgme.STATUS_GET_LINE)
         self.assertEqual(self.args, 'keyedit.prompt')
-        
+
+    def test_edit_ownertrust(self):
+        ctx = gpgme.Context()
+        key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        self.assertEqual(key.owner_trust, gpgme.VALIDITY_UNKNOWN)
+
+        # try setting each validity:
+        for trust in [gpgme.VALIDITY_NEVER,
+                      gpgme.VALIDITY_MARGINAL,
+                      gpgme.VALIDITY_FULL,
+                      gpgme.VALIDITY_ULTIMATE]:
+            gpgme.editutil.edit_trust(ctx, key, trust)
+            key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+            self.assertEqual(key.owner_trust, trust)
+
 
 def test_suite():
     loader = unittest.TestLoader()
