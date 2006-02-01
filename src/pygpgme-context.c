@@ -977,7 +977,76 @@ pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-// pygpgme_context_edit
+static gpgme_error_t
+pygpgme_edit_cb(void *user_data, gpgme_status_code_t status,
+                const char *args, int fd)
+{
+    PyObject *callback, *ret;
+    PyGILState_STATE state;
+    gpgme_error_t err;
+
+    state = PyGILState_Ensure();
+    callback = (PyObject *)user_data;
+    ret = PyObject_CallFunction(callback, "lzi", (long)status, args, fd);
+    err = pygpgme_check_pyerror();
+    Py_XDECREF(ret);
+    PyGILState_Release(state);
+    return err;
+}
+
+static PyObject *
+pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
+{
+    PyGpgmeKey *key;
+    PyObject *callback, *py_out;
+    gpgme_data_t out;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "O!OO", &PyGpgmeKey_Type, &key, &callback,
+                          &py_out))
+        return NULL;
+
+    if (pygpgme_data_new(&out, py_out))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_edit(self->ctx, key->key,
+                        pygpgme_edit_cb, (void *)callback, out);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(out);
+
+    if (pygpgme_check_error(err))
+        return NULL;
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
+{
+    PyGpgmeKey *key;
+    PyObject *callback, *py_out;
+    gpgme_data_t out;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "O!OO", &PyGpgmeKey_Type, &key, &callback,
+                          &py_out))
+        return NULL;
+
+    if (pygpgme_data_new(&out, py_out))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_card_edit(self->ctx, key->key,
+                             pygpgme_edit_cb, (void *)callback, out);
+    Py_END_ALLOW_THREADS;
+
+    gpgme_data_release(out);
+
+    if (pygpgme_check_error(err))
+        return NULL;
+    Py_RETURN_NONE;
+}
 
 static PyObject *
 pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
@@ -1061,7 +1130,8 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
     // genkey
     { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
-    // edit
+    { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS },
+    { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS },
     { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS },
     // trustlist
     { NULL, 0, 0 }

@@ -6,4 +6,10 @@ build:
 check: build
 	$(PYTHON) test_all.py -v
 
-.PHONY: build check
+clean:
+	$(PYTHON) setup.py clean
+
+dist: build
+	$(PYTHON) setup.py sdist
+
+.PHONY: build check clean dist
