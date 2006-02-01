@@ -246,7 +246,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         try:
             ctx.verify(signature, None, plaintext)
         except gpgme.error, exc:
-            self.assertEqual(exc[1], 'No data')
+            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc[1], gpgme.ERR_NO_DATA)
         else:
             self.fail('gpgme.error not raised')
 

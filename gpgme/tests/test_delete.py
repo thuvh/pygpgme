@@ -39,8 +39,9 @@ class DeleteTestCase(GpgHomeTestCase):
         # delete it again
         try:
             ctx.delete(key)
-        except gpgme.error, e:
-            self.assertEqual(e[1], 'No public key')
+        except gpgme.error, exc:
+            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc[1], gpgme.ERR_NO_PUBKEY)
         else:
             self.fail('gpgme.error was not raised')
 

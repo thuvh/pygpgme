@@ -17,7 +17,10 @@ pygpgme_error_object(gpgme_error_t err)
     if (gpgme_strerror_r(err, buf, 255) != 0)
         strcpy(buf, "Unknown");
 
-    exc = PyObject_CallFunction(pygpgme_error, "ls", (long)err, buf);
+    exc = PyObject_CallFunction(pygpgme_error, "lls",
+                                (long)gpgme_err_source(err),
+                                (long)gpgme_err_code(err),
+                                buf);
     if (!exc)
         return NULL;
     /* set the source and code as attributes of the exception object: */
@@ -27,6 +30,10 @@ pygpgme_error_object(gpgme_error_t err)
 
     attr = PyInt_FromLong(gpgme_err_code(err));
     PyObject_SetAttrString(exc, "code", attr);
+    Py_DECREF(attr);
+
+    attr = PyString_FromString(buf);
+    PyObject_SetAttrString(exc, "message", attr);
     Py_DECREF(attr);
 
     return exc;
@@ -56,7 +63,7 @@ pygpgme_check_pyerror(void)
 {
     PyObject *err_type, *err_value, *err_traceback;
     gpgme_error_t err;
-    PyObject *args = NULL, *code = NULL;
+    PyObject *args = NULL, *source = NULL, *code = NULL;
 
     if (!PyErr_Occurred())
         return GPG_ERR_NO_ERROR;
@@ -69,17 +76,22 @@ pygpgme_check_pyerror(void)
     args = PyObject_GetAttrString(err_value, "args");
     if (args == NULL)
         goto end;
-    code = PyTuple_GetItem(args, 0);
-    if (code == NULL)
-        goto end;
 
+    source = PyTuple_GetItem(args, 0);
+    if (source == NULL)
+        goto end;
+  
     if (PyErr_GivenExceptionMatches(err_type, pygpgme_error)) {
-        if (PyInt_Check(code))
-            err = PyInt_AsLong(code);
+        code = PyTuple_GetItem(args, 1);
+        if (code == NULL)
+            goto end;
+
+        if (PyInt_Check(source) && PyInt_Check(code))
+            err = gpgme_err_make(PyInt_AsLong(source), PyInt_AsLong(code));
     } else if (PyErr_GivenExceptionMatches(err_type, PyExc_IOError) ||
                PyErr_GivenExceptionMatches(err_type, PyExc_OSError)) {
-        if (PyInt_Check(code))
-            err = gpgme_err_code_from_errno(PyInt_AsLong(code));
+        if (PyInt_Check(source))
+            err = gpgme_err_code_from_errno(PyInt_AsLong(source));
     }
 
  end:
