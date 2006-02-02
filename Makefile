@@ -10,6 +10,6 @@ clean:
 	$(PYTHON) setup.py clean
 
 dist: build
-	$(PYTHON) setup.py sdist
+	$(PYTHON) setup.py sdist --force-manifest
 
 .PHONY: build check clean dist

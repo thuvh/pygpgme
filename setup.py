@@ -17,7 +17,7 @@ gpgme = Extension(
     libraries=['gpgme'])
 
 setup(name='pygpgme',
-      version='0.0',
+      version='0.1',
       author='James Henstridge',
       author_email='james@jamesh.id.au',
       ext_modules=[gpgme],
