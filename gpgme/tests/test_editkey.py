@@ -8,7 +8,8 @@ from gpgme.tests.util import GpgHomeTestCase
 
 class EditKeyTestCase(GpgHomeTestCase):
 
-    import_keys = ['key1.pub', 'key1.sec', 'key2.pub']
+    import_keys = ['key1.pub', 'key1.sec', 'key2.pub',
+                   'signonly.pub', 'signonly.sec']
 
     def edit_quit_cb(self, status, args, fd):
         if status in [gpgme.STATUS_EOF, gpgme.STATUS_GOT_IT]:
@@ -42,6 +43,28 @@ class EditKeyTestCase(GpgHomeTestCase):
             gpgme.editutil.edit_trust(ctx, key, trust)
             key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
             self.assertEqual(key.owner_trust, trust)
+
+    def test_edit_sign(self):
+        ctx = gpgme.Context()
+        # we set the keylist mode so we can see signatures
+        ctx.keylist_mode = gpgme.KEYLIST_MODE_SIGS
+        ctx.signers = [ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')]
+        key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+        # check that there are no signatures from 0xCB935A42
+        for uid in key.uids:
+            sigs = [sig for sig in uid.signatures
+                    if sig.keyid == 'F540A569CB935A42']
+            self.assertEqual(len(sigs), 0)
+
+        gpgme.editutil.edit_sign(ctx, key, check=0)
+        key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+        # check that there is a signature from 0xCB935A42 on each UID
+        for uid in key.uids:
+            sigs = [sig for sig in uid.signatures
+                    if sig.keyid == 'F540A569CB935A42']
+            self.assertEqual(len(sigs), 1)
 
 
 def test_suite():

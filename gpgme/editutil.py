@@ -48,8 +48,11 @@ class _EditData:
                       gpgme.STATUS_ALREADY_SIGNED):
             return
 
+        #print 'S: %s (%d)' % (args, status)
+
         if (self.state, status, args) in self.transitions:
             self.state, data = self.transitions[self.state, status, args]
+            #print 'C: %r' % data
             if data is not None:
                 os.write(fd, data)
         else:
@@ -91,6 +94,43 @@ class _EditTrust(_EditData):
                            gpgme.STATUS_GET_BOOL, 'keyedit.save.okay',
                            self.STATE_CONFIRM, 'Y\n')
 
+class _EditSign(_EditData):
+    # states
+    STATE_UID = 1
+    STATE_COMMAND = 2
+    STATE_QUIT = 3
+
+    def __init__(self, index, command, expire, check):
+        _EditData.__init__(self)
+
+        self.addTransition(self.STATE_START,
+                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
+                           self.STATE_UID, 'uid %d\n' % index)
+
+        self.addTransition(self.STATE_UID,
+                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
+                           self.STATE_COMMAND, '%s\n' % command)
+
+        self.addTransition(self.STATE_COMMAND,
+                           gpgme.STATUS_GET_BOOL, 'keyedit.sign_all.okay',
+                           self.STATE_COMMAND, 'Y\n')
+        self.addTransition(self.STATE_COMMAND,
+                           gpgme.STATUS_GET_LINE, 'sign_uid.expire',
+                           self.STATE_COMMAND, '%s\n' % (expire and 'Y' or 'N'))
+        self.addTransition(self.STATE_COMMAND,
+                           gpgme.STATUS_GET_LINE, 'sign_uid.class',
+                           self.STATE_COMMAND, '%d\n' % check)
+        self.addTransition(self.STATE_COMMAND,
+                           gpgme.STATUS_GET_BOOL, 'sign_uid.okay',
+                           self.STATE_COMMAND, 'Y\n')
+        self.addTransition(self.STATE_COMMAND,
+                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
+                           self.STATE_QUIT, 'quit\n')
+
+        self.addTransition(self.STATE_QUIT,
+                           gpgme.STATUS_GET_BOOL, 'keyedit.save.okay',
+                           self.STATE_COMMAND, 'Y\n')
+
 
 def edit_trust(ctx, key, trust):
     if trust not in (gpgme.VALIDITY_UNDEFINED,
@@ -100,4 +140,32 @@ def edit_trust(ctx, key, trust):
                      gpgme.VALIDITY_ULTIMATE):
         raise ValueError('Bad trust value %d' % trust)
     statemachine = _EditTrust(trust)
+    statemachine.do_edit(ctx, key)
+
+def edit_sign(ctx, key, index=0, local=False, norevoke=False,
+              expire=True, check=0):
+    """Sign the given key.
+
+    index:    the index of the user ID to sign, starting at 1.  Sign all
+               user IDs if set to 0.
+    local:    make a local signature
+    norevoke: make a non-revokable signature
+    command:  the type of signature.  One of sign, lsign, tsign or nrsign.
+    expire:   whether the signature should expire with the key.
+    check:    Amount of checking performed.  One of:
+                 0 - no answer
+                 1 - no checking
+                 2 - casual checking
+                 3 - careful checking
+    """
+    if index < 0 or index > len(key.uids):
+        raise ValueError('user ID index out of range')
+    command = 'sign'
+    if local:
+        command = 'l%s' % command
+    if norevoke:
+        command = 'nr%s' % command
+    if check not in [0, 1, 2, 3]:
+        raise ValueError('check must be one of 0, 1, 2, 3')
+    statemachine = _EditSign(index, command, expire, check)
     statemachine.do_edit(ctx, key)
