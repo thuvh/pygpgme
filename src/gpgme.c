@@ -12,7 +12,7 @@ init_gpgme(void)
 {
     PyObject *mod;
 
-    pygpgme_error = PyErr_NewException("gpgme.error",
+    pygpgme_error = PyErr_NewException("gpgme.GpgmeError",
                                        PyExc_RuntimeError, NULL);
 
 #define INIT_TYPE(type)                      \
@@ -52,5 +52,5 @@ init_gpgme(void)
     ADD_TYPE(KeyIter);
 
     Py_INCREF(pygpgme_error);
-    PyModule_AddObject(mod, "error", pygpgme_error);
+    PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
 }

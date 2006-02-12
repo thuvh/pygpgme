@@ -142,11 +142,11 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         try:
             ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
                         plaintext, ciphertext)
-        except gpgme.error, e:
+        except gpgme.GpgmeError, e:
             self.assertEqual(e[0], gpgme.ERR_SOURCE_UNKNOWN)
             self.assertEqual(e[1], gpgme.ERR_GENERAL)
         else:
-            self.fail('gpgme.error not raised')
+            self.fail('gpgme.GpgmeError not raised')
         
 
 def test_suite():

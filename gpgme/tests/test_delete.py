@@ -15,14 +15,14 @@ class DeleteTestCase(GpgHomeTestCase):
         ctx.delete(key)
 
         # check that it is deleted
-        self.assertRaises(gpgme.error, ctx.get_key,
+        self.assertRaises(gpgme.GpgmeError, ctx.get_key,
                           '93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
 
     def test_delete_public_key_with_secret_key(self):
         ctx = gpgme.Context()
         # key1
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-        self.assertRaises(gpgme.error, ctx.delete, key)
+        self.assertRaises(gpgme.GpgmeError, ctx.delete, key)
 
     def test_delete_secret_key(self):
         ctx = gpgme.Context()
@@ -39,11 +39,11 @@ class DeleteTestCase(GpgHomeTestCase):
         # delete it again
         try:
             ctx.delete(key)
-        except gpgme.error, exc:
+        except gpgme.GpgmeError, exc:
             self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
             self.assertEqual(exc[1], gpgme.ERR_NO_PUBKEY)
         else:
-            self.fail('gpgme.error was not raised')
+            self.fail('gpgme.GpgmeError was not raised')
 
 
 def test_suite():

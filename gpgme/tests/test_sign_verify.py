@@ -245,11 +245,11 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         try:
             ctx.verify(signature, None, plaintext)
-        except gpgme.error, exc:
+        except gpgme.GpgmeError, exc:
             self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
             self.assertEqual(exc[1], gpgme.ERR_NO_DATA)
         else:
-            self.fail('gpgme.error not raised')
+            self.fail('gpgme.GpgmeError not raised')
 
     def test_sign_normal(self):
         ctx = gpgme.Context()

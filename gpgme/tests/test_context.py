@@ -20,7 +20,7 @@ class ContextTestCase(GpgHomeTestCase):
         # check error on setting to invalid protocol value
         def set_protocol(ctx, value):
             ctx.protocol = value
-        self.assertRaises(gpgme.error, set_protocol, ctx, 999)
+        self.assertRaises(gpgme.GpgmeError, set_protocol, ctx, 999)
 
         def del_protocol(ctx):
             del ctx.protocol
@@ -72,7 +72,7 @@ class ContextTestCase(GpgHomeTestCase):
         # check error on setting to invalid keylist_mode value
         def set_keylist_mode(ctx, value):
             ctx.keylist_mode = value
-        self.assertRaises(gpgme.error, set_keylist_mode, ctx, 128)
+        self.assertRaises(gpgme.GpgmeError, set_keylist_mode, ctx, 128)
 
         def del_keylist_mode(ctx):
             del ctx.keylist_mode

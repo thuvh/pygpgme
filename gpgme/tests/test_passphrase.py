@@ -19,11 +19,11 @@ class PassphraseTestCase(GpgHomeTestCase):
 
         try:
             new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
-        except gpgme.error, e:
+        except gpgme.GpgmeError, e:
             self.assertEqual(e[0], gpgme.ERR_SOURCE_GPGME)
             self.assertEqual(e[1], gpgme.ERR_BAD_PASSPHRASE)
         else:
-            self.fail('gpgme.error not raised')
+            self.fail('gpgme.GpgmeError not raised')
 
     def passphrase_cb(self, uid_hint, passphrase_info, prev_was_bad, fd):
         self.uid_hint = uid_hint
