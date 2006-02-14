@@ -30,3 +30,5 @@ exceptions:
    the matched keys, rather than requiring the user to use a special
    iteration function.
 
+This library is licensed under the LGPL, the same license as the gpgme
+library.
