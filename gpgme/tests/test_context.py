@@ -69,7 +69,10 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_include_certs(self):
         ctx = gpgme.Context()
-        self.assertEqual(ctx.include_certs, 1)
+        # XXX: 20060413 jamesh
+        # gpgme 1.0.x and 1.1.x have different default values for
+        # include_certs, so I am disabling this test for now.
+        #self.assertEqual(ctx.include_certs, 1)
         ctx.include_certs = 2
         self.assertEqual(ctx.include_certs, 2)
 
