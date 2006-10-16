@@ -68,7 +68,8 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_ELG_E)
         self.assertEqual(key.subkeys[1].length, 2048)
         self.assertEqual(key.subkeys[1].keyid, '659A6AC69BC3B085')
-        self.assertEqual(key.subkeys[1].fpr, None)
+        # Some versions of libgpgme fill this one in and others don't
+        #self.assertEqual(key.subkeys[1].fpr, None)
         self.assertEqual(key.subkeys[1].timestamp, 1137568234)
         self.assertEqual(key.subkeys[1].expires, 0)
 
@@ -124,7 +125,8 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_RSA)
         self.assertEqual(key.subkeys[1].length, 4096)
         self.assertEqual(key.subkeys[1].keyid, 'A95221D00DCBDD64')
-        self.assertEqual(key.subkeys[1].fpr, None)
+        # Some versions of libgpgme fill this one in and others don't
+        #self.assertEqual(key.subkeys[1].fpr, None)
         self.assertEqual(key.subkeys[1].timestamp, 1137568395)
         self.assertEqual(key.subkeys[1].expires, 0)
 
@@ -180,7 +182,8 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_ELG_E)
         self.assertEqual(key.subkeys[1].length, 1024)
         self.assertEqual(key.subkeys[1].keyid, 'E50B59CF50CE4D54')
-        self.assertEqual(key.subkeys[1].fpr, None)
+        # Some versions of libgpgme fill this one in and others don't
+        #self.assertEqual(key.subkeys[1].fpr, None)
         self.assertEqual(key.subkeys[1].timestamp, 1137569047)
         self.assertEqual(key.subkeys[1].expires, 0)
 

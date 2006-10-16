@@ -89,11 +89,6 @@ class ContextTestCase(GpgHomeTestCase):
         self.assertEqual(ctx.keylist_mode,
                          gpgme.KEYLIST_MODE_LOCAL | gpgme.KEYLIST_MODE_EXTERN)
 
-        # check error on setting to invalid keylist_mode value
-        def set_keylist_mode(ctx, value):
-            ctx.keylist_mode = value
-        self.assertRaises(gpgme.GpgmeError, set_keylist_mode, ctx, 128)
-
         def del_keylist_mode(ctx):
             del ctx.keylist_mode
         self.assertRaises(TypeError, del_keylist_mode, ctx)
