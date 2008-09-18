@@ -22,23 +22,50 @@ import gpgme
 from gpgme.tests.util import GpgHomeTestCase
 
 
+# See /usr/share/doc/gnupg/DETAILS.gz
+
+# XXX we are using a passwordless key because the passphrase_cb
+# backend seems to be currently broken.
+
+signing_only_param = """
+<GnupgKeyParms format="internal">
+  Key-Type: RSA
+  Key-Length: 1024
+  Name-Real: Testing
+  Expire-Date: 0
+</GnupgKeyParms>
+"""
+
+
 class GenerateKeyTestCase(GpgHomeTestCase):
 
-    def test_key_generation(self):
-        ctx = gpgme.Context()
+    def _getSignature(self, fingerprint):
+        """Use the pointed key to create an ASCII-armored deatached signature.
 
-        # See /usr/share/doc/gnupg/DETAILS.gz
-        # XXX we are using a passwordless key because the passphrase_cb
-        # backend seems to be currently broken.
-        param = """
-        <GnupgKeyParms format="internal">
-           Key-Type: RSA
-           Key-Length: 1024
-           Name-Real: Testing
-           Expire-Date: 0
-        </GnupgKeyParms>
+        Verify and return the signature object.
         """
-        result = ctx.genkey(param)
+        ctx = gpgme.Context()
+        key = ctx.get_key(fingerprint)
+        ctx.signers = [key]
+
+        plaintext = StringIO.StringIO('Hello World\n')
+        signature = StringIO.StringIO()
+
+        ctx.armor = True
+        new_sigs = ctx.sign(
+            plaintext, signature, gpgme.SIG_MODE_DETACH)
+
+        signature.seek(0)
+        plaintext.seek(0)
+
+        sigs = ctx.verify(signature, plaintext, None)
+        self.assertEqual(len(sigs), 1)
+
+        return sigs[0]
+
+    def test_generate_signing_only_keys(self):
+        ctx = gpgme.Context()
+        result = ctx.genkey(signing_only_param)
         self.assertEquals(result, None)
 
         # The generated key is part of the current keyring.
@@ -58,21 +85,9 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(uid.comment, '')
         self.assertEqual(uid.email, '')
 
-        # The generated key is able to sign.
-        ctx.armor = True
-        ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
-
-        new_sigs = ctx.sign(
-            plaintext, signature, gpgme.SIG_MODE_DETACH)
-
-        signature.seek(0)
-        plaintext.seek(0)
-        sigs = ctx.verify(signature, plaintext, None)
-
-        self.assertEqual(len(sigs), 1)
-        self.assertEqual(sigs[0].fpr, key.subkeys[0].fpr)
+        # Finally check if the generated key can perform signatures.
+        signature = self._getSignature(key.subkeys[0].fpr)
+        self.assertEqual(signature.fpr, key.subkeys[0].fpr)
 
 
 def test_suite():

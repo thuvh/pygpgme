@@ -29,7 +29,10 @@ def test_suite():
     import gpgme.tests.test_passphrase
     import gpgme.tests.test_progress
     import gpgme.tests.test_editkey
+    import gpgme.tests.test_genkey
+
     suite = unittest.TestSuite()
+
     suite.addTest(gpgme.tests.test_context.test_suite())
     suite.addTest(gpgme.tests.test_keys.test_suite())
     suite.addTest(gpgme.tests.test_keylist.test_suite())
@@ -41,4 +44,6 @@ def test_suite():
     suite.addTest(gpgme.tests.test_passphrase.test_suite())
     suite.addTest(gpgme.tests.test_progress.test_suite())
     suite.addTest(gpgme.tests.test_editkey.test_suite())
+    suite.addTest(gpgme.tests.test_genkey.test_suite())
+
     return suite
