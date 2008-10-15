@@ -97,6 +97,13 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
+    PyObject *primary;
+    PyObject *sub;
+    PyObject *fpr;
+} PyGpgmeGenkeyResult;
+
+typedef struct {
+    PyObject_HEAD
     PyGpgmeContext *ctx;
 } PyGpgmeKeyIter;
 
@@ -109,6 +116,7 @@ extern HIDDEN PyTypeObject PyGpgmeKeySig_Type;
 extern HIDDEN PyTypeObject PyGpgmeNewSignature_Type;
 extern HIDDEN PyTypeObject PyGpgmeSignature_Type;
 extern HIDDEN PyTypeObject PyGpgmeImportResult_Type;
+extern HIDDEN PyTypeObject PyGpgmeGenkeyResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeyIter_Type;
 
 HIDDEN int           pygpgme_check_error    (gpgme_error_t err);
@@ -122,6 +130,7 @@ HIDDEN PyObject     *pygpgme_key_new        (gpgme_key_t key);
 HIDDEN PyObject     *pygpgme_newsiglist_new (gpgme_new_signature_t siglist);
 HIDDEN PyObject     *pygpgme_siglist_new    (gpgme_signature_t siglist);
 HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
+HIDDEN PyObject     *pygpgme_genkey_result  (gpgme_ctx_t ctx);
 
 HIDDEN PyObject     *pygpgme_make_constants (PyObject *self, PyObject *args);
 

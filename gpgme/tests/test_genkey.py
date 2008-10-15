@@ -30,6 +30,7 @@ from gpgme.tests.util import GpgHomeTestCase
 signing_only_param = """
 <GnupgKeyParms format="internal">
   Key-Type: RSA
+  Key-Usage: sign
   Key-Length: 1024
   Name-Real: Testing
   Expire-Date: 0
@@ -66,7 +67,10 @@ class GenerateKeyTestCase(GpgHomeTestCase):
     def test_generate_signing_only_keys(self):
         ctx = gpgme.Context()
         result = ctx.genkey(signing_only_param)
-        self.assertEquals(result, None)
+
+        self.assertEqual(result.primary, 1)
+        self.assertEqual(result.sub, 0)
+        self.assertEqual(len(result.fpr), 40)
 
         # The generated key is part of the current keyring.
         [key] = ctx.keylist(None, True)
@@ -75,9 +79,19 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.secret, True)
         self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
 
-        # Signing-only RSA keys contain only one subkey.
+        # Single signing-only RSA key.
         self.assertEqual(len(key.subkeys), 1)
-        self.assertTrue(key.subkeys[0].secret)
+        [subkey] = key.subkeys
+        self.assertTrue(subkey.secret)
+        self.assertEqual(subkey.pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(subkey.length, 1024)
+
+        # XXX cprov 20081014: 'can_sign' is obviously wrong, since the key
+        # can sign context tests below.
+        self.assertEqual(key.can_sign, False)
+        self.assertEqual(subkey.can_sign, False)
+        self.assertEqual(key.can_encrypt, False)
+        self.assertEqual(subkey.can_encrypt, False)
 
         # The only UID available matches the given parameters.
         [uid] = key.uids

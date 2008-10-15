@@ -978,6 +978,7 @@ static PyObject *
 pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
 {
     const char *parameters;
+    PyObject *result;
     gpgme_error_t err;
 
     if (!PyArg_ParseTuple(args, "z", &parameters))
@@ -987,9 +988,11 @@ pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
     err = gpgme_op_genkey(self->ctx, parameters, NULL, NULL);
     Py_END_ALLOW_THREADS;
 
+    result = pygpgme_genkey_result(self->ctx);
     if (pygpgme_check_error(err))
         return NULL;
-    Py_RETURN_NONE;
+
+    return (PyObject *) result;
 }
 
 
