@@ -4,7 +4,7 @@ build:
 	$(PYTHON) setup.py build_ext -i
 
 check: build
-	$(PYTHON) test_all.py -v
+	GPG_AGENT_INFO= $(PYTHON) test_all.py -v
 
 clean:
 	$(PYTHON) setup.py clean
