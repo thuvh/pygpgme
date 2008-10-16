@@ -62,9 +62,14 @@ pygpgme_genkey_result(gpgme_ctx_t ctx)
     if (!self)
         return NULL;
 
-    self->primary = PyInt_FromLong(result->primary);
-    self->sub = PyInt_FromLong(result->sub);
-    self->fpr = PyString_FromString(result->fpr);
+    self->primary = PyBool_FromLong(result->primary);
+    self->sub = PyBool_FromLong(result->sub);
+    if (result->fpr)
+        self->fpr = PyString_FromString(result->fpr);
+    else {
+        Py_INCREF(Py_None);
+        self->fpr = Py_None;
+    }
 
     return (PyObject *) self;
 }

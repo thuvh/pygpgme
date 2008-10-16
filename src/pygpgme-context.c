@@ -977,20 +977,48 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 static PyObject *
 pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
 {
-    const char *parameters;
+    PyObject *py_pubkey = Py_None, *py_seckey = Py_None;
+    const char *parms;
+    gpgme_data_t pubkey = NULL, seckey = NULL;
     PyObject *result;
     gpgme_error_t err;
 
-    if (!PyArg_ParseTuple(args, "z", &parameters))
+    if (!PyArg_ParseTuple(args, "z|OO", &parms, &py_pubkey, &py_seckey))
         return NULL;
+
+    if (pygpgme_data_new(&pubkey, py_pubkey))
+        return NULL;
+
+    if (pygpgme_data_new(&seckey, py_seckey)) {
+        gpgme_data_release(pubkey);
+        return NULL;
+    }
 
     Py_BEGIN_ALLOW_THREADS;
-    err = gpgme_op_genkey(self->ctx, parameters, NULL, NULL);
+    err = gpgme_op_genkey(self->ctx, parms, pubkey, seckey);
     Py_END_ALLOW_THREADS;
 
+    gpgme_data_release(seckey);
+    gpgme_data_release(pubkey);
     result = pygpgme_genkey_result(self->ctx);
-    if (pygpgme_check_error(err))
+
+    if (pygpgme_check_error(err)) {
+        PyObject *err_type, *err_value, *err_traceback;
+
+        PyErr_Fetch(&err_type, &err_value, &err_traceback);
+        PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+
+        if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
+            goto end;
+
+        if (result != NULL) {
+            PyObject_SetAttrString(err_value, "result", result);
+            Py_DECREF(result);
+        }
+    end:
+        PyErr_Restore(err_type, err_value, err_traceback);
         return NULL;
+    }
 
     return (PyObject *) result;
 }

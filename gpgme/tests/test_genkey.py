@@ -33,6 +33,8 @@ signing_only_param = """
   Key-Usage: sign
   Key-Length: 1024
   Name-Real: Testing
+  Name-Comment: comment
+  Name-Email: someone@example.com
   Expire-Date: 0
 </GnupgKeyParms>
 """
@@ -40,13 +42,9 @@ signing_only_param = """
 
 class GenerateKeyTestCase(GpgHomeTestCase):
 
-    def _getSignature(self, fingerprint):
-        """Use the pointed key to create an ASCII-armored deatached signature.
-
-        Verify and return the signature object.
-        """
+    def assertCanSign(self, key):
+        """Check that the given key can be used to create signatures."""
         ctx = gpgme.Context()
-        key = ctx.get_key(fingerprint)
         ctx.signers = [key]
 
         plaintext = StringIO.StringIO('Hello World\n')
@@ -61,19 +59,18 @@ class GenerateKeyTestCase(GpgHomeTestCase):
 
         sigs = ctx.verify(signature, plaintext, None)
         self.assertEqual(len(sigs), 1)
-
-        return sigs[0]
+        self.assertEqual(sigs[0].fpr, key.subkeys[0].fpr)
 
     def test_generate_signing_only_keys(self):
         ctx = gpgme.Context()
         result = ctx.genkey(signing_only_param)
 
-        self.assertEqual(result.primary, 1)
-        self.assertEqual(result.sub, 0)
+        self.assertEqual(result.primary, True)
+        self.assertEqual(result.sub, False)
         self.assertEqual(len(result.fpr), 40)
 
         # The generated key is part of the current keyring.
-        [key] = ctx.keylist(None, True)
+        key = ctx.get_key(result.fpr, True)
         self.assertEqual(key.revoked, False)
         self.assertEqual(key.expired, False)
         self.assertEqual(key.secret, True)
@@ -81,27 +78,35 @@ class GenerateKeyTestCase(GpgHomeTestCase):
 
         # Single signing-only RSA key.
         self.assertEqual(len(key.subkeys), 1)
-        [subkey] = key.subkeys
-        self.assertTrue(subkey.secret)
+        subkey = key.subkeys[0]
+        self.assertEqual(subkey.secret, True)
         self.assertEqual(subkey.pubkey_algo, gpgme.PK_RSA)
         self.assertEqual(subkey.length, 1024)
 
-        # XXX cprov 20081014: 'can_sign' is obviously wrong, since the key
-        # can sign context tests below.
-        self.assertEqual(key.can_sign, False)
-        self.assertEqual(subkey.can_sign, False)
+        self.assertEqual(key.can_sign, True)
         self.assertEqual(key.can_encrypt, False)
-        self.assertEqual(subkey.can_encrypt, False)
 
         # The only UID available matches the given parameters.
         [uid] = key.uids
         self.assertEqual(uid.name, 'Testing')
-        self.assertEqual(uid.comment, '')
-        self.assertEqual(uid.email, '')
+        self.assertEqual(uid.comment, 'comment')
+        self.assertEqual(uid.email, 'someone@example.com')
 
         # Finally check if the generated key can perform signatures.
-        signature = self._getSignature(key.subkeys[0].fpr)
-        self.assertEqual(signature.fpr, key.subkeys[0].fpr)
+        self.assertCanSign(key)
+
+    def test_invalid_parameters(self):
+        ctx = gpgme.Context()
+        try:
+            ctx.genkey('garbage parameters')
+        except gpgme.GpgmeError, exc:
+            self.assertTrue(hasattr(exc, "result"))
+            result = exc.result
+            self.assertEqual(result.primary, False)
+            self.assertEqual(result.sub, False)
+            self.assertEqual(result.fpr, None)
+        else:
+            self.fail("GpgmeError not raised")
 
 
 def test_suite():
