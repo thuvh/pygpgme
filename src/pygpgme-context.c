@@ -974,7 +974,27 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-// pygpgme_context_genkey
+static PyObject *
+pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
+{
+    const char *parameters;
+    PyObject *result;
+    gpgme_error_t err;
+
+    if (!PyArg_ParseTuple(args, "z", &parameters))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_genkey(self->ctx, parameters, NULL, NULL);
+    Py_END_ALLOW_THREADS;
+
+    result = pygpgme_genkey_result(self->ctx);
+    if (pygpgme_check_error(err))
+        return NULL;
+
+    return (PyObject *) result;
+}
+
 
 static PyObject *
 pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
@@ -1146,7 +1166,7 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
     { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
-    // genkey
+    { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS },
     { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
     { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS },
     { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS },
