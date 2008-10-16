@@ -28,7 +28,7 @@ keydir = os.path.join(os.path.dirname(__file__), 'keys')
 
 class GpgHomeTestCase(unittest.TestCase):
 
-    gpg_conf_contents = ''
+    gpg_conf_contents = 'no-use-agent\n'
     import_keys = []
 
     def keyfile(self, key):
