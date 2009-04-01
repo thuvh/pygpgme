@@ -40,4 +40,10 @@
 
 #endif
 
+#if PY_VERSION_HEX > 0x03000000
+/* Ugh.  I'll need to fix this code, but the text/bytes changes take
+   precedence. */
+#  include <intobject.h>
+#endif
+
 #endif /* PYGPGME_COMPAT_H */

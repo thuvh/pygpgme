@@ -26,8 +26,17 @@ static PyMethodDef pygpgme_functions[] = {
     { NULL, NULL, 0 }
 };
 
-PyMODINIT_FUNC
-init_gpgme(void)
+#if PY_VERSION_HEX >= 0x03000000
+static PyModuleDef pygpgme_module = {
+    PyModuleDef_HEAD_INIT,
+    "gpgme._gpgme",
+    .m_size = -1,
+    .m_methods = pygpgme_functions
+};
+#endif
+
+static PyObject *
+create_module(void)
 {
     PyObject *mod;
 
@@ -42,7 +51,7 @@ init_gpgme(void)
     if (!type.tp_new)                        \
         type.tp_new = PyType_GenericNew;     \
     if (PyType_Ready(&type) < 0)             \
-        return
+        return NULL
 
 #define ADD_TYPE(type)                \
     Py_INCREF(&PyGpgme ## type ## _Type); \
@@ -59,7 +68,11 @@ init_gpgme(void)
     INIT_TYPE(PyGpgmeGenkeyResult_Type);
     INIT_TYPE(PyGpgmeKeyIter_Type);
 
+#if PY_VERSION_HEX >= 0x03000000
+    mod = PyModule_Create(&pygpgme_module);
+#else
     mod = Py_InitModule("gpgme._gpgme", pygpgme_functions);
+#endif
 
     ADD_TYPE(Context);
     ADD_TYPE(Key);
@@ -74,4 +87,20 @@ init_gpgme(void)
 
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
+
+    return mod;
 }
+
+#if PY_VERSION_HEX >= 0x03000000
+PyMODINIT_FUNC
+PyInit__gpgme(void)
+{
+    return create_module();
+}
+#else
+PyMODINIT_FUNC
+init_gpgme(void)
+{
+    create_module();
+}
+#endif
