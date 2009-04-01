@@ -72,7 +72,8 @@ pygpgme_newsiglist_new(gpgme_new_signature_t siglist)
         item->hash_algo = PyInt_FromLong(sig->hash_algo);
         item->timestamp = PyInt_FromLong(sig->timestamp);
         if (sig->fpr) {
-            item->fpr = PyBytes_FromString(sig->fpr);
+            item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
+                                              "replace");
         } else {
             Py_INCREF(Py_None);
             item->fpr = Py_None;
@@ -148,7 +149,8 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
         }
         item->summary = PyInt_FromLong(sig->summary);
         if (sig->fpr) {
-            item->fpr = PyBytes_FromString(sig->fpr);
+            item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
+                                              "replace");
         } else {
             Py_INCREF(Py_None);
             item->fpr = Py_None;

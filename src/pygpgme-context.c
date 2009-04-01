@@ -619,7 +619,9 @@ decode_decrypt_result(PyGpgmeContext *self)
         goto end;
 
     if (res->unsupported_algorithm) {
-        value = PyBytes_FromString(res->unsupported_algorithm);
+        value = PyUnicode_DecodeUTF8(res->unsupported_algorithm,
+                                     strlen(res->unsupported_algorithm),
+                                     "replace");
     } else {
         Py_INCREF(Py_None);
         value = Py_None;

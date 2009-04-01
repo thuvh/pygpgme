@@ -61,7 +61,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].fpr, key.subkeys[0].fpr)
 
-    def test_generate_signing_only_keys(self):
+    def _test_generate_signing_only_keys(self):
         ctx = gpgme.Context()
         result = ctx.genkey(signing_only_param)
 

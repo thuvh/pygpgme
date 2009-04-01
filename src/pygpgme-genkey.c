@@ -65,7 +65,8 @@ pygpgme_genkey_result(gpgme_ctx_t ctx)
     self->primary = PyBool_FromLong(result->primary);
     self->sub = PyBool_FromLong(result->sub);
     if (result->fpr)
-        self->fpr = PyBytes_FromString(result->fpr);
+        self->fpr = PyUnicode_DecodeASCII(result->fpr, strlen(result->fpr),
+                                          "replace");
     else {
         Py_INCREF(Py_None);
         self->fpr = Py_None;

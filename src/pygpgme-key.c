@@ -99,7 +99,8 @@ static PyObject *
 pygpgme_subkey_get_keyid(PyGpgmeSubkey *self)
 {
     if (self->subkey->keyid)
-        return PyBytes_FromString(self->subkey->keyid);
+        return PyUnicode_DecodeASCII(self->subkey->keyid,
+                                     strlen(self->subkey->keyid), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -108,7 +109,8 @@ static PyObject *
 pygpgme_subkey_get_fpr(PyGpgmeSubkey *self)
 {
     if (self->subkey->fpr)
-        return PyBytes_FromString(self->subkey->fpr);
+        return PyUnicode_DecodeASCII(self->subkey->fpr,
+                                     strlen(self->subkey->fpr), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -198,7 +200,8 @@ static PyObject *
 pygpgme_key_sig_get_keyid(PyGpgmeKeySig *self)
 {
     if (self->key_sig->keyid)
-        return PyBytes_FromString(self->key_sig->keyid);
+        return PyUnicode_DecodeASCII(self->key_sig->keyid,
+                                     strlen(self->key_sig->keyid), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -225,7 +228,8 @@ static PyObject *
 pygpgme_key_sig_get_uid(PyGpgmeKeySig *self)
 {
     if (self->key_sig->uid)
-        return PyBytes_FromString(self->key_sig->uid);
+        return PyUnicode_DecodeUTF8(self->key_sig->uid,
+                                    strlen(self->key_sig->uid), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -234,7 +238,8 @@ static PyObject *
 pygpgme_key_sig_get_name(PyGpgmeKeySig *self)
 {
     if (self->key_sig->name)
-        return PyBytes_FromString(self->key_sig->name);
+        return PyUnicode_DecodeUTF8(self->key_sig->name,
+                                    strlen(self->key_sig->name), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -243,7 +248,8 @@ static PyObject *
 pygpgme_key_sig_get_email(PyGpgmeKeySig *self)
 {
     if (self->key_sig->email)
-        return PyBytes_FromString(self->key_sig->email);
+        return PyUnicode_DecodeUTF8(self->key_sig->email,
+                                    strlen(self->key_sig->email), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -252,7 +258,8 @@ static PyObject *
 pygpgme_key_sig_get_comment(PyGpgmeKeySig *self)
 {
     if (self->key_sig->comment)
-        return PyBytes_FromString(self->key_sig->comment);
+        return PyUnicode_DecodeUTF8(self->key_sig->comment,
+                                    strlen(self->key_sig->comment), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -323,7 +330,8 @@ static PyObject *
 pygpgme_user_id_get_uid(PyGpgmeUserId *self)
 {
     if (self->user_id->uid)
-        return PyBytes_FromString(self->user_id->uid);
+        return PyUnicode_DecodeUTF8(self->user_id->uid,
+                                    strlen(self->user_id->uid), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -332,7 +340,8 @@ static PyObject *
 pygpgme_user_id_get_name(PyGpgmeUserId *self)
 {
     if (self->user_id->name)
-        return PyBytes_FromString(self->user_id->name);
+        return PyUnicode_DecodeUTF8(self->user_id->name,
+                                    strlen(self->user_id->name), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -341,7 +350,8 @@ static PyObject *
 pygpgme_user_id_get_email(PyGpgmeUserId *self)
 {
     if (self->user_id->email)
-        return PyBytes_FromString(self->user_id->email);
+        return PyUnicode_DecodeUTF8(self->user_id->email,
+                                    strlen(self->user_id->email), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -350,7 +360,8 @@ static PyObject *
 pygpgme_user_id_get_comment(PyGpgmeUserId *self)
 {
     if (self->user_id->comment)
-        return PyBytes_FromString(self->user_id->comment);
+        return PyUnicode_DecodeUTF8(self->user_id->comment,
+                                    strlen(self->user_id->comment), "replace");
     else
         Py_RETURN_NONE;
 }
@@ -476,7 +487,10 @@ static PyObject *
 pygpgme_key_get_issuer_serial(PyGpgmeKey *self)
 {
     if (self->key->issuer_serial)
-        return PyBytes_FromString(self->key->issuer_serial);
+        /* Haven't tested this, so perhaps it should be UTF8 */
+        return PyUnicode_DecodeASCII(self->key->issuer_serial,
+                                     strlen(self->key->issuer_serial),
+                                     "replace");
     else
         Py_RETURN_NONE;
 }
@@ -485,7 +499,9 @@ static PyObject *
 pygpgme_key_get_issuer_name(PyGpgmeKey *self)
 {
     if (self->key->issuer_name)
-        return PyBytes_FromString(self->key->issuer_name);
+        return PyUnicode_DecodeUTF8(self->key->issuer_name,
+                                    strlen(self->key->issuer_name),
+                                    "replace");
     else
         Py_RETURN_NONE;
 }
@@ -494,7 +510,9 @@ static PyObject *
 pygpgme_key_get_chain_id(PyGpgmeKey *self)
 {
     if (self->key->chain_id)
-        return PyBytes_FromString(self->key->chain_id);
+        /* Haven't tested this, so perhaps it should be UTF8 */
+        return PyUnicode_DecodeASCII(self->key->chain_id,
+                                     strlen(self->key->chain_id), "replace");
     else
         Py_RETURN_NONE;
 }

@@ -50,7 +50,7 @@ pygpgme_error_object(gpgme_error_t err)
     PyObject_SetAttrString(exc, "code", attr);
     Py_DECREF(attr);
 
-    attr = PyBytes_FromString(buf);
+    attr = PyUnicode_DecodeUTF8(buf, strlen(buf), "replace");
     PyObject_SetAttrString(exc, "message", attr);
     Py_DECREF(attr);
 
