@@ -35,8 +35,8 @@ init_gpgme(void)
                                        PyExc_RuntimeError, NULL);
 
 #define INIT_TYPE(type)                      \
-    if (!type.ob_type)                       \
-        type.ob_type = &PyType_Type;         \
+    if (!Py_TYPE(&type))                      \
+        Py_TYPE(&type) = &PyType_Type;        \
     if (!type.tp_alloc)                      \
         type.tp_alloc = PyType_GenericAlloc; \
     if (!type.tp_new)                        \

@@ -42,33 +42,32 @@ pygpgme_import_dealloc(PyGpgmeImportResult *self)
 }
 
 static PyMemberDef pygpgme_import_members[] = {
-    { "considered", T_OBJECT, offsetof(PyGpgmeImportResult, considered), RO},
-    { "no_user_id", T_OBJECT, offsetof(PyGpgmeImportResult, no_user_id), RO},
-    { "imported", T_OBJECT, offsetof(PyGpgmeImportResult, imported), RO},
-    { "imported_rsa", T_OBJECT, offsetof(PyGpgmeImportResult, imported_rsa), RO},
-    { "unchanged", T_OBJECT, offsetof(PyGpgmeImportResult, unchanged), RO},
-    { "new_user_ids", T_OBJECT, offsetof(PyGpgmeImportResult, new_user_ids), RO},
-    { "new_sub_keys", T_OBJECT, offsetof(PyGpgmeImportResult, new_sub_keys), RO},
-    { "new_signatures", T_OBJECT, offsetof(PyGpgmeImportResult, new_signatures), RO},
+    { "considered", T_OBJECT, offsetof(PyGpgmeImportResult, considered), READONLY},
+    { "no_user_id", T_OBJECT, offsetof(PyGpgmeImportResult, no_user_id), READONLY},
+    { "imported", T_OBJECT, offsetof(PyGpgmeImportResult, imported), READONLY},
+    { "imported_rsa", T_OBJECT, offsetof(PyGpgmeImportResult, imported_rsa), READONLY},
+    { "unchanged", T_OBJECT, offsetof(PyGpgmeImportResult, unchanged), READONLY},
+    { "new_user_ids", T_OBJECT, offsetof(PyGpgmeImportResult, new_user_ids), READONLY},
+    { "new_sub_keys", T_OBJECT, offsetof(PyGpgmeImportResult, new_sub_keys), READONLY},
+    { "new_signatures", T_OBJECT, offsetof(PyGpgmeImportResult, new_signatures), READONLY},
     { "new_revocations", T_OBJECT,
-      offsetof(PyGpgmeImportResult, new_revocations), RO},
+      offsetof(PyGpgmeImportResult, new_revocations), READONLY},
     { "secret_read", T_OBJECT,
-      offsetof(PyGpgmeImportResult, secret_read), RO},
+      offsetof(PyGpgmeImportResult, secret_read), READONLY},
     { "secret_imported", T_OBJECT,
-      offsetof(PyGpgmeImportResult, secret_imported), RO},
+      offsetof(PyGpgmeImportResult, secret_imported), READONLY},
     { "secret_unchanged", T_OBJECT,
-      offsetof(PyGpgmeImportResult, secret_unchanged), RO},
+      offsetof(PyGpgmeImportResult, secret_unchanged), READONLY},
     { "skipped_new_keys", T_OBJECT,
-      offsetof(PyGpgmeImportResult, skipped_new_keys), RO},
+      offsetof(PyGpgmeImportResult, skipped_new_keys), READONLY},
     { "not_imported", T_OBJECT,
-      offsetof(PyGpgmeImportResult, not_imported), RO},
-    { "imports", T_OBJECT, offsetof(PyGpgmeImportResult, imports), RO},
+      offsetof(PyGpgmeImportResult, not_imported), READONLY},
+    { "imports", T_OBJECT, offsetof(PyGpgmeImportResult, imports), READONLY},
     { NULL, 0, 0, 0}
 };
 
 PyTypeObject PyGpgmeImportResult_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.Import",
     sizeof(PyGpgmeImportResult),
     .tp_flags = Py_TPFLAGS_DEFAULT,

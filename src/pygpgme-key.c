@@ -147,8 +147,7 @@ static PyGetSetDef pygpgme_subkey_getsets[] = {
 };
 
 PyTypeObject PyGpgmeSubkey_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.Subkey",
     sizeof(PyGpgmeSubkey),
     .tp_flags = Py_TPFLAGS_DEFAULT,
@@ -289,8 +288,7 @@ static PyGetSetDef pygpgme_key_sig_getsets[] = {
 };
 
 PyTypeObject PyGpgmeKeySig_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.KeySig",
     sizeof(PyGpgmeKeySig),
     .tp_flags = Py_TPFLAGS_DEFAULT,
@@ -405,8 +403,7 @@ static PyGetSetDef pygpgme_user_id_getsets[] = {
 };
 
 PyTypeObject PyGpgmeUserId_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.UserId",
     sizeof(PyGpgmeUserId),
     .tp_flags = Py_TPFLAGS_DEFAULT,
@@ -603,8 +600,7 @@ static PyGetSetDef pygpgme_key_getsets[] = {
 };
 
 PyTypeObject PyGpgmeKey_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.Key",
     sizeof(PyGpgmeKey),
     .tp_flags = Py_TPFLAGS_DEFAULT,

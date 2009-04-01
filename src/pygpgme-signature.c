@@ -33,18 +33,17 @@ pygpgme_newsig_dealloc(PyGpgmeNewSignature *self)
 }
 
 static PyMemberDef pygpgme_newsig_members[] = {
-    { "type", T_OBJECT, offsetof(PyGpgmeNewSignature, type), RO},
-    { "pubkey_algo", T_OBJECT, offsetof(PyGpgmeNewSignature, pubkey_algo), RO},
-    { "hash_algo", T_OBJECT, offsetof(PyGpgmeNewSignature, hash_algo), RO},
-    { "timestamp", T_OBJECT, offsetof(PyGpgmeNewSignature, timestamp), RO},
-    { "fpr", T_OBJECT, offsetof(PyGpgmeNewSignature, fpr), RO},
-    { "sig_class", T_OBJECT, offsetof(PyGpgmeNewSignature, sig_class), RO},
+    { "type", T_OBJECT, offsetof(PyGpgmeNewSignature, type), READONLY},
+    { "pubkey_algo", T_OBJECT, offsetof(PyGpgmeNewSignature, pubkey_algo), READONLY},
+    { "hash_algo", T_OBJECT, offsetof(PyGpgmeNewSignature, hash_algo), READONLY},
+    { "timestamp", T_OBJECT, offsetof(PyGpgmeNewSignature, timestamp), READONLY},
+    { "fpr", T_OBJECT, offsetof(PyGpgmeNewSignature, fpr), READONLY},
+    { "sig_class", T_OBJECT, offsetof(PyGpgmeNewSignature, sig_class), READONLY},
     { NULL, 0, 0, 0}
 };
 
 PyTypeObject PyGpgmeNewSignature_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.NewSignature",
     sizeof(PyGpgmeNewSignature),
     .tp_flags = Py_TPFLAGS_DEFAULT,
@@ -106,24 +105,23 @@ pygpgme_sig_dealloc(PyGpgmeSignature *self)
 }
 
 static PyMemberDef pygpgme_sig_members[] = {
-    { "summary", T_OBJECT, offsetof(PyGpgmeSignature, summary), RO},
-    { "fpr", T_OBJECT, offsetof(PyGpgmeSignature, fpr), RO},
-    { "status", T_OBJECT, offsetof(PyGpgmeSignature, status), RO},
-    { "notations", T_OBJECT, offsetof(PyGpgmeSignature, notations), RO},
-    { "timestamp", T_OBJECT, offsetof(PyGpgmeSignature, timestamp), RO},
+    { "summary", T_OBJECT, offsetof(PyGpgmeSignature, summary), READONLY},
+    { "fpr", T_OBJECT, offsetof(PyGpgmeSignature, fpr), READONLY},
+    { "status", T_OBJECT, offsetof(PyGpgmeSignature, status), READONLY},
+    { "notations", T_OBJECT, offsetof(PyGpgmeSignature, notations), READONLY},
+    { "timestamp", T_OBJECT, offsetof(PyGpgmeSignature, timestamp), READONLY},
     { "exp_timestamp", T_OBJECT,
-      offsetof(PyGpgmeSignature, exp_timestamp), RO},
+      offsetof(PyGpgmeSignature, exp_timestamp), READONLY},
     { "wrong_key_usage", T_OBJECT,
-      offsetof(PyGpgmeSignature, wrong_key_usage), RO},
-    { "validity", T_OBJECT, offsetof(PyGpgmeSignature, validity), RO},
+      offsetof(PyGpgmeSignature, wrong_key_usage), READONLY},
+    { "validity", T_OBJECT, offsetof(PyGpgmeSignature, validity), READONLY},
     { "validity_reason", T_OBJECT,
-      offsetof(PyGpgmeSignature, validity_reason), RO},
+      offsetof(PyGpgmeSignature, validity_reason), READONLY},
     { NULL, 0, 0, 0}
 };
 
 PyTypeObject PyGpgmeSignature_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.Signature",
     sizeof(PyGpgmeSignature),
     .tp_flags = Py_TPFLAGS_DEFAULT,

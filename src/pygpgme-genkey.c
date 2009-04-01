@@ -30,15 +30,14 @@ pygpgme_genkey_result_dealloc(PyGpgmeGenkeyResult *self)
 }
 
 static PyMemberDef pygpgme_genkey_result_members[] = {
-    { "primary", T_OBJECT, offsetof(PyGpgmeGenkeyResult, primary), RO},
-    { "sub", T_OBJECT, offsetof(PyGpgmeGenkeyResult, sub), RO},
-    { "fpr", T_OBJECT, offsetof(PyGpgmeGenkeyResult, fpr), RO},
+    { "primary", T_OBJECT, offsetof(PyGpgmeGenkeyResult, primary), READONLY},
+    { "sub", T_OBJECT, offsetof(PyGpgmeGenkeyResult, sub), READONLY},
+    { "fpr", T_OBJECT, offsetof(PyGpgmeGenkeyResult, fpr), READONLY},
     { NULL, 0, 0, 0}
 };
 
 PyTypeObject PyGpgmeGenkeyResult_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.GenkeyResult",
     sizeof(PyGpgmeGenkeyResult),
     .tp_flags = Py_TPFLAGS_DEFAULT,

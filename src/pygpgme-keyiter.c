@@ -73,8 +73,7 @@ pygpgme_keyiter_next(PyGpgmeKeyIter *self)
 }
 
 PyTypeObject PyGpgmeKeyIter_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.KeyIter",
     sizeof(PyGpgmeKeyIter),
     .tp_flags = Py_TPFLAGS_DEFAULT,

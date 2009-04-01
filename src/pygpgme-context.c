@@ -1227,8 +1227,7 @@ static PyMethodDef pygpgme_context_methods[] = {
 };
 
 PyTypeObject PyGpgmeContext_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.Context",
     sizeof(PyGpgmeContext),
     .tp_flags = Py_TPFLAGS_DEFAULT,
