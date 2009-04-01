@@ -424,10 +424,17 @@ decode_encrypt_result(PyGpgmeContext *self)
 
     list = PyList_New(0);
     for (key = res->invalid_recipients; key != NULL; key = key->next) {
-        PyObject *item, *err;
+        PyObject *item, *py_fpr, *err;
 
+        if (key->fpr)
+            py_fpr = PyUnicode_DecodeASCII(key->fpr, strlen(key->fpr),
+                                           "replace");
+        else {
+            py_fpr = Py_None;
+            Py_INCREF(py_fpr);
+        }
         err = pygpgme_error_object(key->reason);
-        item = Py_BuildValue("(zN)", key->fpr, err);
+        item = Py_BuildValue("(NN)", py_fpr, err);
         PyList_Append(list, item);
         Py_DECREF(item);
     }
@@ -577,10 +584,17 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
 
         list = PyList_New(0);
         for (key = result->invalid_signers; key != NULL; key = key->next) {
-            PyObject *item, *err;
+            PyObject *item, *py_fpr, *err;
 
+            if (key->fpr)
+                py_fpr = PyUnicode_DecodeASCII(key->fpr, strlen(key->fpr),
+                                               "replace");
+            else {
+                py_fpr = Py_None;
+                Py_INCREF(py_fpr);
+            }
             err = pygpgme_error_object(key->reason);
-            item = Py_BuildValue("(zN)", key->fpr, err);
+            item = Py_BuildValue("(NN)", py_fpr, err);
             PyList_Append(list, item);
             Py_DECREF(item);
         }
@@ -783,10 +797,17 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
 
         list = PyList_New(0);
         for (key = result->invalid_signers; key != NULL; key = key->next) {
-            PyObject *item, *err;
+            PyObject *item, *py_fpr, *err;
 
+            if (key->fpr)
+                py_fpr = PyUnicode_DecodeASCII(key->fpr, strlen(key->fpr),
+                                               "replace");
+            else {
+                py_fpr = Py_None;
+                Py_INCREF(py_fpr);
+            }
             err = pygpgme_error_object(key->reason);
-            item = Py_BuildValue("(zN)", key->fpr, err);
+            item = Py_BuildValue("(NN)", py_fpr, err);
             PyList_Append(list, item);
             Py_DECREF(item);
         }

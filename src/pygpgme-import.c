@@ -115,10 +115,17 @@ pygpgme_import_result(gpgme_ctx_t ctx)
     if (!self->imports)
         return NULL;
     for (status = result->imports; status != NULL; status = status->next) {
-        PyObject *item;
+        PyObject *py_fpr, *item;
 
-        item = Py_BuildValue("(zNi)",
-                             status->fpr,
+        if (status->fpr)
+            py_fpr = PyUnicode_DecodeASCII(status->fpr, strlen(status->fpr),
+                                           "replace");
+        else {
+            py_fpr = Py_None;
+            Py_INCREF(py_fpr);
+        }
+        item = Py_BuildValue("(NNi)",
+                             py_fpr,
                              pygpgme_error_object(status->result),
                              status->status);
         if (!item) {

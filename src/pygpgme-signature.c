@@ -158,12 +158,17 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
         item->status = pygpgme_error_object(sig->status);
         item->notations = PyList_New(0);
         for (not = sig->notations; not != NULL; not = not->next) {
-            PyObject *pynot = Py_BuildValue("(zz)", not->name, not->value);
+            PyObject *py_name, *py_value, *py_not;
 
-            if (!pynot)
+            py_name = PyUnicode_DecodeUTF8(not->name, not->name_len,
+                                           "replace");
+            py_value = PyBytes_FromStringAndSize(not->value, not->value_len);
+            py_not = Py_BuildValue("(NN)", py_name, py_value);
+
+            if (!py_not)
                 break;
-            PyList_Append(item->notations, pynot);
-            Py_DECREF(pynot);
+            PyList_Append(item->notations, py_not);
+            Py_DECREF(py_not);
         }
         item->timestamp = PyInt_FromLong(sig->timestamp);
         item->exp_timestamp = PyInt_FromLong(sig->exp_timestamp);
