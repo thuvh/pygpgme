@@ -65,17 +65,17 @@ read_cb(void *handle, void *buffer, size_t size)
         goto end;
     }
     /* if we don't have a string return value, consider that an error too */
-    if (!PyString_Check(result)) {
+    if (!PyBytes_Check(result)) {
         Py_DECREF(result);
         errno = EINVAL;
         result_size = -1;
         goto end;
     }
     /* copy the result into the given buffer */
-    result_size = PyString_Size(result);
+    result_size = PyBytes_Size(result);
     if (result_size > size)
         result_size = size;
-    memcpy(buffer, PyString_AsString(result), result_size);
+    memcpy(buffer, PyBytes_AsString(result), result_size);
     Py_DECREF(result);
  end:
     PyGILState_Release(state);

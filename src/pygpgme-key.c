@@ -99,7 +99,7 @@ static PyObject *
 pygpgme_subkey_get_keyid(PyGpgmeSubkey *self)
 {
     if (self->subkey->keyid)
-        return PyString_FromString(self->subkey->keyid);
+        return PyBytes_FromString(self->subkey->keyid);
     else
         Py_RETURN_NONE;
 }
@@ -108,7 +108,7 @@ static PyObject *
 pygpgme_subkey_get_fpr(PyGpgmeSubkey *self)
 {
     if (self->subkey->fpr)
-        return PyString_FromString(self->subkey->fpr);
+        return PyBytes_FromString(self->subkey->fpr);
     else
         Py_RETURN_NONE;
 }
@@ -198,7 +198,7 @@ static PyObject *
 pygpgme_key_sig_get_keyid(PyGpgmeKeySig *self)
 {
     if (self->key_sig->keyid)
-        return PyString_FromString(self->key_sig->keyid);
+        return PyBytes_FromString(self->key_sig->keyid);
     else
         Py_RETURN_NONE;
 }
@@ -225,7 +225,7 @@ static PyObject *
 pygpgme_key_sig_get_uid(PyGpgmeKeySig *self)
 {
     if (self->key_sig->uid)
-        return PyString_FromString(self->key_sig->uid);
+        return PyBytes_FromString(self->key_sig->uid);
     else
         Py_RETURN_NONE;
 }
@@ -234,7 +234,7 @@ static PyObject *
 pygpgme_key_sig_get_name(PyGpgmeKeySig *self)
 {
     if (self->key_sig->name)
-        return PyString_FromString(self->key_sig->name);
+        return PyBytes_FromString(self->key_sig->name);
     else
         Py_RETURN_NONE;
 }
@@ -243,7 +243,7 @@ static PyObject *
 pygpgme_key_sig_get_email(PyGpgmeKeySig *self)
 {
     if (self->key_sig->email)
-        return PyString_FromString(self->key_sig->email);
+        return PyBytes_FromString(self->key_sig->email);
     else
         Py_RETURN_NONE;
 }
@@ -252,7 +252,7 @@ static PyObject *
 pygpgme_key_sig_get_comment(PyGpgmeKeySig *self)
 {
     if (self->key_sig->comment)
-        return PyString_FromString(self->key_sig->comment);
+        return PyBytes_FromString(self->key_sig->comment);
     else
         Py_RETURN_NONE;
 }
@@ -323,7 +323,7 @@ static PyObject *
 pygpgme_user_id_get_uid(PyGpgmeUserId *self)
 {
     if (self->user_id->uid)
-        return PyString_FromString(self->user_id->uid);
+        return PyBytes_FromString(self->user_id->uid);
     else
         Py_RETURN_NONE;
 }
@@ -332,7 +332,7 @@ static PyObject *
 pygpgme_user_id_get_name(PyGpgmeUserId *self)
 {
     if (self->user_id->name)
-        return PyString_FromString(self->user_id->name);
+        return PyBytes_FromString(self->user_id->name);
     else
         Py_RETURN_NONE;
 }
@@ -341,7 +341,7 @@ static PyObject *
 pygpgme_user_id_get_email(PyGpgmeUserId *self)
 {
     if (self->user_id->email)
-        return PyString_FromString(self->user_id->email);
+        return PyBytes_FromString(self->user_id->email);
     else
         Py_RETURN_NONE;
 }
@@ -350,7 +350,7 @@ static PyObject *
 pygpgme_user_id_get_comment(PyGpgmeUserId *self)
 {
     if (self->user_id->comment)
-        return PyString_FromString(self->user_id->comment);
+        return PyBytes_FromString(self->user_id->comment);
     else
         Py_RETURN_NONE;
 }
@@ -476,7 +476,7 @@ static PyObject *
 pygpgme_key_get_issuer_serial(PyGpgmeKey *self)
 {
     if (self->key->issuer_serial)
-        return PyString_FromString(self->key->issuer_serial);
+        return PyBytes_FromString(self->key->issuer_serial);
     else
         Py_RETURN_NONE;
 }
@@ -485,7 +485,7 @@ static PyObject *
 pygpgme_key_get_issuer_name(PyGpgmeKey *self)
 {
     if (self->key->issuer_name)
-        return PyString_FromString(self->key->issuer_name);
+        return PyBytes_FromString(self->key->issuer_name);
     else
         Py_RETURN_NONE;
 }
@@ -494,7 +494,7 @@ static PyObject *
 pygpgme_key_get_chain_id(PyGpgmeKey *self)
 {
     if (self->key->chain_id)
-        return PyString_FromString(self->key->chain_id);
+        return PyBytes_FromString(self->key->chain_id);
     else
         Py_RETURN_NONE;
 }

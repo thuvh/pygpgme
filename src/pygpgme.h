@@ -23,6 +23,8 @@
 #include <Python.h>
 #include <gpgme.h>
 
+#include "pycompat.h"
+
 #define HIDDEN __attribute__((visibility("hidden")))
 
 typedef struct {

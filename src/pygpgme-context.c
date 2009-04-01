@@ -619,7 +619,7 @@ decode_decrypt_result(PyGpgmeContext *self)
         goto end;
 
     if (res->unsupported_algorithm) {
-        value = PyString_FromString(res->unsupported_algorithm);
+        value = PyBytes_FromString(res->unsupported_algorithm);
     } else {
         Py_INCREF(Py_None);
         value = Py_None;
@@ -924,9 +924,9 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
         Py_INCREF(py_pattern);
         pattern = NULL;
         patterns = NULL;
-    } else if (PyString_Check(py_pattern)) {
+    } else if (PyBytes_Check(py_pattern)) {
         Py_INCREF(py_pattern);
-        pattern = PyString_AsString(py_pattern);
+        pattern = PyBytes_AsString(py_pattern);
         patterns = NULL;
     } else {
         py_pattern = PySequence_Fast(py_pattern,
@@ -939,14 +939,14 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
         for (i = 0; i < length; i++) {
             PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
 
-            if (!PyString_Check(item)) {
+            if (!PyBytes_Check(item)) {
                 PyErr_SetString(PyExc_TypeError,
                     "first argument must be a string or sequence of strings");
                 free(patterns);
                 Py_DECREF(py_pattern);
                 return NULL;
             }
-            patterns[i] = PyString_AsString(item);
+            patterns[i] = PyBytes_AsString(item);
         }
         patterns[i] = NULL;
     }
@@ -1131,9 +1131,9 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
         Py_INCREF(py_pattern);
         pattern = NULL;
         patterns = NULL;
-    } else if (PyString_Check(py_pattern)) {
+    } else if (PyBytes_Check(py_pattern)) {
         Py_INCREF(py_pattern);
-        pattern = PyString_AsString(py_pattern);
+        pattern = PyBytes_AsString(py_pattern);
         patterns = NULL;
     } else {
         py_pattern = PySequence_Fast(py_pattern,
@@ -1146,14 +1146,14 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
         for (i = 0; i < length; i++) {
             PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
 
-            if (!PyString_Check(item)) {
+            if (!PyBytes_Check(item)) {
                 PyErr_SetString(PyExc_TypeError,
                     "first argument must be a string or sequence of strings");
                 free(patterns);
                 Py_DECREF(py_pattern);
                 return NULL;
             }
-            patterns[i] = PyString_AsString(item);
+            patterns[i] = PyBytes_AsString(item);
         }
         patterns[i] = NULL;
     }
