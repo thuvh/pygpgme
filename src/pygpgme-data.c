@@ -87,19 +87,25 @@ write_cb(void *handle, const void *buffer, size_t size)
 {
     PyGILState_STATE state;
     PyObject *fp = handle;
-    PyObject *result;
-    ssize_t bytes_written = 0;
+    PyObject *py_buffer = NULL;
+    PyObject *result = NULL;
+    ssize_t bytes_written = -1;
 
     state = PyGILState_Ensure();
-    result = PyObject_CallMethod(fp, "write", "s#", buffer, (int)size);
-    if (result == NULL) {
+    py_buffer = PyBytes_FromStringAndSize(buffer, size);
+    if (py_buffer == NULL) {
         set_errno();
-        bytes_written = -1;
         goto end;
     }
-    Py_DECREF(result);
+    result = PyObject_CallMethod(fp, "write", "O", py_buffer);
+    if (result == NULL) {
+        set_errno();
+        goto end;
+    }
     bytes_written = size;
  end:
+    Py_XDECREF(result);
+    Py_XDECREF(py_buffer);
     PyGILState_Release(state);
     return bytes_written;
 }
