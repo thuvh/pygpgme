@@ -356,7 +356,6 @@ static PyGetSetDef pygpgme_context_getsets[] = {
     { NULL, (getter)0, (setter)0 }
 };
 
-/* XXX: set_locale */
 static PyObject *
 pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 {
@@ -371,11 +370,6 @@ pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 
     Py_RETURN_NONE;
 }
-
-/* the following don't seem to be used */
-/* XXX: signers_clear */
-/* XXX: signers_add */
-/* XXX: signers_enum */
 
 static PyObject *
 pygpgme_context_get_key(PyGpgmeContext *self, PyObject *args)
@@ -482,13 +476,13 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
     if (pygpgme_data_new(&plain, py_plain)) {
         free(recp);
         Py_DECREF(py_recp);
-        return NULL;    
+        return NULL;
     }
     if (pygpgme_data_new(&cipher, py_cipher)) {
         free(recp);
         Py_DECREF(py_recp);
         gpgme_data_release(plain);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
@@ -545,13 +539,13 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
     if (pygpgme_data_new(&plain, py_plain)) {
         free(recp);
         Py_DECREF(py_recp);
-        return NULL;    
+        return NULL;
     }
     if (pygpgme_data_new(&cipher, py_cipher)) {
         free(recp);
         Py_DECREF(py_recp);
         gpgme_data_release(plain);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
@@ -671,7 +665,7 @@ pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
 
     if (pygpgme_data_new(&plain, py_plain)) {
         gpgme_data_release(cipher);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
@@ -706,7 +700,7 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
 
     if (pygpgme_data_new(&plain, py_plain)) {
         gpgme_data_release(cipher);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
@@ -764,11 +758,11 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
         return NULL;
 
     if (pygpgme_data_new(&plain, py_plain))
-        return NULL;    
+        return NULL;
 
     if (pygpgme_data_new(&sig, py_sig)) {
         gpgme_data_release(plain);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
@@ -845,12 +839,12 @@ pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
     }
     if (pygpgme_data_new(&signed_text, py_signed_text)) {
         gpgme_data_release(sig);
-        return NULL;    
+        return NULL;
     }
     if (pygpgme_data_new(&plaintext, py_plaintext)) {
         gpgme_data_release(sig);
         gpgme_data_release(signed_text);
-        return NULL;    
+        return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
