@@ -17,7 +17,10 @@
 
 import unittest
 import os
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 from textwrap import dedent
 
 import gpgme
@@ -31,8 +34,8 @@ class PassphraseTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         try:
             new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
@@ -53,8 +56,8 @@ class PassphraseTestCase(GpgHomeTestCase):
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]
         ctx.passphrase_cb = self.passphrase_cb
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         self.uid_hint = None
         self.passphrase_info = None

@@ -17,7 +17,10 @@
 
 import unittest
 import os
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 from textwrap import dedent
 
 import gpgme
@@ -35,8 +38,8 @@ class ProgressTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
         ctx.progress_cb = self.progress_cb
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         self.progress_cb_called = False
         new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)

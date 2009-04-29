@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 from textwrap import dedent
 
 import gpgme
@@ -28,7 +31,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
                    'signonly.pub', 'signonly.sec']
 
     def test_decrypt(self):
-        ciphertext = StringIO.StringIO(dedent('''
+        ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
 
@@ -48,13 +51,13 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             =1s5N
             -----END PGP MESSAGE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'hello world\n')
 
     def test_decrypt_verify(self):
-        ciphertext = StringIO.StringIO(dedent('''
+        ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
 
@@ -76,7 +79,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             =fl3U
             -----END PGP MESSAGE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'hello world\n')
@@ -93,8 +96,8 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_encrypt(self):
-        plaintext = StringIO.StringIO('Hello World\n')
-        ciphertext = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
         ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
@@ -102,13 +105,13 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
 
         # rewind ciphertext buffer, and try to decrypt:
         ciphertext.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
 
     def test_encrypt_armor(self):
-        plaintext = StringIO.StringIO('Hello World\n')
-        ciphertext = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        ciphertext = BytesIO()
         ctx = gpgme.Context()
         ctx.armor = True
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
@@ -117,13 +120,13 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
 
         # rewind ciphertext buffer, and try to decrypt:
         ciphertext.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
 
     def test_encrypt_sign(self):
-        plaintext = StringIO.StringIO('Hello World\n')
-        ciphertext = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        ciphertext = BytesIO()
         ctx = gpgme.Context()
         ctx.armor = True
         signer = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
@@ -139,7 +142,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
 
         # rewind ciphertext buffer, and try to decrypt:
         ciphertext.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
         self.assertEqual(len(sigs), 1)
@@ -152,8 +155,8 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_encrypt_to_signonly(self):
-        plaintext = StringIO.StringIO('Hello World\n')
-        ciphertext = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
         try:

@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 from textwrap import dedent
 
 import gpgme
@@ -29,7 +32,7 @@ class ExportTestCase(GpgHomeTestCase):
     def test_export_by_fingerprint(self):
         ctx = gpgme.Context()
         ctx.armor = True
-        keydata = StringIO.StringIO()
+        keydata = BytesIO()
         ctx.export('15E7CE9BF1771A4ABC550B31F540A569CB935A42', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(
@@ -38,7 +41,7 @@ class ExportTestCase(GpgHomeTestCase):
     def test_export_by_email(self):
         ctx = gpgme.Context()
         ctx.armor = True
-        keydata = StringIO.StringIO()
+        keydata = BytesIO()
         ctx.export('signonly@example.org', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(
@@ -47,7 +50,7 @@ class ExportTestCase(GpgHomeTestCase):
     def test_export_by_name(self):
         ctx = gpgme.Context()
         ctx.armor = True
-        keydata = StringIO.StringIO()
+        keydata = BytesIO()
         ctx.export('Sign Only', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(

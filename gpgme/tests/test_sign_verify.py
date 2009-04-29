@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 from textwrap import dedent
 
 import gpgme
@@ -28,7 +31,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
                    'signonly.pub', 'signonly.sec']
 
     def test_verify_normal(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
 
@@ -38,7 +41,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             =HCW0
             -----END PGP MESSAGE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
@@ -56,7 +59,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_detached(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNATURE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
 
@@ -65,7 +68,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             =dyZS
             -----END PGP SIGNATURE-----
             '''))
-        signed_text = StringIO.StringIO('Hello World\n')
+        signed_text = BytesIO('Hello World\n')
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, signed_text, None)
 
@@ -82,7 +85,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_clearsign(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
 
@@ -95,7 +98,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             =kZ2c
             -----END PGP SIGNATURE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
@@ -113,7 +116,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_multiple_sigs(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
 
@@ -137,7 +140,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             =0A7N
             -----END PGP SIGNATURE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
@@ -166,7 +169,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[1].validity_reason, None)
 
     def test_verify_no_signature(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
 
@@ -174,7 +177,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             -----BEGIN PGP SIGNATURE-----
             -----END PGP SIGNATURE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
@@ -182,7 +185,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(len(sigs), 0)
 
     def test_verify_bad_signature(self):
-        signature = StringIO.StringIO(dedent('''
+        signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
 
@@ -193,7 +196,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             iNhhNHx+gzGBUqtIK5LpENTCGgCfV3aO
             -----END PGP SIGNATURE-----
             '''))
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         ctx = gpgme.Context()
         try:
             ctx.verify(signature, None, plaintext)
@@ -208,8 +211,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx.armor = False
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_NORMAL)
         self.assertEqual(len(new_sigs), 1)
@@ -219,7 +222,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
 
         # now verify the signature
         signature.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         sigs = ctx.verify(signature, None, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
         self.assertEqual(len(sigs), 1)
@@ -236,8 +239,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_NORMAL)
         self.assertEqual(len(new_sigs), 1)
@@ -247,7 +250,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
 
         # now verify the signature
         signature.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         sigs = ctx.verify(signature, None, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
         self.assertEqual(len(sigs), 1)
@@ -264,8 +267,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_DETACH)
         self.assertEqual(len(new_sigs), 1)
@@ -291,8 +294,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
         self.assertEqual(len(new_sigs), 1)
@@ -302,7 +305,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
 
         # now verify the signature
         signature.seek(0)
-        plaintext = StringIO.StringIO()
+        plaintext = BytesIO()
         sigs = ctx.verify(signature, None, plaintext)
         self.assertEqual(plaintext.getvalue(), 'Hello World\n')
         self.assertEqual(len(sigs), 1)

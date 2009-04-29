@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 
 import gpgme
 from gpgme.tests.util import GpgHomeTestCase
@@ -79,7 +82,7 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
     def test_import_stringio(self):
-        fp = StringIO.StringIO(self.keyfile('key1.pub').read())
+        fp = BytesIO(self.keyfile('key1.pub').read())
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(len(result.imports), 1)
@@ -93,7 +96,7 @@ class ImportTestCase(GpgHomeTestCase):
         keys = '\n'.join([self.keyfile('key1.pub').read(),
                           self.keyfile('key1.sec').read(),
                           self.keyfile('key2.pub').read()])
-        fp = StringIO.StringIO(keys)
+        fp = BytesIO(keys)
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(result.considered, 3)
@@ -130,7 +133,7 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
     def test_import_empty(self):
-        fp = StringIO.StringIO('')
+        fp = BytesIO('')
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(result.considered, 0)
@@ -143,7 +146,7 @@ class ImportTestCase(GpgHomeTestCase):
 
         fp = self.keyfile('key1.pub')
         result = ctx.import_(fp)
-        
+
         self.assertEqual(result.considered, 1)
         self.assertEqual(result.no_user_id, 0)
         self.assertEqual(result.imported, 0)

@@ -16,7 +16,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 
 import gpgme
 from gpgme.tests.util import GpgHomeTestCase
@@ -47,8 +50,8 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         ctx.signers = [key]
 
-        plaintext = StringIO.StringIO('Hello World\n')
-        signature = StringIO.StringIO()
+        plaintext = BytesIO('Hello World\n')
+        signature = BytesIO()
 
         ctx.armor = True
         new_sigs = ctx.sign(
