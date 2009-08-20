@@ -357,6 +357,22 @@ static PyGetSetDef pygpgme_context_getsets[] = {
 };
 
 static PyObject *
+pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
+{
+    int protocol;
+    const char *file_name, *home_dir;
+
+    if (!PyArg_ParseTuple(args, "izz", &protocol, &file_name, &home_dir))
+        return NULL;
+
+    if (pygpgme_check_error(gpgme_ctx_set_engine_info(self->ctx, protocol,
+                                                      file_name, home_dir)))
+        return NULL;
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 {
     int category;
@@ -1201,6 +1217,7 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
 // pygpgme_context_trustlist
 
 static PyMethodDef pygpgme_context_methods[] = {
+    { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS },
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
     { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS },
