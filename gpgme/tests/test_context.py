@@ -15,6 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import unittest
 
 import gpgme
@@ -118,6 +119,25 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.progress_cb = progress_cb
         del ctx.progress_cb
         self.assertEqual(ctx.progress_cb, None)
+
+    def test_set_engine_info(self):
+        # Add a key using the default $GNUPGHOME based keyring.
+        ctx = gpgme.Context()
+        ctx.import_(self.keyfile('key1.pub'))
+
+        # If we set $GNUPGHOME to a dummy value, we can't read in the
+        # keywe just loaded.
+        os.environ['GNUPGHOME'] = '/no/such/dir'
+        ctx = gpgme.Context()
+        self.assertRaises(gpgme.GpgmeError, ctx.get_key,
+                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+        # But if we configure the context using set_engine_info(), it
+        # will find the key.
+        ctx = gpgme.Context()
+        ctx.set_engine_info(gpgme.PROTOCOL_OpenPGP, None, self._gpghome)
+        key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        self.assertTrue(key)
 
 
 def test_suite():
