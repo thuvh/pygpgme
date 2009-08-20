@@ -15,6 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import unittest
 try:
     from io import BytesIO
@@ -119,6 +120,24 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
                     plaintext, ciphertext)
 
         # rewind ciphertext buffer, and try to decrypt:
+        ciphertext.seek(0)
+        plaintext = BytesIO()
+        ctx.decrypt(ciphertext, plaintext)
+        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+
+    def test_encrypt_symmetric(self):
+        plaintext = BytesIO('Hello World\n')
+        ciphertext = BytesIO()
+        def passphrase(uid_hint, passphrase_info, prev_was_bad, fd):
+            os.write(fd, 'Symmetric passphrase\n')
+        ctx = gpgme.Context()
+        ctx.armor = True
+        ctx.passphrase_cb = passphrase
+        ctx.encrypt(None, 0, plaintext, ciphertext)
+        self.assertTrue(
+            ciphertext.getvalue().startswith('-----BEGIN PGP MESSAGE-----'))
+
+        # Rewind ciphertext buffer and try to decrypt it:
         ciphertext.seek(0)
         plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)

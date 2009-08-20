@@ -459,121 +459,107 @@ decode_encrypt_result(PyGpgmeContext *self)
 static PyObject *
 pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
 {
-    PyObject *py_recp, *py_plain, *py_cipher;
+    PyObject *py_recp, *py_plain, *py_cipher, *recp_seq = NULL, *result = NULL;
     int flags, i, length;
-    gpgme_key_t *recp;
-    gpgme_data_t plain, cipher;
+    gpgme_key_t *recp = NULL;
+    gpgme_data_t plain = NULL, cipher = NULL;
     gpgme_error_t err;
 
     if (!PyArg_ParseTuple(args, "OiOO", &py_recp, &flags,
                           &py_plain, &py_cipher))
-        return NULL;
+        goto end;
 
-    py_recp = PySequence_Fast(py_recp, "first argument must be a sequence");
-    if (py_recp == NULL)
-        return NULL;
+    if (py_recp != Py_None) {
+        recp_seq = PySequence_Fast(py_recp, "first argument must be a "
+                                   "sequence or None");
+        if (recp_seq == NULL)
+            goto end;
 
-    length = PySequence_Fast_GET_SIZE(py_recp);
-    recp = malloc((length + 1) * sizeof (gpgme_key_t));
-    for (i = 0; i < length; i++) {
-        PyObject *item = PySequence_Fast_GET_ITEM(py_recp, i);
+        length = PySequence_Fast_GET_SIZE(recp_seq);
+        recp = malloc((length + 1) * sizeof (gpgme_key_t));
+        for (i = 0; i < length; i++) {
+            PyObject *item = PySequence_Fast_GET_ITEM(recp_seq, i);
 
-        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
-            free(recp);
-            Py_DECREF(py_recp);
-            PyErr_SetString(PyExc_TypeError, "items in first argument must "
-                            "be gpgme.Key objects");
-            return NULL;
+            if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+                PyErr_SetString(PyExc_TypeError, "items in first argument "
+                                "must be gpgme.Key objects");
+                goto end;
+            }
+            recp[i] = ((PyGpgmeKey *)item)->key;
         }
-        recp[i] = ((PyGpgmeKey *)item)->key;
-    }
-    recp[i] = NULL;
-
-    if (pygpgme_data_new(&plain, py_plain)) {
-        free(recp);
-        Py_DECREF(py_recp);
-        return NULL;
-    }
-    if (pygpgme_data_new(&cipher, py_cipher)) {
-        free(recp);
-        Py_DECREF(py_recp);
-        gpgme_data_release(plain);
-        return NULL;
+        recp[i] = NULL;
     }
 
-    Py_BEGIN_ALLOW_THREADS;
-    err = gpgme_op_encrypt(self->ctx, recp, flags, plain, cipher);
+    if (pygpgme_data_new(&plain, py_plain))
+        goto end;
+    if (pygpgme_data_new(&cipher, py_cipher))
+        goto end;
+
+    Py_BEGIN_ALLOW_THREADS;    err = gpgme_op_encrypt(self->ctx, recp, flags, plain, cipher);
     Py_END_ALLOW_THREADS;
-
-    free(recp);
-    Py_DECREF(py_recp);
-    gpgme_data_release(plain);
-    gpgme_data_release(cipher);
 
     if (pygpgme_check_error(err)) {
         decode_encrypt_result(self);
-        return NULL;
+        goto end;
     }
 
-    Py_RETURN_NONE;
+    Py_INCREF(Py_None);
+    result = Py_None;
+
+ end:
+    if (recp != NULL)
+        free(recp);
+    Py_XDECREF(recp_seq);
+    if (plain != NULL)
+        gpgme_data_release(plain);
+    if (cipher != NULL)
+        gpgme_data_release(cipher);
+
+    return result;
 }
 
 static PyObject *
 pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
 {
-    PyObject *py_recp, *py_plain, *py_cipher;
+    PyObject *py_recp, *py_plain, *py_cipher, *recp_seq = NULL, *result = NULL;
     int flags, i, length;
-    gpgme_key_t *recp;
-    gpgme_data_t plain, cipher;
+    gpgme_key_t *recp = NULL;
+    gpgme_data_t plain = NULL, cipher = NULL;
     gpgme_error_t err;
-    gpgme_sign_result_t result;
+    gpgme_sign_result_t sign_result;
 
     if (!PyArg_ParseTuple(args, "OiOO", &py_recp, &flags,
                           &py_plain, &py_cipher))
-        return NULL;
+        goto end;
 
-    py_recp = PySequence_Fast(py_recp, "first argument must be a sequence");
-    if (py_recp == NULL)
-        return NULL;
+    recp_seq = PySequence_Fast(py_recp, "first argument must be a sequence");
+    if (recp_seq == NULL)
+        goto end;
 
-    length = PySequence_Fast_GET_SIZE(py_recp);
+    length = PySequence_Fast_GET_SIZE(recp_seq);
     recp = malloc((length + 1) * sizeof (gpgme_key_t));
     for (i = 0; i < length; i++) {
-        PyObject *item = PySequence_Fast_GET_ITEM(py_recp, i);
+        PyObject *item = PySequence_Fast_GET_ITEM(recp_seq, i);
 
         if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
-            free(recp);
-            Py_DECREF(py_recp);
-            PyErr_SetString(PyExc_TypeError, "items in first argument must "
-                            "be gpgme.Key objects");
-            return NULL;
+            PyErr_SetString(PyExc_TypeError, "items in first argument "
+                            "must be gpgme.Key objects");
+            goto end;
         }
         recp[i] = ((PyGpgmeKey *)item)->key;
     }
     recp[i] = NULL;
 
-    if (pygpgme_data_new(&plain, py_plain)) {
-        free(recp);
-        Py_DECREF(py_recp);
-        return NULL;
-    }
-    if (pygpgme_data_new(&cipher, py_cipher)) {
-        free(recp);
-        Py_DECREF(py_recp);
-        gpgme_data_release(plain);
-        return NULL;
-    }
+    if (pygpgme_data_new(&plain, py_plain))
+        goto end;
+    if (pygpgme_data_new(&cipher, py_cipher))
+        goto end;
 
     Py_BEGIN_ALLOW_THREADS;
     err = gpgme_op_encrypt_sign(self->ctx, recp, flags, plain, cipher);
     Py_END_ALLOW_THREADS;
 
-    free(recp);
-    Py_DECREF(py_recp);
-    gpgme_data_release(plain);
-    gpgme_data_release(cipher);
-
-    result = gpgme_op_sign_result(self->ctx);
+    sign_result = gpgme_op_sign_result(self->ctx);
 
     /* annotate exception */
     if (pygpgme_check_error(err)) {
@@ -586,14 +572,14 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
         PyErr_Fetch(&err_type, &err_value, &err_traceback);
         PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
 
-        if (result == NULL)
-            goto end;
+        if (sign_result == NULL)
+            goto error_end;
 
         if (!PyErr_GivenExceptionMatches(err_type, pygpgme_error))
-            goto end;
+            goto error_end;
 
         list = PyList_New(0);
-        for (key = result->invalid_signers; key != NULL; key = key->next) {
+        for (key = sign_result->invalid_signers; key != NULL; key = key->next) {
             PyObject *item, *py_fpr, *err;
 
             if (key->fpr)
@@ -611,18 +597,29 @@ pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
         PyObject_SetAttrString(err_value, "invalid_signers", list);
         Py_DECREF(list);
 
-        list = pygpgme_newsiglist_new(result->signatures);
+        list = pygpgme_newsiglist_new(sign_result->signatures);
         PyObject_SetAttrString(err_value, "signatures", list);
         Py_DECREF(list);
-    end:
+    error_end:
         PyErr_Restore(err_type, err_value, err_traceback);
-        return NULL;
+        goto end;
     }
 
-    if (result)
-        return pygpgme_newsiglist_new(result->signatures);
+    if (sign_result)
+        result = pygpgme_newsiglist_new(sign_result->signatures);
     else
-        return PyList_New(0);
+        result = PyList_New(0);
+
+ end:
+    if (recp != NULL)
+        free(recp);
+    Py_XDECREF(recp_seq);
+    if (plain != NULL)
+        gpgme_data_release(plain);
+    if (cipher != NULL)
+        gpgme_data_release(cipher);
+
+    return result;
 }
 
 static void

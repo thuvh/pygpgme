@@ -177,8 +177,10 @@ pygpgme_data_new(gpgme_data_t *dh, PyObject *fp)
 
     error = gpgme_data_new_from_cbs(dh, &python_data_cbs, fp);
 
-    if (pygpgme_check_error(error))
+    if (pygpgme_check_error(error)) {
+        *dh = NULL;
         return -1;
+    }
 
     /* if no error, then the new gpgme_data_t object owns a reference to
      * the python object */
