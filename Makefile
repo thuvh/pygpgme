@@ -1,4 +1,4 @@
-PYTHON = python2.4
+PYTHON = python
 
 build:
 	$(PYTHON) setup.py build_ext -i
