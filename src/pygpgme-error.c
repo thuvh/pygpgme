@@ -26,34 +26,62 @@ PyObject *
 pygpgme_error_object(gpgme_error_t err)
 {
     char buf[256] = { '\0' };
-    PyObject *exc, *attr;
+    PyObject *exc = NULL, *source = NULL, *code = NULL, *strerror = NULL;
 
     if (err == GPG_ERR_NO_ERROR)
         Py_RETURN_NONE;
 
+    if (!(source = PyInt_FromLong(gpgme_err_source(err))))
+        goto end;
+
+    if (!(code = PyInt_FromLong(gpgme_err_code(err))))
+        goto end;
+
     /* get the error string */
-    if (gpgme_strerror_r(err, buf, 255) != 0)
+    if (gpgme_strerror_r(err, buf, sizeof(buf) - 1) != 0)
         strcpy(buf, "Unknown");
+    if (!(strerror = PyUnicode_DecodeUTF8(buf, strlen(buf), "replace")))
+        goto end;
 
-    exc = PyObject_CallFunction(pygpgme_error, "lls",
-                                (long)gpgme_err_source(err),
-                                (long)gpgme_err_code(err),
-                                buf);
+    exc = PyObject_CallFunction(pygpgme_error, "OOO", source, code, strerror);
     if (!exc)
-        return NULL;
+        goto end;
+
     /* set the source and code as attributes of the exception object: */
-    attr = PyInt_FromLong(gpgme_err_source(err));
-    PyObject_SetAttrString(exc, "source", attr);
-    Py_DECREF(attr);
+    PyObject_SetAttrString(exc, "source", source);
+    PyObject_SetAttrString(exc, "code", code);
+    PyObject_SetAttrString(exc, "strerror", strerror);
 
-    attr = PyInt_FromLong(gpgme_err_code(err));
-    PyObject_SetAttrString(exc, "code", attr);
-    Py_DECREF(attr);
+    /* pygpgme 0.1 set the "message" attribute on exceptions, but
+     * Python 2.6 classes this exception attribute as deprecated (even
+     * though we weren't using it in the deprecated fashion).
+     *
+     * We now set the "strerror" attribute for this information, which
+     * is similar to IOError/OSError.
+     *
+     * For backward compatibility, we still set "message" on Python
+     * versions before 3.0.  The hack below is to avoid issuing a
+     * deprecation warning.
+     */
+#if PY_VERSION_HEX < 0x03000000
+#  if PY_VERSION_HEX >= 0x02060000
+    {
+        PyBaseExceptionObject *base_exc = (PyBaseExceptionObject *)exc;
+        PyObject *old_message = base_exc->message;
 
-    attr = PyUnicode_DecodeUTF8(buf, strlen(buf), "replace");
-    PyObject_SetAttrString(exc, "message", attr);
-    Py_DECREF(attr);
+        Py_INCREF(strerror);
+        base_exc->message = strerror;
+        Py_XDECREF(old_message);
+    }
+#  else
+    PyObject_SetAttrString(exc, "message", strerror);
+#  endif
+#endif
 
+ end:
+    Py_XDECREF(strerror);
+    Py_XDECREF(code);
+    Py_XDECREF(source);
     return exc;
 }
 
@@ -98,7 +126,7 @@ pygpgme_check_pyerror(void)
     source = PyTuple_GetItem(args, 0);
     if (source == NULL)
         goto end;
-  
+
     if (PyErr_GivenExceptionMatches(err_type, pygpgme_error)) {
         code = PyTuple_GetItem(args, 1);
         if (code == NULL)
