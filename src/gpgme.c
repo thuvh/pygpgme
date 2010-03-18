@@ -38,6 +38,7 @@ static PyModuleDef pygpgme_module = {
 static PyObject *
 create_module(void)
 {
+    const char *gpgme_version;
     PyObject *mod;
 
     pygpgme_error = PyErr_NewException("gpgme.GpgmeError",
@@ -87,6 +88,10 @@ create_module(void)
 
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
+
+    gpgme_version = gpgme_check_version(NULL);
+    PyModule_AddObject(mod, "GPGME_VERSION",
+                       PyString_FromString(gpgme_version));
 
     return mod;
 }
