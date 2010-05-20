@@ -90,7 +90,12 @@ create_module(void)
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
 
     gpgme_version = gpgme_check_version(NULL);
-    PyModule_AddObject(mod, "GPGME_VERSION",
+    if (gpgme_version == NULL) {
+        PyErr_SetString(PyExc_ImportError, "Unable to initialize gpgme.");
+        Py_DECREF(mod);
+        return NULL;
+    }
+    PyModule_AddObject(mod, "gpgme_version",
                        PyString_FromString(gpgme_version));
 
     return mod;
