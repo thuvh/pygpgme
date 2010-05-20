@@ -38,6 +38,7 @@ static PyModuleDef pygpgme_module = {
 static PyObject *
 create_module(void)
 {
+    const char *gpgme_version;
     PyObject *mod;
 
     pygpgme_error = PyErr_NewException("gpgme.GpgmeError",
@@ -87,6 +88,15 @@ create_module(void)
 
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
+
+    gpgme_version = gpgme_check_version(NULL);
+    if (gpgme_version == NULL) {
+        PyErr_SetString(PyExc_ImportError, "Unable to initialize gpgme.");
+        Py_DECREF(mod);
+        return NULL;
+    }
+    PyModule_AddObject(mod, "gpgme_version",
+                       PyString_FromString(gpgme_version));
 
     return mod;
 }
