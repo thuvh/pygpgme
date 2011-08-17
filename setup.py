@@ -27,7 +27,7 @@ gpgme = Extension(
 description, long_description = __doc__.split("\n\n", 1)
 
 setup(name='pygpgme',
-      version='0.1',
+      version='0.2',
       author='James Henstridge',
       author_email='james@jamesh.id.au',
       description=description,
