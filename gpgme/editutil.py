@@ -76,7 +76,7 @@ class _EditData:
             if data is not None:
                 os.write(fd, data.encode('ASCII'))
         else:
-            self.state = STATE_ERROR
+            self.state = self.STATE_ERROR
             raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)
 
 
