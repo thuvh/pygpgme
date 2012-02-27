@@ -96,7 +96,8 @@ create_module(void)
         return NULL;
     }
     PyModule_AddObject(mod, "gpgme_version",
-                       PyString_FromString(gpgme_version));
+                       PyUnicode_DecodeASCII(gpgme_version,
+                                             strlen(gpgme_version), "replace"));
 
     return mod;
 }

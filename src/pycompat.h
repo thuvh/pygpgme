@@ -43,7 +43,9 @@
 #if PY_VERSION_HEX > 0x03000000
 /* Ugh.  I'll need to fix this code, but the text/bytes changes take
    precedence. */
-#  include <intobject.h>
+#  define PyInt_Check PyLong_Check
+#  define PyInt_FromLong PyLong_FromLong
+#  define PyInt_AsLong PyLong_AsLong
 #endif
 
 #endif /* PYGPGME_COMPAT_H */
