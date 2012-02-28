@@ -24,7 +24,7 @@ except ImportError:
 from textwrap import dedent
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class PassphraseTestCase(GpgHomeTestCase):
 
@@ -39,9 +39,9 @@ class PassphraseTestCase(GpgHomeTestCase):
 
         try:
             new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
-        except gpgme.GpgmeError, e:
-            self.assertEqual(e[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(e[1], gpgme.ERR_BAD_PASSPHRASE)
+        except gpgme.GpgmeError as exc:
+            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc[1], gpgme.ERR_BAD_PASSPHRASE)
         else:
             self.fail('gpgme.GpgmeError not raised')
 

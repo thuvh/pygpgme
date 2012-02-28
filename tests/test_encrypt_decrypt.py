@@ -24,7 +24,7 @@ except ImportError:
 from textwrap import dedent
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class EncryptDecryptTestCase(GpgHomeTestCase):
 
@@ -181,9 +181,9 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         try:
             ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
                         plaintext, ciphertext)
-        except gpgme.GpgmeError, e:
-            self.assertEqual(e[0], gpgme.ERR_SOURCE_UNKNOWN)
-            self.assertEqual(e[1], gpgme.ERR_GENERAL)
+        except gpgme.GpgmeError as exc:
+            self.assertEqual(exc[0], gpgme.ERR_SOURCE_UNKNOWN)
+            self.assertEqual(exc[1], gpgme.ERR_GENERAL)
         else:
             self.fail('gpgme.GpgmeError not raised')
         

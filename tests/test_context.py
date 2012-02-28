@@ -19,7 +19,7 @@ import os
 import unittest
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class ContextTestCase(GpgHomeTestCase):
 

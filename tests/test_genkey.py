@@ -22,7 +22,7 @@ except ImportError:
     from StringIO import StringIO as BytesIO
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 
 # See /usr/share/doc/gnupg/DETAILS.gz
@@ -102,7 +102,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         try:
             ctx.genkey('garbage parameters')
-        except gpgme.GpgmeError, exc:
+        except gpgme.GpgmeError as exc:
             self.assertTrue(hasattr(exc, "result"))
             result = exc.result
             self.assertEqual(result.primary, False)

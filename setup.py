@@ -44,5 +44,4 @@ setup(name='pygpgme',
       ],
       url='https://launchpad.net/pygpgme',
       ext_modules=[gpgme],
-      packages=['gpgme', 'gpgme.tests'],
-      package_data={'gpgme.tests': ['keys/*.pub', 'keys/*.sec']})
+      packages=['gpgme'])

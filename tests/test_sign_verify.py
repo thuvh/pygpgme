@@ -23,7 +23,7 @@ except ImportError:
 from textwrap import dedent
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class SignVerifyTestCase(GpgHomeTestCase):
 
@@ -200,7 +200,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         try:
             ctx.verify(signature, None, plaintext)
-        except gpgme.GpgmeError, exc:
+        except gpgme.GpgmeError as exc:
             self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
             self.assertEqual(exc[1], gpgme.ERR_NO_DATA)
         else:

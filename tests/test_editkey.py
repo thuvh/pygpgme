@@ -24,7 +24,7 @@ except ImportError:
 
 import gpgme
 import gpgme.editutil
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class EditKeyTestCase(GpgHomeTestCase):
 

@@ -18,7 +18,7 @@
 import unittest
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class DeleteTestCase(GpgHomeTestCase):
 
@@ -55,7 +55,7 @@ class DeleteTestCase(GpgHomeTestCase):
         # delete it again
         try:
             ctx.delete(key)
-        except gpgme.GpgmeError, exc:
+        except gpgme.GpgmeError as exc:
             self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
             self.assertEqual(exc[1], gpgme.ERR_NO_PUBKEY)
         else:

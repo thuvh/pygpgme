@@ -26,7 +26,10 @@ __metaclass__ = type
 __all__ = ['edit_trust']
 
 import os
-import StringIO
+try:
+    from io import BytesIO
+except ImportError:
+    from StringIO import StringIO as BytesIO
 import gpgme
 
 
@@ -48,7 +51,7 @@ class _EditData:
         self.transitions[state, status, args] = newstate, data
 
     def do_edit(self, ctx, key):
-        output = StringIO.StringIO()
+        output = BytesIO()
         ctx.edit(key, self.callback, output)
 
     def callback(self, status, args, fd):

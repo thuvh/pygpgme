@@ -16,7 +16,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import unittest
-import os
 try:
     from io import BytesIO
 except ImportError:
@@ -24,32 +23,39 @@ except ImportError:
 from textwrap import dedent
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
-class ProgressTestCase(GpgHomeTestCase):
+class ExportTestCase(GpgHomeTestCase):
 
-    import_keys = ['key1.pub', 'key1.sec']
+    import_keys = ['signonly.pub', 'signonly.sec']
 
-    def progress_cb(self, what, type_, current, total):
-        self.progress_cb_called = True
-
-    def test_sign_with_progress_cb(self):
+    def test_export_by_fingerprint(self):
         ctx = gpgme.Context()
-        key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-        ctx.signers = [key]
-        ctx.progress_cb = self.progress_cb
-        plaintext = BytesIO('Hello World\n')
-        signature = BytesIO()
+        ctx.armor = True
+        keydata = BytesIO()
+        ctx.export('15E7CE9BF1771A4ABC550B31F540A569CB935A42', keydata)
 
-        self.progress_cb_called = False
-        new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
+        self.assertTrue(keydata.getvalue().startswith(
+            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+        
+    def test_export_by_email(self):
+        ctx = gpgme.Context()
+        ctx.armor = True
+        keydata = BytesIO()
+        ctx.export('signonly@example.org', keydata)
 
-        # ensure that progress_cb has been run
-        self.assertEqual(self.progress_cb_called, True)
+        self.assertTrue(keydata.getvalue().startswith(
+            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_CLEAR)
-        self.assertEqual(new_sigs[0].fpr,
-                        'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+    def test_export_by_name(self):
+        ctx = gpgme.Context()
+        ctx.armor = True
+        keydata = BytesIO()
+        ctx.export('Sign Only', keydata)
+
+        self.assertTrue(keydata.getvalue().startswith(
+            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+
 
 def test_suite():
     loader = unittest.TestLoader()

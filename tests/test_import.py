@@ -22,7 +22,7 @@ except ImportError:
     from StringIO import StringIO as BytesIO
 
 import gpgme
-from gpgme.tests.util import GpgHomeTestCase
+from tests.util import GpgHomeTestCase
 
 class ImportTestCase(GpgHomeTestCase):
 
