@@ -38,7 +38,7 @@ class GpgHomeTestCase(unittest.TestCase):
         self._gpghome = tempfile.mkdtemp(prefix='tmp.gpghome')
         os.environ['GNUPGHOME'] = self._gpghome
         fp = open(os.path.join(self._gpghome, 'gpg.conf'), 'wb')
-        fp.write(self.gpg_conf_contents)
+        fp.write(self.gpg_conf_contents.encode('UTF-8'))
         fp.close()
 
         # import requested keys into the keyring

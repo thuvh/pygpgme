@@ -93,9 +93,9 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
     def test_import_concat(self):
-        keys = '\n'.join([self.keyfile('key1.pub').read(),
-                          self.keyfile('key1.sec').read(),
-                          self.keyfile('key2.pub').read()])
+        keys = b'\n'.join([self.keyfile('key1.pub').read(),
+                           self.keyfile('key1.sec').read(),
+                           self.keyfile('key2.pub').read()])
         fp = BytesIO(keys)
         ctx = gpgme.Context()
         result = ctx.import_(fp)
@@ -133,7 +133,7 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
     def test_import_empty(self):
-        fp = BytesIO('')
+        fp = BytesIO(b'')
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(result.considered, 0)
