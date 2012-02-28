@@ -109,6 +109,11 @@ pygpgme_context_set_protocol(PyGpgmeContext *self, PyObject *value)
 {
     gpgme_protocol_t protocol;
 
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
     protocol = PyInt_AsLong(value);
     if (PyErr_Occurred())
         return -1;
@@ -130,6 +135,11 @@ pygpgme_context_set_armor(PyGpgmeContext *self, PyObject *value)
 {
     int armor;
 
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
     armor = PyInt_AsLong(value) != 0;
     if (PyErr_Occurred())
         return -1;
@@ -148,6 +158,11 @@ static int
 pygpgme_context_set_textmode(PyGpgmeContext *self, PyObject *value)
 {
     int textmode;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
 
     textmode = PyInt_AsLong(value) != 0;
     if (PyErr_Occurred())
@@ -168,6 +183,11 @@ pygpgme_context_set_include_certs(PyGpgmeContext *self, PyObject *value)
 {
     int nr_of_certs;
 
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
     nr_of_certs = PyInt_AsLong(value);
     if (PyErr_Occurred())
         return -1;
@@ -186,6 +206,11 @@ static int
 pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
 {
     gpgme_keylist_mode_t keylist_mode;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
 
     keylist_mode = PyInt_AsLong(value);
     if (PyErr_Occurred())
@@ -310,6 +335,11 @@ pygpgme_context_set_signers(PyGpgmeContext *self, PyObject *value)
 {
     PyObject *signers = NULL;
     int i, length, ret = 0;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
 
     signers = PySequence_Fast(value, "signers must be a sequence of keys");
     if (!signers) {

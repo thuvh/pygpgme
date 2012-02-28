@@ -42,7 +42,7 @@ class ContextTestCase(GpgHomeTestCase):
 
         def del_protocol(ctx):
             del ctx.protocol
-        self.assertRaises(TypeError, del_protocol, ctx)
+        self.assertRaises(AttributeError, del_protocol, ctx)
 
     def test_armor(self):
         ctx = gpgme.Context()
@@ -54,7 +54,7 @@ class ContextTestCase(GpgHomeTestCase):
 
         def del_armor(ctx):
             del ctx.armor
-        self.assertRaises(TypeError, del_armor, ctx)
+        self.assertRaises(AttributeError, del_armor, ctx)
 
     def test_textmode(self):
         ctx = gpgme.Context()
@@ -66,7 +66,7 @@ class ContextTestCase(GpgHomeTestCase):
 
         def del_textmode(ctx):
             del ctx.textmode
-        self.assertRaises(TypeError, del_textmode, ctx)
+        self.assertRaises(AttributeError, del_textmode, ctx)
 
     def test_include_certs(self):
         ctx = gpgme.Context()
@@ -79,7 +79,7 @@ class ContextTestCase(GpgHomeTestCase):
 
         def del_include_certs(ctx):
             del ctx.include_certs
-        self.assertRaises(TypeError, del_include_certs, ctx)
+        self.assertRaises(AttributeError, del_include_certs, ctx)
 
     def test_keylist_mode(self):
         ctx = gpgme.Context()
@@ -92,7 +92,7 @@ class ContextTestCase(GpgHomeTestCase):
 
         def del_keylist_mode(ctx):
             del ctx.keylist_mode
-        self.assertRaises(TypeError, del_keylist_mode, ctx)
+        self.assertRaises(AttributeError, del_keylist_mode, ctx)
 
     def test_passphrase_cb(self):
         ctx = gpgme.Context()
