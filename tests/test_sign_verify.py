@@ -45,7 +45,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].summary, 0)
         self.assertEqual(sigs[0].fpr,
@@ -102,7 +102,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].summary, 0)
         self.assertEqual(sigs[0].fpr,
@@ -144,7 +144,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
         self.assertEqual(len(sigs), 2)
         self.assertEqual(sigs[0].summary, 0)
         self.assertEqual(sigs[0].fpr,
@@ -181,7 +181,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
 
-        self.assertEqual(plaintext.getvalue(), '')
+        self.assertEqual(plaintext.getvalue(), b'')
         self.assertEqual(len(sigs), 0)
 
     def test_verify_bad_signature(self):

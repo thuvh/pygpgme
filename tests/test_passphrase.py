@@ -34,14 +34,14 @@ class PassphraseTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
         try:
             new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(exc[1], gpgme.ERR_BAD_PASSPHRASE)
+            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc.args[1], gpgme.ERR_BAD_PASSPHRASE)
         else:
             self.fail('gpgme.GpgmeError not raised')
 
@@ -56,7 +56,7 @@ class PassphraseTestCase(GpgHomeTestCase):
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]
         ctx.passphrase_cb = self.passphrase_cb
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
         self.uid_hint = None

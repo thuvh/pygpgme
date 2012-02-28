@@ -56,8 +56,8 @@ class DeleteTestCase(GpgHomeTestCase):
         try:
             ctx.delete(key)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(exc[1], gpgme.ERR_NO_PUBKEY)
+            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc.args[1], gpgme.ERR_NO_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError was not raised')
 

@@ -55,7 +55,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         plaintext = BytesIO()
         ctx = gpgme.Context()
         ctx.decrypt(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'hello world\n')
+        self.assertEqual(plaintext.getvalue(), b'hello world\n')
 
     def test_decrypt_verify(self):
         ciphertext = BytesIO(dedent('''
@@ -83,7 +83,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'hello world\n')
+        self.assertEqual(plaintext.getvalue(), b'hello world\n')
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].summary, 0)
         self.assertEqual(sigs[0].fpr,
@@ -97,7 +97,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_encrypt(self):
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
@@ -108,10 +108,10 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ciphertext.seek(0)
         plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
     def test_encrypt_armor(self):
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         ctx.armor = True
@@ -123,10 +123,10 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ciphertext.seek(0)
         plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
     def test_encrypt_symmetric(self):
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         def passphrase(uid_hint, passphrase_info, prev_was_bad, fd):
             os.write(fd, 'Symmetric passphrase\n')
@@ -141,10 +141,10 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ciphertext.seek(0)
         plaintext = BytesIO()
         ctx.decrypt(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
     def test_encrypt_sign(self):
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         ctx.armor = True
@@ -163,7 +163,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ciphertext.seek(0)
         plaintext = BytesIO()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
-        self.assertEqual(plaintext.getvalue(), 'Hello World\n')
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].summary, 0)
         self.assertEqual(sigs[0].fpr,
@@ -174,7 +174,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_encrypt_to_signonly(self):
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
@@ -182,11 +182,11 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
                         plaintext, ciphertext)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc[0], gpgme.ERR_SOURCE_UNKNOWN)
-            self.assertEqual(exc[1], gpgme.ERR_GENERAL)
+            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_UNKNOWN)
+            self.assertEqual(exc.args[1], gpgme.ERR_GENERAL)
         else:
             self.fail('gpgme.GpgmeError not raised')
-        
+
 
 def test_suite():
     loader = unittest.TestLoader()

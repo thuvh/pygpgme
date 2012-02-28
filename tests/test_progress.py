@@ -38,7 +38,7 @@ class ProgressTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
         ctx.progress_cb = self.progress_cb
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
         self.progress_cb_called = False
