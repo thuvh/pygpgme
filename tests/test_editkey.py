@@ -36,7 +36,7 @@ class EditKeyTestCase(GpgHomeTestCase):
             return
         self.status = status
         self.args = args
-        os.write(fd, 'quit\n')
+        os.write(fd, b'quit\n')
 
     def test_edit_quit(self):
         ctx = gpgme.Context()

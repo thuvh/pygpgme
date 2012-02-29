@@ -74,7 +74,7 @@ class _EditData:
             self.state, data = self.transitions[self.state, status, args]
             #print 'C: %r' % data
             if data is not None:
-                os.write(fd, data)
+                os.write(fd, data.encode('ASCII'))
         else:
             self.state = STATE_ERROR
             raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)

@@ -49,7 +49,7 @@ class PassphraseTestCase(GpgHomeTestCase):
         self.uid_hint = uid_hint
         self.passphrase_info = passphrase_info
         self.prev_was_bad = prev_was_bad
-        os.write(fd, 'test\n')
+        os.write(fd, b'test\n')
 
     def test_sign_with_passphrase_cb(self):
         ctx = gpgme.Context()
