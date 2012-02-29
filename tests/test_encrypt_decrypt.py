@@ -51,7 +51,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             XUfidNAhuOmeZ4pF31qSFiAnKRbzjzHp
             =1s5N
             -----END PGP MESSAGE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         ctx.decrypt(ciphertext, plaintext)
@@ -79,7 +79,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             OSk=
             =fl3U
             -----END PGP MESSAGE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.decrypt_verify(ciphertext, plaintext)
@@ -135,7 +135,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.passphrase_cb = passphrase
         ctx.encrypt(None, 0, plaintext, ciphertext)
         self.assertTrue(
-            ciphertext.getvalue().startswith('-----BEGIN PGP MESSAGE-----'))
+            ciphertext.getvalue().startswith(b'-----BEGIN PGP MESSAGE-----'))
 
         # Rewind ciphertext buffer and try to decrypt it:
         ciphertext.seek(0)

@@ -40,7 +40,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             EQA=
             =HCW0
             -----END PGP MESSAGE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
@@ -67,7 +67,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             hhSTiguzgSYNwKSuV6SLGOM=
             =dyZS
             -----END PGP SIGNATURE-----
-            '''))
+            ''').encode('ASCII'))
         signed_text = BytesIO(b'Hello World\n')
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, signed_text, None)
@@ -97,7 +97,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             ZTFlGRyKN26HccsC6ZWcPUQ=
             =kZ2c
             -----END PGP SIGNATURE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
@@ -139,7 +139,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             FsW3EQWNlQnwkn2lic51Cdp3w7yPH5CKfw==
             =0A7N
             -----END PGP SIGNATURE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
@@ -176,7 +176,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
             Hello World
             -----BEGIN PGP SIGNATURE-----
             -----END PGP SIGNATURE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         sigs = ctx.verify(signature, None, plaintext)
@@ -195,14 +195,14 @@ class SignVerifyTestCase(GpgHomeTestCase):
 
             iNhhNHx+gzGBUqtIK5LpENTCGgCfV3aO
             -----END PGP SIGNATURE-----
-            '''))
+            ''').encode('ASCII'))
         plaintext = BytesIO()
         ctx = gpgme.Context()
         try:
             ctx.verify(signature, None, plaintext)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(exc[1], gpgme.ERR_NO_DATA)
+            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc.args[1], gpgme.ERR_NO_DATA)
         else:
             self.fail('gpgme.GpgmeError not raised')
 
