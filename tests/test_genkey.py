@@ -50,7 +50,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         ctx.signers = [key]
 
-        plaintext = BytesIO('Hello World\n')
+        plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
         ctx.armor = True
