@@ -977,6 +977,8 @@ free_key_patterns(char **patterns) {
     free(patterns);
 }
 
+/* This function should probably be changed to not accept bytes() when
+ * Python 2.x support is dropped. */
 static int
 parse_key_patterns(PyObject *py_pattern, char ***patterns)
 {
@@ -986,18 +988,27 @@ parse_key_patterns(PyObject *py_pattern, char ***patterns)
     *patterns = NULL;
     if (py_pattern == Py_None) {
         result = 0;
-    } else if (PyUnicode_Check(py_pattern)) {
-        PyObject *utf8 = PyUnicode_AsUTF8String(py_pattern);
-        if (utf8 == NULL)
-            goto end;
+    } else if (PyUnicode_Check(py_pattern) || PyBytes_Check(py_pattern)) {
+        PyObject *bytes;
+
+        if (PyUnicode_Check(py_pattern)) {
+            bytes = PyUnicode_AsUTF8String(py_pattern);
+            if (bytes == NULL)
+                goto end;
+        } else {
+            bytes = py_pattern;
+            Py_INCREF(bytes);
+        }
         *patterns = calloc(2, sizeof (char *));
         if (*patterns == NULL) {
             PyErr_NoMemory();
+            Py_DECREF(bytes);
             goto end;
         }
-        (*patterns)[0] = strdup(PyBytes_AsString(utf8));
+        (*patterns)[0] = strdup(PyBytes_AsString(bytes));
         if ((*patterns)[0] == NULL) {
             PyErr_NoMemory();
+            Py_DECREF(bytes);
             goto end;
         }
         result = 0;
@@ -1016,20 +1027,25 @@ parse_key_patterns(PyObject *py_pattern, char ***patterns)
         }
         for (i = 0; i < length; i++) {
             PyObject *item = PySequence_Fast_GET_ITEM(list, i);
-            PyObject *utf8;
+            PyObject *bytes;
 
-            if (!PyUnicode_Check(item)) {
+            if (PyBytes_Check(item)) {
+                bytes = item;
+                Py_INCREF(bytes);
+            } else if (PyUnicode_Check(item)) {
+                bytes = PyUnicode_AsUTF8String(item);
+                if (bytes == NULL) {
+                    goto end;
+                }
+            } else {
                 PyErr_SetString(PyExc_TypeError,
                     "first argument must be a string or sequence of strings");
                 goto end;
             }
-            utf8 = PyUnicode_AsUTF8String(item);
-            if (utf8 == NULL) {
-                goto end;
-            }
-            (*patterns)[i] = strdup(PyBytes_AsString(utf8));
+            (*patterns)[i] = strdup(PyBytes_AsString(bytes));
             if ((*patterns)[i] == NULL) {
                 PyErr_NoMemory();
+                Py_DECREF(bytes);
                 goto end;
             }
         }

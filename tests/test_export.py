@@ -37,7 +37,7 @@ class ExportTestCase(GpgHomeTestCase):
 
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
-        
+
     def test_export_by_email(self):
         ctx = gpgme.Context()
         ctx.armor = True
