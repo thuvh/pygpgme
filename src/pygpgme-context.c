@@ -967,67 +967,110 @@ pygpgme_context_import(PyGpgmeContext *self, PyObject *args)
     return result;
 }
 
+static void
+free_key_patterns(char **patterns) {
+    int i;
+
+    for (i = 0; patterns[i] != NULL; i++) {
+        free(patterns[i]);
+    }
+    free(patterns);
+}
+
+static int
+parse_key_patterns(PyObject *py_pattern, char ***patterns)
+{
+    int result = -1, length, i;
+    PyObject *list = NULL;
+
+    *patterns = NULL;
+    if (py_pattern == Py_None) {
+        result = 0;
+    } else if (PyUnicode_Check(py_pattern)) {
+        PyObject *utf8 = PyUnicode_AsUTF8String(py_pattern);
+        if (utf8 == NULL)
+            goto end;
+        *patterns = calloc(2, sizeof (char *));
+        if (*patterns == NULL) {
+            PyErr_NoMemory();
+            goto end;
+        }
+        (*patterns)[0] = strdup(PyBytes_AsString(utf8));
+        if ((*patterns)[0] == NULL) {
+            PyErr_NoMemory();
+            goto end;
+        }
+        result = 0;
+    } else {
+        /* We must have a sequence of strings. */
+        list = PySequence_Fast(py_pattern,
+            "first argument must be a string or sequence of strings");
+        if (list == NULL)
+            goto end;
+
+        length = PySequence_Fast_GET_SIZE(list);
+        *patterns = calloc((length + 1), sizeof(char *));
+        if (*patterns == NULL) {
+            PyErr_NoMemory();
+            goto end;
+        }
+        for (i = 0; i < length; i++) {
+            PyObject *item = PySequence_Fast_GET_ITEM(list, i);
+            PyObject *utf8;
+
+            if (!PyUnicode_Check(item)) {
+                PyErr_SetString(PyExc_TypeError,
+                    "first argument must be a string or sequence of strings");
+                goto end;
+            }
+            utf8 = PyUnicode_AsUTF8String(item);
+            if (utf8 == NULL) {
+                goto end;
+            }
+            (*patterns)[i] = strdup(PyBytes_AsString(utf8));
+            if ((*patterns)[i] == NULL) {
+                PyErr_NoMemory();
+                goto end;
+            }
+        }
+        result = 0;
+    }
+ end:
+    Py_XDECREF(list);
+    /* cleanup the partial pattern list if there was an error*/
+    if (result < 0 && *patterns != NULL) {
+        free_key_patterns(*patterns);
+        *patterns = NULL;
+    }
+    return result;
+}
+
 static PyObject *
 pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 {
     PyObject *py_pattern, *py_keydata;
-    const char *pattern;
-    const char **patterns;
-    int i, length;
+    char **patterns = NULL;
     gpgme_data_t keydata;
     gpgme_error_t err;
 
     if (!PyArg_ParseTuple(args, "OO", &py_pattern, &py_keydata))
         return NULL;
 
-    if (py_pattern == Py_None) {
-        Py_INCREF(py_pattern);
-        pattern = NULL;
-        patterns = NULL;
-    } else if (PyBytes_Check(py_pattern)) {
-        Py_INCREF(py_pattern);
-        pattern = PyBytes_AsString(py_pattern);
-        patterns = NULL;
-    } else {
-        py_pattern = PySequence_Fast(py_pattern,
-            "first argument must be a string or sequence of strings");
-        if (py_pattern == NULL)
-            return NULL;
-        length = PySequence_Fast_GET_SIZE(py_pattern);
-        pattern = NULL;
-        patterns = malloc((length + 1) * sizeof(const char *));
-        for (i = 0; i < length; i++) {
-            PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
-
-            if (!PyBytes_Check(item)) {
-                PyErr_SetString(PyExc_TypeError,
-                    "first argument must be a string or sequence of strings");
-                free(patterns);
-                Py_DECREF(py_pattern);
-                return NULL;
-            }
-            patterns[i] = PyBytes_AsString(item);
-        }
-        patterns[i] = NULL;
-    }
+    if (parse_key_patterns(py_pattern, &patterns) < 0)
+        return NULL;
 
     if (pygpgme_data_new(&keydata, py_keydata)) {
-        Py_DECREF(py_pattern);
         if (patterns)
-            free(patterns);
+            free_key_patterns(patterns);
         return NULL;
     }
 
     Py_BEGIN_ALLOW_THREADS;
-    if (patterns)
-        err = gpgme_op_export_ext(self->ctx, patterns, 0, keydata);
-    else
-        err = gpgme_op_export(self->ctx, pattern, 0, keydata);
+    err = gpgme_op_export_ext(self->ctx, (const char **)patterns, 0, keydata);
     Py_END_ALLOW_THREADS;
 
-    Py_DECREF(py_pattern);
     if (patterns)
-        free(patterns);
+        free_key_patterns(patterns);
     gpgme_data_release(keydata);
     if (pygpgme_check_error(err))
         return NULL;
@@ -1178,56 +1221,24 @@ static PyObject *
 pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
 {
     PyObject *py_pattern = Py_None;
-    const char *pattern;
-    const char **patterns;
-    int secret_only = 0, i, length;
+    char **patterns = NULL;
+    int secret_only = 0;
     gpgme_error_t err;
     PyGpgmeKeyIter *ret;
 
     if (!PyArg_ParseTuple(args, "|Oi", &py_pattern, &secret_only))
         return NULL;
 
-    if (py_pattern == Py_None) {
-        Py_INCREF(py_pattern);
-        pattern = NULL;
-        patterns = NULL;
-    } else if (PyBytes_Check(py_pattern)) {
-        Py_INCREF(py_pattern);
-        pattern = PyBytes_AsString(py_pattern);
-        patterns = NULL;
-    } else {
-        py_pattern = PySequence_Fast(py_pattern,
-            "first argument must be a string or sequence of strings");
-        if (py_pattern == NULL)
-            return NULL;
-        length = PySequence_Fast_GET_SIZE(py_pattern);
-        pattern = NULL;
-        patterns = malloc((length + 1) * sizeof(const char *));
-        for (i = 0; i < length; i++) {
-            PyObject *item = PySequence_Fast_GET_ITEM(py_pattern, i);
-
-            if (!PyBytes_Check(item)) {
-                PyErr_SetString(PyExc_TypeError,
-                    "first argument must be a string or sequence of strings");
-                free(patterns);
-                Py_DECREF(py_pattern);
-                return NULL;
-            }
-            patterns[i] = PyBytes_AsString(item);
-        }
-        patterns[i] = NULL;
-    }
+    if (parse_key_patterns(py_pattern, &patterns) < 0)
+        return NULL;
 
     Py_BEGIN_ALLOW_THREADS;
-    if (patterns)
-        err = gpgme_op_keylist_ext_start(self->ctx, patterns, secret_only, 0);
-    else
-        err = gpgme_op_keylist_start(self->ctx, pattern, secret_only);
+    err = gpgme_op_keylist_ext_start(self->ctx, (const char **)patterns,
+                                     secret_only, 0);
     Py_END_ALLOW_THREADS;
 
-    Py_DECREF(py_pattern);
     if (patterns)
-        free(patterns);
+        free_key_patterns(patterns);
 
     if (pygpgme_check_error(err))
         return NULL;

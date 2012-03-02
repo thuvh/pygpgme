@@ -36,7 +36,7 @@ class ExportTestCase(GpgHomeTestCase):
         ctx.export('15E7CE9BF1771A4ABC550B31F540A569CB935A42', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(
-            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+            b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
         
     def test_export_by_email(self):
         ctx = gpgme.Context()
@@ -45,7 +45,7 @@ class ExportTestCase(GpgHomeTestCase):
         ctx.export('signonly@example.org', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(
-            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+            b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
     def test_export_by_name(self):
         ctx = gpgme.Context()
@@ -54,7 +54,7 @@ class ExportTestCase(GpgHomeTestCase):
         ctx.export('Sign Only', keydata)
 
         self.assertTrue(keydata.getvalue().startswith(
-            '-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+            b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
 
 def test_suite():
