@@ -23,8 +23,9 @@ value of a key in a keyring.
 
 __metaclass__ = type
 
-__all__ = ['edit_trust']
+__all__ = ['edit_sign', 'edit_trust']
 
+import functools
 import os
 try:
     from io import BytesIO
@@ -33,135 +34,80 @@ except ImportError:
 import gpgme
 
 
-class _EditData:
-    """Simple base class to wrap 'edit key' interactions"""
-
-    STATE_START = 0
-    STATE_ERROR = -1
-
-    def __init__(self):
-        self.state = self.STATE_START
-        self.transitions = {}
-        # a default state transition to try and quit the edit on error
-        self.addTransition(self.STATE_ERROR,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_ERROR, 'quit\n')
-
-    def addTransition(self, state, status, args, newstate, data):
-        self.transitions[state, status, args] = newstate, data
-
-    def do_edit(self, ctx, key):
-        output = BytesIO()
-        ctx.edit(key, self.callback, output)
-
-    def callback(self, status, args, fd):
-        if status in (gpgme.STATUS_EOF,
-                      gpgme.STATUS_GOT_IT,
-                      gpgme.STATUS_NEED_PASSPHRASE,
-                      gpgme.STATUS_GOOD_PASSPHRASE,
-                      gpgme.STATUS_BAD_PASSPHRASE,
-                      gpgme.STATUS_USERID_HINT,
-                      gpgme.STATUS_SIGEXPIRED,
-                      gpgme.STATUS_KEYEXPIRED,
-                      gpgme.STATUS_PROGRESS,
-                      gpgme.STATUS_KEY_CREATED,
-                      gpgme.STATUS_ALREADY_SIGNED):
+def key_editor(function):
+    """A decorator that lets key editor callbacks be written as generators."""
+    @functools.wraps(function)
+    def wrapper(ctx, key, *args, **kwargs):
+        # Start the generator and run it once.
+        gen = function(ctx, key, *args, **kwargs)
+        try:
+            # XXX: this is for Python 2.x compatibility.
+            try:
+                gen.__next__()
+            except AttributeError:
+                gen.next()
+        except StopIteration:
             return
 
-        #print 'S: %s (%d)' % (args, status)
+        def edit_callback(status, args, fd):
+            if status in (gpgme.STATUS_EOF,
+                          gpgme.STATUS_GOT_IT,
+                          gpgme.STATUS_NEED_PASSPHRASE,
+                          gpgme.STATUS_GOOD_PASSPHRASE,
+                          gpgme.STATUS_BAD_PASSPHRASE,
+                          gpgme.STATUS_USERID_HINT,
+                          gpgme.STATUS_SIGEXPIRED,
+                          gpgme.STATUS_KEYEXPIRED,
+                          gpgme.STATUS_PROGRESS,
+                          gpgme.STATUS_KEY_CREATED,
+                          gpgme.STATUS_ALREADY_SIGNED):
+                return
+            try:
+                data = gen.send((status, args))
+            except StopIteration:
+                raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)
 
-        if (self.state, status, args) in self.transitions:
-            self.state, data = self.transitions[self.state, status, args]
-            #print 'C: %r' % data
             if data is not None:
                 os.write(fd, data.encode('ASCII'))
-        else:
-            self.state = self.STATE_ERROR
-            raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)
+
+        output = BytesIO()
+        try:
+            ctx.edit(key, edit_callback, output)
+        finally:
+            gen.close()
+
+    return wrapper
 
 
-class _EditTrust(_EditData):
-    # states
-    STATE_COMMAND = 1
-    STATE_VALUE   = 2
-    STATE_CONFIRM = 3
-    STATE_QUIT    = 4
-
-    def __init__(self, trust):
-        _EditData.__init__(self)
-
-        self.addTransition(self.STATE_START,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_COMMAND, 'trust\n')
-
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_LINE, 'edit_ownertrust.value',
-                           self.STATE_VALUE, '%d\n' % trust)
-
-        self.addTransition(self.STATE_VALUE,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_QUIT, 'quit\n')
-
-        self.addTransition(self.STATE_VALUE,
-                           gpgme.STATUS_GET_BOOL, 'edit_ownertrust.set_ultimate.okay',
-                           self.STATE_CONFIRM, 'Y\n')
-
-        self.addTransition(self.STATE_CONFIRM,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_QUIT, 'quit\n')
-
-        self.addTransition(self.STATE_QUIT,
-                           gpgme.STATUS_GET_BOOL, 'keyedit.save.okay',
-                           self.STATE_CONFIRM, 'Y\n')
-
-class _EditSign(_EditData):
-    # states
-    STATE_UID = 1
-    STATE_COMMAND = 2
-    STATE_QUIT = 3
-
-    def __init__(self, index, command, expire, check):
-        _EditData.__init__(self)
-
-        self.addTransition(self.STATE_START,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_UID, 'uid %d\n' % index)
-
-        self.addTransition(self.STATE_UID,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_COMMAND, '%s\n' % command)
-
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_BOOL, 'keyedit.sign_all.okay',
-                           self.STATE_COMMAND, 'Y\n')
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_LINE, 'sign_uid.expire',
-                           self.STATE_COMMAND, '%s\n' % (expire and 'Y' or 'N'))
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_LINE, 'sign_uid.class',
-                           self.STATE_COMMAND, '%d\n' % check)
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_BOOL, 'sign_uid.okay',
-                           self.STATE_COMMAND, 'Y\n')
-        self.addTransition(self.STATE_COMMAND,
-                           gpgme.STATUS_GET_LINE, 'keyedit.prompt',
-                           self.STATE_QUIT, 'quit\n')
-
-        self.addTransition(self.STATE_QUIT,
-                           gpgme.STATUS_GET_BOOL, 'keyedit.save.okay',
-                           self.STATE_COMMAND, 'Y\n')
-
-
+@key_editor
 def edit_trust(ctx, key, trust):
+    """Edit the trust level of the given key."""
     if trust not in (gpgme.VALIDITY_UNDEFINED,
                      gpgme.VALIDITY_NEVER,
                      gpgme.VALIDITY_MARGINAL,
                      gpgme.VALIDITY_FULL,
                      gpgme.VALIDITY_ULTIMATE):
         raise ValueError('Bad trust value %d' % trust)
-    statemachine = _EditTrust(trust)
-    statemachine.do_edit(ctx, key)
 
+    status, args = yield None
+
+    assert args == 'keyedit.prompt'
+    status, args = yield 'trust\n'
+
+    assert args == 'edit_ownertrust.value'
+    status, args = yield '%d\n' % trust
+
+    if args == 'edit_ownertrust.set_ultimate.okay':
+        status, args = yield 'Y\n'
+
+    assert args == 'keyedit.prompt'
+    status, args = yield 'quit\n'
+
+    assert args == 'keyedit.save.okay'
+    status, args = yield 'Y\n'
+
+
+@key_editor
 def edit_sign(ctx, key, index=0, local=False, norevoke=False,
               expire=True, check=0):
     """Sign the given key.
@@ -187,5 +133,28 @@ def edit_sign(ctx, key, index=0, local=False, norevoke=False,
         command = 'nr%s' % command
     if check not in [0, 1, 2, 3]:
         raise ValueError('check must be one of 0, 1, 2, 3')
-    statemachine = _EditSign(index, command, expire, check)
-    statemachine.do_edit(ctx, key)
+
+    status, args = yield None
+
+    assert args == 'keyedit.prompt'
+    status, args = yield 'uid %d\n' % index
+
+    assert args == 'keyedit.prompt'
+    status, args = yield '%s\n' % command
+
+    while args != 'keyedit.prompt':
+        if args == 'keyedit.sign_all.okay':
+            status, args = yield 'Y\n'
+        elif args == 'sign_uid.expire':
+            status, args = yield '%s\n' % ('Y' if expire else 'N')
+        elif args == 'sign_uid.class':
+            status, args = yield '%d\n' % check
+        elif args == 'sign_uid.okay':
+            status, args = yield 'Y\n'
+        else:
+            raise AssertionError("Unexpected state %r" % ((status, args),))
+
+    status, args = yield 'quit\n'
+
+    assert args == 'keyedit.save.okay'
+    status, args = yield 'Y\n'
