@@ -27,9 +27,9 @@ from tests.util import GpgHomeTestCase
 class ImportTestCase(GpgHomeTestCase):
 
     def test_import_file(self):
-        fp = self.keyfile('key1.pub')
         ctx = gpgme.Context()
-        result = ctx.import_(fp)
+        with self.keyfile('key1.pub') as fp:
+            result = ctx.import_(fp)
         self.assertEqual(result.considered, 1)
         self.assertEqual(result.no_user_id, 0)
         self.assertEqual(result.imported, 1)
@@ -52,9 +52,9 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
     def test_import_secret_file(self):
-        fp = self.keyfile('key1.sec')
         ctx = gpgme.Context()
-        result = ctx.import_(fp)
+        with self.keyfile('key1.sec') as fp:
+            result = ctx.import_(fp)
         self.assertEqual(result.considered, 1)
         self.assertEqual(result.no_user_id, 0)
         self.assertEqual(result.imported, 1)
@@ -82,7 +82,9 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
     def test_import_stringio(self):
-        fp = BytesIO(self.keyfile('key1.pub').read())
+        with self.keyfile('key1.pub') as fp:
+            data = fp.read()
+        fp = BytesIO(data)
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(len(result.imports), 1)
@@ -93,10 +95,11 @@ class ImportTestCase(GpgHomeTestCase):
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
     def test_import_concat(self):
-        keys = b'\n'.join([self.keyfile('key1.pub').read(),
-                           self.keyfile('key1.sec').read(),
-                           self.keyfile('key2.pub').read()])
-        fp = BytesIO(keys)
+        keys = []
+        for filename in ['key1.pub', 'key1.sec', 'key2.pub']:
+            with self.keyfile(filename) as fp:
+                keys.append(fp.read())
+        fp = BytesIO(b'\n'.join(keys))
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(result.considered, 3)
@@ -141,11 +144,11 @@ class ImportTestCase(GpgHomeTestCase):
 
     def test_import_twice(self):
         ctx = gpgme.Context()
-        fp = self.keyfile('key1.pub')
-        result = ctx.import_(fp)
+        with self.keyfile('key1.pub') as fp:
+            result = ctx.import_(fp)
 
-        fp = self.keyfile('key1.pub')
-        result = ctx.import_(fp)
+        with self.keyfile('key1.pub') as fp:
+            result = ctx.import_(fp)
 
         self.assertEqual(result.considered, 1)
         self.assertEqual(result.no_user_id, 0)

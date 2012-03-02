@@ -44,7 +44,8 @@ class GpgHomeTestCase(unittest.TestCase):
         # import requested keys into the keyring
         ctx = gpgme.Context()
         for key in self.import_keys:
-            ctx.import_(self.keyfile(key))
+            with self.keyfile(key) as fp:
+                ctx.import_(fp)
 
     def tearDown(self):
         del os.environ['GNUPGHOME']

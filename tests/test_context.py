@@ -123,7 +123,8 @@ class ContextTestCase(GpgHomeTestCase):
     def test_set_engine_info(self):
         # Add a key using the default $GNUPGHOME based keyring.
         ctx = gpgme.Context()
-        ctx.import_(self.keyfile('key1.pub'))
+        with self.keyfile('key1.pub') as fp:
+            ctx.import_(fp)
 
         # If we set $GNUPGHOME to a dummy value, we can't read in the
         # keywe just loaded.
