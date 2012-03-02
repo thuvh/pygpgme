@@ -27,7 +27,7 @@ gpgme = Extension(
 description, long_description = __doc__.split("\n\n", 1)
 
 setup(name='pygpgme',
-      version='0.2',
+      version='0.3',
       author='James Henstridge',
       author_email='james@jamesh.id.au',
       description=description,
@@ -38,7 +38,8 @@ setup(name='pygpgme',
           'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
           'Operating System :: POSIX',
           'Programming Language :: C',
-          'Programming Language :: Python',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 3',
           'Topic :: Security :: Cryptography',
           'Topic :: Software Development :: Libraries :: Python Modules'
       ],
