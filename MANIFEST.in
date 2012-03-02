@@ -1,6 +1,7 @@
 include Makefile
 include MANIFEST.in
 include test_all.py
+recursive-include examples *.py
 
 recursive-include gpgme *.py
 recursive-include tests *.py
