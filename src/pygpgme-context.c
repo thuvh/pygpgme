@@ -368,21 +368,44 @@ pygpgme_context_set_signers(PyGpgmeContext *self, PyObject *value)
 
 static PyGetSetDef pygpgme_context_getsets[] = {
     { "protocol", (getter)pygpgme_context_get_protocol,
-      (setter)pygpgme_context_set_protocol },
+      (setter)pygpgme_context_set_protocol,
+      "Set to a PROTOCOL_* constant to change the encryption protocol." },
     { "armor", (getter)pygpgme_context_get_armor,
-      (setter)pygpgme_context_set_armor },
+      (setter)pygpgme_context_set_armor,
+      "Set to 1 if encrypted data should be ASCII-armored, otherwise 0." },
     { "textmode", (getter)pygpgme_context_get_textmode,
-      (setter)pygpgme_context_set_textmode },
+      (setter)pygpgme_context_set_textmode,
+      "Set to 1 to make the OpenPGP engine use canonical text mode." },
     { "include_certs", (getter)pygpgme_context_get_include_certs,
-      (setter)pygpgme_context_set_include_certs },
+      (setter)pygpgme_context_set_include_certs,
+      "How many certificates will be included in an S/MIME signed message.\n\n"
+      "See GPGME docs for details." },
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
-      (setter)pygpgme_context_set_keylist_mode },
+      (setter)pygpgme_context_set_keylist_mode,
+      "Set to KEYLIST_MODE_* constants added together.\n\nSee GPGME docs "
+      "for details." },
     { "passphrase_cb", (getter)pygpgme_context_get_passphrase_cb,
-      (setter)pygpgme_context_set_passphrase_cb },
+      (setter)pygpgme_context_set_passphrase_cb,
+      "A callback that will get a passphrase from the user.\n\n"
+      "The callable must have the following signature:\n\n"
+      "    callback(uidHint, passphraseInfo, prevWasBad, fd)\n\n"
+      "uidHint: a string describing the key whose passphrase is needed, or\n"
+      "  None.\n\n"
+      "passphraseInfo: a string containing more information about the\n"
+      "  required passphrase, or None.\n\n"
+      "prevWasBad: If the user gave a bad passphrase and we're asking again,\n"
+      "  this will be 1, otherwise 0.\n\n"
+      "fd: A numeric file-descriptor, as returned by os.open().\n\n"
+      "The callback is required to prompt the user for a passphrase, then\n"
+      "write the passphrase followed by a '\\n' to the file-descriptor fd\n"
+      "using os.write(). If the user indicates they wish to cancel the\n"
+      "operation, you should raise a gpgme.GpgmeError whose .code attribute\n"
+      "is set to ERR_CANCELED." },
     { "progress_cb", (getter)pygpgme_context_get_progress_cb,
       (setter)pygpgme_context_set_progress_cb },
     { "signers", (getter)pygpgme_context_get_signers,
-      (setter)pygpgme_context_set_signers },
+      (setter)pygpgme_context_set_signers,
+      "A list of Key objects, used to sign data with the .sign() method." },
     { NULL, (getter)0, (setter)0 }
 };
 
@@ -1273,10 +1296,36 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
 static PyMethodDef pygpgme_context_methods[] = {
     { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS },
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
-    { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS },
-    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS },
+    { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS,
+      "get_key(fingerprint[, secret]) -> Key instance\n\n"
+      "Finds a key with the given fingerprint (a string of hex digits) in\n"
+      "the user's keyring. If secret is 1, only private keys will be\n"
+      "returned.\n\nIf no key can be found, raises GpgmeError." },
+    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS, 
+      "encrypt(recipients, flags, plaintext, ciphertext)\n\n"
+      "Encrypts plaintext so it can only be read by the given recipients.\n\n"
+      "recipients: A list of Key objects. Only people in posession of the\n"
+      "  corresponding private key (for public key encryption) or passphrase\n"
+      "  (for symmetric encryption) will be able to decrypt the result.\n\n"
+      "flags: ENCRYPT_* constants added together. See GPGME docs for\n"
+      "  details.\n\n"
+      "plaintext: A file-like object opened for reading, containing the data\n"
+      "  to be encrypted.\n\n"
+      "ciphertext: A file-like object opened for writing, where the\n"
+      "  encrypted data will be written. If the Context's .armor property is\n"
+      "  False, this file should be opened in binary mode." },
     { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
-    { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS },
+    { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS,
+      "decrypt(ciphertext, plaintext)\n\n"
+      "Decrypts the ciphertext and writes out the plaintext.\n\n"
+      "ciphertext: A file-like object opened for reading, containing the\n"
+      "  encrypted data.\n\n"
+      "plaintext: A file-like object opened for writing, where the decrypted\n"
+      "  data will be written.\n\n"
+      "To decrypt data, you must have one of the recipients' private keys in\n"
+      "your keyring (for public key encryption) or the passphrase (for \n"
+      "symmetric encryption). If gpg finds the key but needs a passphrase to\n"
+      "unlock it, the .passphrase_cb callback will be used to ask for it."},
     { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
     { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
     { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
@@ -1286,7 +1335,14 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
     { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS },
     { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS },
-    { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS },
+    { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS,
+      "keylist([strOrSeq[, secret]]) -> KeyIter instance\n\n"
+      "Searches for keys matching the given pattern(s).\n\n"
+      "strOrSeq: If None or not supplied, the KeyIter fetches all available\n"
+      "  keys. If a string, it fetches keys matching the given pattern (such\n"
+      "  as a name or email address). If a sequence of strings, it fetches\n"
+      "  keys matching at least one of the given patterns.\n\n"
+      "secret: If True, only secret keys will be returned (like 'gpg -K')." },
     // trustlist
     { NULL, 0, 0 }
 };
@@ -1300,4 +1356,6 @@ PyTypeObject PyGpgmeContext_Type = {
     .tp_init = (initproc)pygpgme_context_init,
     .tp_getset = pygpgme_context_getsets,
     .tp_methods = pygpgme_context_methods,
+    .tp_doc = "The settings and methods for interacting with GPG.\n\n"
+        "Context() -> Context instance",
 };

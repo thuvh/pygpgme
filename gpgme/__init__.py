@@ -15,6 +15,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+"""
+PyGPGME, a Python wrapper for the GPGME library.
+
+PyGPGME is a Python module that lets you sign, verify, encrypt and decrypt
+messages using the OpenPGP format.
+
+It is built on top of the GNU Privacy Guard and the GPGME library.
+
+All interaction begins by creating a Context.
+"""
+
 from gpgme._gpgme import *
 
 # create constants
