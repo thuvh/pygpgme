@@ -23,6 +23,20 @@
 #include <Python.h>
 #include <gpgme.h>
 
+/* Provide fallback definitions for older GPGME versions.  */
+#if GPGME_VERSION_NUMBER < 0x010400
+typedef enum
+  {
+    GPGME_PINENTRY_MODE_DEFAULT  = 0,
+    GPGME_PINENTRY_MODE_ASK      = 1,
+    GPGME_PINENTRY_MODE_CANCEL   = 2,
+    GPGME_PINENTRY_MODE_ERROR    = 3,
+    GPGME_PINENTRY_MODE_LOOPBACK = 4
+  }
+gpgme_pinentry_mode_t;
+#endif /* GPGME < 1.4.0 */
+
+
 #include "pycompat.h"
 
 #define HIDDEN __attribute__((visibility("hidden")))
