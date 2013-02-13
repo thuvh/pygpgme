@@ -2,7 +2,7 @@ A Python binding for the gpgme library, used to drive the gpg command
 line program.
 
 More information about gpgme can be found here:
-  http://www.gnupg.org/(en)/related_software/gpgme/index.html
+  http://www.gnupg.org/related_software/gpgme/index.html
 
 This binding stays fairly close to the C API with the following
 exceptions:

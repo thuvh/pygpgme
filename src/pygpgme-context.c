@@ -239,6 +239,35 @@ pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
     return 0;
 }
 
+static const char pygpgme_context_pinentry_mode_doc[] =
+    "Set to PINENTRY_MODE_* constant.\n\nSee GPGME docs for details.";
+
+static PyObject *
+pygpgme_context_get_pinentry_mode(PyGpgmeContext *self)
+{
+    return PyInt_FromLong(gpgme_get_pinentry_mode(self->ctx));
+}
+
+static int
+pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
+{
+    gpgme_pinentry_mode_t pinentry_mode;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
+    pinentry_mode = PyInt_AsLong(value);
+    if (PyErr_Occurred())
+        return -1;
+
+    if (pygpgme_check_error(gpgme_set_pinentry_mode(self->ctx, pinentry_mode)))
+        return -1;
+
+    return 0;
+}
+
 static const char pygpgme_context_passphrase_cb_doc[] =
     "A callback that will get a passphrase from the user.\n\n"
     "The callable must have the following signature:\n\n"
@@ -419,6 +448,9 @@ static PyGetSetDef pygpgme_context_getsets[] = {
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
       (setter)pygpgme_context_set_keylist_mode,
       (char *)pygpgme_context_keylist_mode_doc },
+    { "pinentry_mode", (getter)pygpgme_context_get_pinentry_mode,
+      (setter)pygpgme_context_set_pinentry_mode,
+      (char *)pygpgme_context_pinentry_mode_doc },
     { "passphrase_cb", (getter)pygpgme_context_get_passphrase_cb,
       (setter)pygpgme_context_set_passphrase_cb,
       (char *)pygpgme_context_passphrase_cb_doc },

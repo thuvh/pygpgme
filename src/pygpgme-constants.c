@@ -80,6 +80,13 @@ static const struct pygpgme_constant constants[] = {
   CONST(KEYLIST_MODE_SIGS),
   CONST(KEYLIST_MODE_VALIDATE),
 
+  /* gpgme_pinentry_mode_t */
+  CONST(PINENTRY_MODE_DEFAULT),
+  CONST(PINENTRY_MODE_ASK),
+  CONST(PINENTRY_MODE_CANCEL),
+  CONST(PINENTRY_MODE_ERROR),
+  CONST(PINENTRY_MODE_LOOPBACK),
+
   /* gpgme_status_code_t */
   CONST(STATUS_EOF),
   CONST(STATUS_ENTER),
