@@ -432,6 +432,82 @@ pygpgme_context_set_signers(PyGpgmeContext *self, PyObject *value)
     return ret;
 }
 
+static const char pygpgme_context_notations_doc[] =
+    "A  tuple of notations added to signatures using the .sign() method.";
+
+static PyObject *
+pygpgme_context_get_notations(PyGpgmeContext *self)
+{
+    gpgme_sig_notation_t not;
+    PyObject *list, *tuple;
+
+    list = PyList_New(0);
+    for (not = gpgme_sig_notation_get(self->ctx); not != NULL; not = not->next) {
+        PyObject *py_name, *py_value, *py_not;
+
+        py_name = PyUnicode_DecodeUTF8(not->name, not->name_len,
+            "replace");
+        py_value = PyBytes_FromStringAndSize(not->value, not->value_len);
+        py_not = Py_BuildValue("(NN)", py_name, py_value);
+
+        if (!py_not)
+            break;
+        PyList_Append(list, py_not);
+        Py_DECREF(py_not);
+    }
+
+    tuple = PySequence_Tuple(list);
+    Py_DECREF(list);
+    return tuple;
+}
+
+static int
+pygpgme_context_set_notations(PyGpgmeContext *self, PyObject *value)
+{
+    PyObject *notations = NULL;
+    PyObject *is_critical = NULL;
+    int i, length, ret = 0;
+    char *notation_name, *notation_value;
+    gpgme_error_t error;
+    /* GPGME supports only human readable notations */
+    gpgme_sig_notation_flags_t flags = GPGME_SIG_NOTATION_HUMAN_READABLE;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
+    notations = PySequence_Fast(value, "notations must be a sequence of tuples");
+    if (!notations ) {
+        ret = -1;
+        goto end;
+    }
+
+    gpgme_sig_notation_clear(self->ctx);
+    length = PySequence_Fast_GET_SIZE(notations);
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(notations, i);
+
+        /* According to RFC 4880 notations are encoded in UTF-8, but gpg might not support names with non-ascii characters */
+        if(!PyArg_ParseTuple(item, "eses|O", "utf-8", &notation_name, "utf-8", &notation_value, &is_critical)) {
+            // pass exception from PyArg_ParseTuple
+            ret = -1;
+            goto end;
+        }
+
+        /* 0 -> True, 1 -> otherwise, -1 -> error */
+        if(is_critical != NULL && PyObject_IsTrue(is_critical) == 0) {
+            flags |= GPGME_SIG_NOTATION_CRITICAL;
+        }
+
+        gpgme_sig_notation_add(self->ctx, notation_name, notation_value, flags);
+    }
+
+ end:
+    Py_XDECREF(notations);
+    return ret;
+}
+
 static PyGetSetDef pygpgme_context_getsets[] = {
     { "protocol", (getter)pygpgme_context_get_protocol,
       (setter)pygpgme_context_set_protocol,
@@ -459,6 +535,9 @@ static PyGetSetDef pygpgme_context_getsets[] = {
     { "signers", (getter)pygpgme_context_get_signers,
       (setter)pygpgme_context_set_signers,
       (char *)pygpgme_context_signers_doc },
+    { "notations", (getter)pygpgme_context_get_notations,
+      (setter)pygpgme_context_set_notations,
+      (char *)pygpgme_context_notations_doc},
     { NULL, (getter)0, (setter)0 }
 };
 

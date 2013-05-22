@@ -323,3 +323,26 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
+
+    def test_sign_notations(self) -> None:
+        ctx = gpgme.Context()
+        key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        ctx.signers = [key]
+        ctx.notations = [('test@example.com', 'test value'), ('unicode@example.com', '\xa7v1')]
+        plaintext = BytesIO(b'Hello World\n')
+        signature = BytesIO()
+
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.NORMAL)
+        self.assertEqual(len(new_sigs), 1)
+        self.assertEqual(new_sigs[0].fpr,
+                        'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+        # now verify the signature
+        signature.seek(0)
+        plaintext = BytesIO()
+        sigs = ctx.verify(signature, None, plaintext)
+        self.assertEqual(plaintext.getvalue(), b'Hello World\n')
+        self.assertEqual(len(sigs), 1)
+        self.assertEqual(sigs[0].fpr,
+                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+        self.assertEqual(sigs[0].notations, [('test@example.com', b'test value'), ('unicode@example.com', b'\xc2\xa7v1')])
