@@ -40,6 +40,8 @@ static const struct pygpgme_constant constants[] = {
   CONST(PK_ELG_E),
   CONST(PK_DSA),
   CONST(PK_ELG),
+  CONST(PK_ECDSA),
+  CONST(PK_ECDH),
 
   /* gpgme_hash_algo_t */
   CONST(MD_NONE),
