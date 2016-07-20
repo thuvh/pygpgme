@@ -76,6 +76,8 @@ typedef struct {
     PyObject *wrong_key_usage;
     PyObject *validity;
     PyObject *validity_reason;
+    PyObject *pubkey_algo;
+    PyObject *hash_algo;
 } PyGpgmeSignature;
 
 typedef struct {

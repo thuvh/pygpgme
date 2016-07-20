@@ -54,6 +54,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
+        self.assertEqual(sigs[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
+        self.assertEqual(sigs[0].hash_algo, gpgme.HashAlgo.SHA1)
 
     def test_verify_detached(self) -> None:
         signature = BytesIO(dedent('''
@@ -80,6 +82,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
+        self.assertEqual(sigs[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
+        self.assertEqual(sigs[0].hash_algo, gpgme.HashAlgo.SHA1)
 
     def test_verify_clearsign(self) -> None:
         signature = BytesIO(dedent('''
@@ -111,6 +115,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
+        self.assertEqual(sigs[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
+        self.assertEqual(sigs[0].hash_algo, gpgme.HashAlgo.SHA1)
 
     def test_verify_multiple_sigs(self) -> None:
         signature = BytesIO(dedent('''
@@ -153,6 +159,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
+        self.assertEqual(sigs[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
+        self.assertEqual(sigs[0].hash_algo, gpgme.HashAlgo.SHA1)
 
         self.assertEqual(sigs[1].summary, 0)
         self.assertEqual(sigs[1].fpr,
@@ -164,6 +172,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[1].wrong_key_usage, False)
         self.assertEqual(sigs[1].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[1].validity_reason, None)
+        self.assertEqual(sigs[1].pubkey_algo, gpgme.PubkeyAlgo.RSA)
+        self.assertEqual(sigs[1].hash_algo, gpgme.HashAlgo.SHA1)
 
     def test_verify_no_signature(self) -> None:
         signature = BytesIO(dedent('''

@@ -119,6 +119,8 @@ class Signature:
     wrong_key_usage: bool
     validity: Validity
     validity_reason: Optional[GpgmeError]
+    pubkey_algo: PubkeyAlgo
+    hash_algo: HashAlgo
 
 class ImportResult:
     considered: int
