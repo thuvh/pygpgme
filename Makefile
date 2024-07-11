@@ -1,10 +1,10 @@
-PYTHON = python
+PYTHON = python3
 
 build:
 	$(PYTHON) setup.py build_ext -i
 
 check: build
-	$(PYTHON) test_all.py -v
+	$(PYTHON) -m unittest discover -v tests
 
 clean:
 	$(PYTHON) setup.py clean

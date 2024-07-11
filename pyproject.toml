@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygpgme"
+version = "0.3"
+authors = [
+    {name = "James Henstridge", email="james@jamesh.id.au"},
+]
+description = "A Python module for working with OpenPGP messages"
+
+license = {text = "LGPL"}
+classifiers = [
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+    'Operating System :: POSIX',
+    'Programming Language :: C',
+    'Programming Language :: Python :: 3',
+    'Topic :: Security :: Cryptography',
+    'Topic :: Software Development :: Libraries :: Python Modules'
+]
+
+[tool.setuptools]
+packages = ["gpgme"]
