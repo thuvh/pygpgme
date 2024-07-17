@@ -54,7 +54,7 @@ read_cb(void *handle, void *buffer, size_t size)
     PyGILState_STATE state;
     PyObject *fp = handle;
     PyObject *result;
-    int result_size;
+    ssize_t result_size;
 
     state = PyGILState_Ensure();
     result = PyObject_CallMethod(fp, "read", "l", (long)size);
@@ -73,7 +73,7 @@ read_cb(void *handle, void *buffer, size_t size)
     }
     /* copy the result into the given buffer */
     result_size = PyBytes_Size(result);
-    if (result_size > size)
+    if ((size_t)result_size > size)
         result_size = size;
     memcpy(buffer, PyBytes_AsString(result), result_size);
     Py_DECREF(result);
