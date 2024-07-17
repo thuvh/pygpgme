@@ -182,8 +182,8 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
                         plaintext, ciphertext)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_UNKNOWN)
-            self.assertEqual(exc.args[1], gpgme.ERR_GENERAL)
+            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
+            self.assertEqual(exc.args[1], gpgme.ERR_UNUSABLE_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError not raised')
 

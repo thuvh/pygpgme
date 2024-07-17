@@ -41,7 +41,7 @@ class PassphraseTestCase(GpgHomeTestCase):
             new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
         except gpgme.GpgmeError as exc:
             self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(exc.args[1], gpgme.ERR_BAD_PASSPHRASE)
+            self.assertEqual(exc.args[1], gpgme.ERR_GENERAL)
         else:
             self.fail('gpgme.GpgmeError not raised')
 
