@@ -3,16 +3,16 @@ from setuptools import setup, Extension
 setup(ext_modules=[
     Extension(
         'gpgme._gpgme',
-        ['src/gpgme.c',
-         'src/pygpgme-error.c',
-         'src/pygpgme-data.c',
-         'src/pygpgme-context.c',
-         'src/pygpgme-key.c',
-         'src/pygpgme-signature.c',
-         'src/pygpgme-import.c',
-         'src/pygpgme-keyiter.c',
-         'src/pygpgme-constants.c',
-         'src/pygpgme-genkey.c',
+        ['lib/gpgme.c',
+         'lib/pygpgme-error.c',
+         'lib/pygpgme-data.c',
+         'lib/pygpgme-context.c',
+         'lib/pygpgme-key.c',
+         'lib/pygpgme-signature.c',
+         'lib/pygpgme-import.c',
+         'lib/pygpgme-keyiter.c',
+         'lib/pygpgme-constants.c',
+         'lib/pygpgme-genkey.c',
          ],
         libraries=['gpgme'])
 ])

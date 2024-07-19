@@ -22,4 +22,5 @@ classifiers = [
 ]
 
 [tool.setuptools]
+package-dir = {"" = "src"}
 packages = ["gpgme"]

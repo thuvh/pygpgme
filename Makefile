@@ -4,7 +4,7 @@ build:
 	$(PYTHON) setup.py build_ext -i
 
 check: build
-	$(PYTHON) -m unittest discover -v tests
+	PYTHONPATH=./src $(PYTHON) -m unittest discover -v tests
 
 clean:
 	$(PYTHON) setup.py clean
