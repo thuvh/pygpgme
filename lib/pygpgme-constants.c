@@ -40,6 +40,8 @@ static const struct pygpgme_constant constants[] = {
   CONST(PK_ELG_E),
   CONST(PK_DSA),
   CONST(PK_ELG),
+  CONST(PK_ECDSA),
+  CONST(PK_ECDH),
 
   /* gpgme_hash_algo_t */
   CONST(MD_NONE),
@@ -86,6 +88,10 @@ static const struct pygpgme_constant constants[] = {
   CONST(PINENTRY_MODE_CANCEL),
   CONST(PINENTRY_MODE_ERROR),
   CONST(PINENTRY_MODE_LOOPBACK),
+
+  /* gpgme_export_mode_t */
+  CONST(EXPORT_MODE_EXTERN),
+  CONST(EXPORT_MODE_MINIMAL),
 
   /* gpgme_status_code_t */
   CONST(STATUS_EOF),
