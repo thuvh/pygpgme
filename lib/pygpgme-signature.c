@@ -66,10 +66,10 @@ pygpgme_newsiglist_new(gpgme_new_signature_t siglist)
             Py_DECREF(list);
             return NULL;
         }
-        item->type = PyInt_FromLong(sig->type);
-        item->pubkey_algo = PyInt_FromLong(sig->pubkey_algo);
-        item->hash_algo = PyInt_FromLong(sig->hash_algo);
-        item->timestamp = PyInt_FromLong(sig->timestamp);
+        item->type = PyLong_FromLong(sig->type);
+        item->pubkey_algo = PyLong_FromLong(sig->pubkey_algo);
+        item->hash_algo = PyLong_FromLong(sig->hash_algo);
+        item->timestamp = PyLong_FromLong(sig->timestamp);
         if (sig->fpr) {
             item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
                                               "replace");
@@ -77,7 +77,7 @@ pygpgme_newsiglist_new(gpgme_new_signature_t siglist)
             Py_INCREF(Py_None);
             item->fpr = Py_None;
         }
-        item->sig_class = PyInt_FromLong(sig->sig_class);
+        item->sig_class = PyLong_FromLong(sig->sig_class);
         if (PyErr_Occurred()) {
             Py_DECREF(item);
             Py_DECREF(list);
@@ -145,7 +145,7 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
             Py_DECREF(list);
             return NULL;
         }
-        item->summary = PyInt_FromLong(sig->summary);
+        item->summary = PyLong_FromLong(sig->summary);
         if (sig->fpr) {
             item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
                                               "replace");
@@ -168,10 +168,10 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
             PyList_Append(item->notations, py_not);
             Py_DECREF(py_not);
         }
-        item->timestamp = PyInt_FromLong(sig->timestamp);
-        item->exp_timestamp = PyInt_FromLong(sig->exp_timestamp);
+        item->timestamp = PyLong_FromLong(sig->timestamp);
+        item->exp_timestamp = PyLong_FromLong(sig->exp_timestamp);
         item->wrong_key_usage = PyBool_FromLong(sig->wrong_key_usage);
-        item->validity = PyInt_FromLong(sig->validity);
+        item->validity = PyLong_FromLong(sig->validity);
         item->validity_reason = pygpgme_error_object(sig->validity_reason);
         if (PyErr_Occurred()) {
             Py_DECREF(item);

@@ -93,7 +93,7 @@ pygpgme_import_result(gpgme_ctx_t ctx)
         return NULL;
 
 #define ADD_INT(name) \
-    self->name = PyInt_FromLong(result->name)
+    self->name = PyLong_FromLong(result->name)
 
     ADD_INT(considered);
     ADD_INT(no_user_id);

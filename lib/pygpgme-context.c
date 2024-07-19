@@ -104,7 +104,7 @@ static const char pygpgme_context_protocol_doc[] =
 static PyObject *
 pygpgme_context_get_protocol(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_protocol(self->ctx));
+    return PyLong_FromLong(gpgme_get_protocol(self->ctx));
 }
 
 static int
@@ -117,7 +117,7 @@ pygpgme_context_set_protocol(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    protocol = PyInt_AsLong(value);
+    protocol = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -146,7 +146,7 @@ pygpgme_context_set_armor(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    armor = PyInt_AsLong(value) != 0;
+    armor = PyLong_AsLong(value) != 0;
     if (PyErr_Occurred())
         return -1;
 
@@ -173,7 +173,7 @@ pygpgme_context_set_textmode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    textmode = PyInt_AsLong(value) != 0;
+    textmode = PyLong_AsLong(value) != 0;
     if (PyErr_Occurred())
         return -1;
 
@@ -188,7 +188,7 @@ static const char pygpgme_context_include_certs_doc[] =
 static PyObject *
 pygpgme_context_get_include_certs(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_include_certs(self->ctx));
+    return PyLong_FromLong(gpgme_get_include_certs(self->ctx));
 }
 
 static int
@@ -201,7 +201,7 @@ pygpgme_context_set_include_certs(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    nr_of_certs = PyInt_AsLong(value);
+    nr_of_certs = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -216,7 +216,7 @@ static const char pygpgme_context_keylist_mode_doc[] =
 static PyObject *
 pygpgme_context_get_keylist_mode(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_keylist_mode(self->ctx));
+    return PyLong_FromLong(gpgme_get_keylist_mode(self->ctx));
 }
 
 static int
@@ -229,7 +229,7 @@ pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    keylist_mode = PyInt_AsLong(value);
+    keylist_mode = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -246,9 +246,9 @@ static PyObject *
 pygpgme_context_get_pinentry_mode(PyGpgmeContext *self)
 {
 #if GPGME_VERSION_NUMBER < 0x010400
-    return PyInt_FromLong(GPGME_PINENTRY_MODE_DEFAULT);
+    return PyLong_FromLong(GPGME_PINENTRY_MODE_DEFAULT);
 #else  /* gpgme >= 1.4.0 */
-    return PyInt_FromLong(gpgme_get_pinentry_mode(self->ctx));
+    return PyLong_FromLong(gpgme_get_pinentry_mode(self->ctx));
 #endif /* gpgme >= 1.4.0 */
 }
 
@@ -267,7 +267,7 @@ pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    pinentry_mode = PyInt_AsLong(value);
+    pinentry_mode = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 

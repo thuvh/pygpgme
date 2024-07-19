@@ -26,17 +26,15 @@ static PyMethodDef pygpgme_functions[] = {
     { NULL, NULL, 0 }
 };
 
-#if PY_VERSION_HEX >= 0x03000000
 static PyModuleDef pygpgme_module = {
     PyModuleDef_HEAD_INIT,
     "gpgme._gpgme",
     .m_size = -1,
     .m_methods = pygpgme_functions
 };
-#endif
 
-static PyObject *
-create_module(void)
+PyMODINIT_FUNC
+PyInit__gpgme(void)
 {
     const char *gpgme_version;
     PyObject *mod;
@@ -69,11 +67,7 @@ create_module(void)
     INIT_TYPE(PyGpgmeGenkeyResult_Type);
     INIT_TYPE(PyGpgmeKeyIter_Type);
 
-#if PY_VERSION_HEX >= 0x03000000
     mod = PyModule_Create(&pygpgme_module);
-#else
-    mod = Py_InitModule("gpgme._gpgme", pygpgme_functions);
-#endif
 
     ADD_TYPE(Context);
     ADD_TYPE(Key);
@@ -101,17 +95,3 @@ create_module(void)
 
     return mod;
 }
-
-#if PY_VERSION_HEX >= 0x03000000
-PyMODINIT_FUNC
-PyInit__gpgme(void)
-{
-    return create_module();
-}
-#else
-PyMODINIT_FUNC
-init_gpgme(void)
-{
-    create_module();
-}
-#endif

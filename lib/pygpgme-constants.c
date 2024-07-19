@@ -571,7 +571,7 @@ pygpgme_make_constants(PyObject *self, PyObject *args)
     for (i = 0; i < n_constants; i++) {
         PyObject *item;
 
-        item = PyInt_FromLong(constants[i].value);
+        item = PyLong_FromLong(constants[i].value);
         PyDict_SetItemString(dict, constants[i].name, item);
         Py_DECREF(item);
     }

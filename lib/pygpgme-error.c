@@ -31,10 +31,10 @@ pygpgme_error_object(gpgme_error_t err)
     if (err == GPG_ERR_NO_ERROR)
         Py_RETURN_NONE;
 
-    if (!(source = PyInt_FromLong(gpgme_err_source(err))))
+    if (!(source = PyLong_FromLong(gpgme_err_source(err))))
         goto end;
 
-    if (!(code = PyInt_FromLong(gpgme_err_code(err))))
+    if (!(code = PyLong_FromLong(gpgme_err_code(err))))
         goto end;
 
     /* get the error string */
@@ -132,12 +132,12 @@ pygpgme_check_pyerror(void)
         if (code == NULL)
             goto end;
 
-        if (PyInt_Check(source) && PyInt_Check(code))
-            err = gpgme_err_make(PyInt_AsLong(source), PyInt_AsLong(code));
+        if (PyLong_Check(source) && PyLong_Check(code))
+            err = gpgme_err_make(PyLong_AsLong(source), PyLong_AsLong(code));
     } else if (PyErr_GivenExceptionMatches(err_type, PyExc_IOError) ||
                PyErr_GivenExceptionMatches(err_type, PyExc_OSError)) {
-        if (PyInt_Check(source))
-            err = gpgme_err_code_from_errno(PyInt_AsLong(source));
+        if (PyLong_Check(source))
+            err = gpgme_err_code_from_errno(PyLong_AsLong(source));
     }
 
  end:
