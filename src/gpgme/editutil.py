@@ -60,7 +60,8 @@ def key_editor(function):
                           gpgme.STATUS_KEYEXPIRED,
                           gpgme.STATUS_PROGRESS,
                           gpgme.STATUS_KEY_CREATED,
-                          gpgme.STATUS_ALREADY_SIGNED):
+                          gpgme.STATUS_ALREADY_SIGNED,
+                          gpgme.STATUS_KEY_CONSIDERED):
                 return
             try:
                 data = gen.send((status, args))

@@ -52,7 +52,8 @@ class GpgHomeTestCase(unittest.TestCase):
                 ctx.import_(fp)
 
     def tearDown(self):
-        subprocess.check_call(['gpg-connect-agent', 'KILLAGENT', '/bye'],
+        # May fail if the agent is not currently running.
+        subprocess.call(['gpg-connect-agent', 'KILLAGENT', '/bye'],
                               stdout=subprocess.DEVNULL,
                               stderr=subprocess.DEVNULL)
         del os.environ['GNUPGHOME']

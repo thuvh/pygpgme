@@ -32,7 +32,7 @@ class EditKeyTestCase(GpgHomeTestCase):
                    'signonly.pub', 'signonly.sec']
 
     def edit_quit_cb(self, status, args, fd):
-        if status in [gpgme.STATUS_EOF, gpgme.STATUS_GOT_IT]:
+        if status in [gpgme.STATUS_EOF, gpgme.STATUS_GOT_IT, gpgme.STATUS_KEY_CONSIDERED]:
             return
         self.status = status
         self.args = args
