@@ -22,7 +22,6 @@
 #include "pygpgme.h"
 
 static PyMethodDef pygpgme_functions[] = {
-    { "make_constants", (PyCFunction)pygpgme_make_constants, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -82,6 +81,8 @@ PyInit__gpgme(void)
 
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
+
+    pygpgme_add_constants(mod);
 
     gpgme_version = gpgme_check_version(NULL);
     if (gpgme_version == NULL) {

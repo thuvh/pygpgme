@@ -119,6 +119,22 @@ extern HIDDEN PyTypeObject PyGpgmeImportResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeGenkeyResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeyIter_Type;
 
+extern HIDDEN PyObject *PyGpgmeDataEncoding_Type;
+extern HIDDEN PyObject *PyGpgmePubkeyAlgo_Type;
+extern HIDDEN PyObject *PyGpgmeHashAlgo_Type;
+extern HIDDEN PyObject *PyGpgmeSigMode_Type;
+extern HIDDEN PyObject *PyGpgmeValidity_Type;
+extern HIDDEN PyObject *PyGpgmeProtocol_Type;
+extern HIDDEN PyObject *PyGpgmeKeylistMode_Type;
+extern HIDDEN PyObject *PyGpgmePinentryMode_Type;
+extern HIDDEN PyObject *PyGpgmeExportMode_Type;
+extern HIDDEN PyObject *PyGpgmeStatus_Type;
+extern HIDDEN PyObject *PyGpgmeEncryptFlags_Type;
+extern HIDDEN PyObject *PyGpgmeSigsum_Type;
+extern HIDDEN PyObject *PyGpgmeImport_Type;
+extern HIDDEN PyObject *PyGpgmeErrSource_Type;
+extern HIDDEN PyObject *PyGpgmeErrCode_Type;
+
 HIDDEN int           pygpgme_check_error    (gpgme_error_t err);
 HIDDEN PyObject     *pygpgme_error_object   (gpgme_error_t err);
 HIDDEN gpgme_error_t pygpgme_check_pyerror  (void);
@@ -132,6 +148,6 @@ HIDDEN PyObject     *pygpgme_siglist_new    (gpgme_signature_t siglist);
 HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
 HIDDEN PyObject     *pygpgme_genkey_result  (gpgme_ctx_t ctx);
 
-HIDDEN PyObject     *pygpgme_make_constants (PyObject *self, PyObject *args);
+HIDDEN void          pygpgme_add_constants  (PyObject *mod);
 
 #endif
