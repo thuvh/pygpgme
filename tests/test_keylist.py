@@ -63,8 +63,3 @@ class KeylistTestCase(GpgHomeTestCase):
         keyids = set(key.subkeys[0].keyid
                      for key in ctx.keylist(None, True))
         self.assertTrue(keyids, set(['46BB55F0885C65A4']))
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

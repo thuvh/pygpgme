@@ -139,8 +139,3 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.set_engine_info(gpgme.Protocol.OpenPGP, None, self._gpghome)
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertTrue(key)
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

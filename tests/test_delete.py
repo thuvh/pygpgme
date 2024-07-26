@@ -60,8 +60,3 @@ class DeleteTestCase(GpgHomeTestCase):
             self.assertEqual(exc.args[1], gpgme.ErrCode.NO_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError was not raised')
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

@@ -29,12 +29,12 @@ keydir = os.path.join(os.path.dirname(__file__), 'keys')
 
 class GpgHomeTestCase(unittest.TestCase):
 
-    import_keys = []
+    import_keys: list[str] = []
 
-    def keyfile(self, key):
+    def keyfile(self, key: str):
         return open(os.path.join(keydir, key), 'rb')
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._gpghome = tempfile.mkdtemp(prefix='tmp.gpghome')
         os.environ['GNUPGHOME'] = self._gpghome
         with open(os.path.join(self._gpghome, 'gpg.conf'), 'w') as fp:
@@ -51,7 +51,7 @@ class GpgHomeTestCase(unittest.TestCase):
             with self.keyfile(key) as fp:
                 ctx.import_(fp)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         # May fail if the agent is not currently running.
         subprocess.call(['gpg-connect-agent', 'KILLAGENT', '/bye'],
                               stdout=subprocess.DEVNULL,

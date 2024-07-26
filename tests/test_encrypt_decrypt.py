@@ -15,13 +15,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from io import BytesIO
 import os
-import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 from textwrap import dedent
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -186,8 +183,3 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
             self.assertEqual(exc.args[1], gpgme.ErrCode.UNUSABLE_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError not raised')
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

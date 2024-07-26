@@ -15,13 +15,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
+from io import BytesIO
 import os
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 from textwrap import dedent
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -74,7 +71,3 @@ class PassphraseTestCase(GpgHomeTestCase):
         self.assertEqual(new_sigs[0].type, gpgme.SigMode.CLEAR)
         self.assertEqual(new_sigs[0].fpr,
                         'EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

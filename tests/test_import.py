@@ -15,11 +15,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from io import BytesIO
 import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -167,7 +164,3 @@ class ImportTestCase(GpgHomeTestCase):
                          ('E79A842DA34A1CA383F64A1546BB55F0885C65A4', None, 0))
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

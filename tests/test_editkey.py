@@ -15,12 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
+from io import BytesIO
 import os
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+import unittest
 
 import gpgme
 import gpgme.editutil
@@ -85,8 +82,3 @@ class EditKeyTestCase(GpgHomeTestCase):
             sigs = [sig for sig in uid.signatures
                     if sig.keyid == 'F540A569CB935A42']
             self.assertEqual(len(sigs), 1)
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

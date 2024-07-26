@@ -15,11 +15,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from io import BytesIO
 import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -109,12 +106,3 @@ class GenerateKeyTestCase(GpgHomeTestCase):
             self.assertEqual(result.fpr, None)
         else:
             self.fail("GpgmeError not raised")
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)
-
-
-if __name__ == '__main__':
-    unittest.main()

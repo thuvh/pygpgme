@@ -15,12 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+from io import BytesIO
 from textwrap import dedent
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -316,7 +313,3 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].wrong_key_usage, False)
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

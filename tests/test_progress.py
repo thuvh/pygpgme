@@ -15,13 +15,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
 import os
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+from io import BytesIO
 from textwrap import dedent
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -50,7 +47,3 @@ class ProgressTestCase(GpgHomeTestCase):
         self.assertEqual(new_sigs[0].type, gpgme.SigMode.CLEAR)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

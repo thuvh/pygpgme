@@ -243,8 +243,3 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[1].name, 'Sign Only')
         self.assertEqual(key.uids[1].email, 'signonly@example.com')
         self.assertEqual(key.uids[1].comment, 'work address')
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

@@ -18,4 +18,4 @@ jobs:
       - name: Build extension
         run: pip install -U .
       - name: Run tests
-        run: python -m unittest discover -v tests
+        run: python -m unittest discover -v -t . tests
