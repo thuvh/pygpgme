@@ -26,18 +26,16 @@ __metaclass__ = type
 __all__ = ['edit_sign', 'edit_trust']
 
 import functools
+import io
 import os
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+
 import gpgme
 
 
 def key_editor(function):
     """A decorator that lets key editor callbacks be written as generators."""
     @functools.wraps(function)
-    def wrapper(ctx, key, *args, **kwargs):
+    def wrapper(ctx: gpgme.Context, key: gpgme.Key, *args, **kwargs):
         # Start the generator and run it once.
         gen = function(ctx, key, *args, **kwargs)
         try:
@@ -49,7 +47,7 @@ def key_editor(function):
         except StopIteration:
             return
 
-        def edit_callback(status, args, fd):
+        def edit_callback(status: gpgme.Status, args: str | None, fd: int):
             if status in (gpgme.Status.EOF,
                           gpgme.Status.GOT_IT,
                           gpgme.Status.NEED_PASSPHRASE,
@@ -66,12 +64,12 @@ def key_editor(function):
             try:
                 data = gen.send((status, args))
             except StopIteration:
-                raise gpgme.error(gpgme.ErrSource.UNKNOWN, gpgme.ErrCode.GENERAL)
+                raise gpgme.GpgmeError(gpgme.ErrSource.UNKNOWN, gpgme.ErrCode.GENERAL)
 
             if data is not None:
                 os.write(fd, data.encode('ASCII'))
 
-        output = BytesIO()
+        output = io.BytesIO()
         try:
             ctx.edit(key, edit_callback, output)
         finally:
