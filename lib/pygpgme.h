@@ -149,5 +149,6 @@ HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
 HIDDEN PyObject     *pygpgme_genkey_result  (gpgme_ctx_t ctx);
 
 HIDDEN void          pygpgme_add_constants  (PyObject *mod);
+HIDDEN PyObject     *pygpgme_enum_value_new (PyObject *type, long value);
 
 #endif

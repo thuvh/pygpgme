@@ -31,10 +31,10 @@ pygpgme_error_object(gpgme_error_t err)
     if (err == GPG_ERR_NO_ERROR)
         Py_RETURN_NONE;
 
-    if (!(source = PyLong_FromLong(gpgme_err_source(err))))
+    if (!(source = pygpgme_enum_value_new(PyGpgmeErrSource_Type, gpgme_err_source(err))))
         goto end;
 
-    if (!(code = PyLong_FromLong(gpgme_err_code(err))))
+    if (!(code = pygpgme_enum_value_new(PyGpgmeErrCode_Type, gpgme_err_code(err))))
         goto end;
 
     /* get the error string */
@@ -52,33 +52,7 @@ pygpgme_error_object(gpgme_error_t err)
     PyObject_SetAttrString(exc, "code", code);
     PyObject_SetAttrString(exc, "strerror", strerror);
 
-    /* pygpgme 0.1 set the "message" attribute on exceptions, but
-     * Python 2.6 classes this exception attribute as deprecated (even
-     * though we weren't using it in the deprecated fashion).
-     *
-     * We now set the "strerror" attribute for this information, which
-     * is similar to IOError/OSError.
-     *
-     * For backward compatibility, we still set "message" on Python
-     * versions before 3.0.  The hack below is to avoid issuing a
-     * deprecation warning.
-     */
-#if PY_VERSION_HEX < 0x03000000
-#  if PY_VERSION_HEX >= 0x02060000
-    {
-        PyBaseExceptionObject *base_exc = (PyBaseExceptionObject *)exc;
-        PyObject *old_message = base_exc->message;
-
-        Py_INCREF(strerror);
-        base_exc->message = strerror;
-        Py_XDECREF(old_message);
-    }
-#  else
-    PyObject_SetAttrString(exc, "message", strerror);
-#  endif
-#endif
-
- end:
+end:
     Py_XDECREF(strerror);
     Py_XDECREF(code);
     Py_XDECREF(source);

@@ -104,7 +104,7 @@ static const char pygpgme_context_protocol_doc[] =
 static PyObject *
 pygpgme_context_get_protocol(PyGpgmeContext *self)
 {
-    return PyLong_FromLong(gpgme_get_protocol(self->ctx));
+    return pygpgme_enum_value_new(PyGpgmeProtocol_Type, gpgme_get_protocol(self->ctx));
 }
 
 static int
@@ -216,7 +216,7 @@ static const char pygpgme_context_keylist_mode_doc[] =
 static PyObject *
 pygpgme_context_get_keylist_mode(PyGpgmeContext *self)
 {
-    return PyLong_FromLong(gpgme_get_keylist_mode(self->ctx));
+    return pygpgme_enum_value_new(PyGpgmeKeylistMode_Type, gpgme_get_keylist_mode(self->ctx));
 }
 
 static int
@@ -246,9 +246,9 @@ static PyObject *
 pygpgme_context_get_pinentry_mode(PyGpgmeContext *self)
 {
 #if GPGME_VERSION_NUMBER < 0x010400
-    return PyLong_FromLong(GPGME_PINENTRY_MODE_DEFAULT);
+    return pygpgme_enum_value_new(PyGpgmePinentryMode_Type, GPGME_PINENTRY_MODE_DEFAULT);
 #else  /* gpgme >= 1.4.0 */
-    return PyLong_FromLong(gpgme_get_pinentry_mode(self->ctx));
+    return pygpgme_enum_value_new(PyGpgmePinentryMode_Type, gpgme_get_pinentry_mode(self->ctx));
 #endif /* gpgme >= 1.4.0 */
 }
 
@@ -1285,13 +1285,15 @@ static gpgme_error_t
 pygpgme_edit_cb(void *user_data, gpgme_status_code_t status,
                 const char *args, int fd)
 {
-    PyObject *callback, *ret;
+    PyObject *callback, *py_status, *ret;
     PyGILState_STATE state;
     gpgme_error_t err;
 
     state = PyGILState_Ensure();
     callback = (PyObject *)user_data;
-    ret = PyObject_CallFunction(callback, "lzi", (long)status, args, fd);
+    py_status = pygpgme_enum_value_new(PyGpgmeStatus_Type, status);
+    ret = PyObject_CallFunction(callback, "Ozi", py_status, args, fd);
+    Py_DECREF(py_status);
     err = pygpgme_check_pyerror();
     Py_XDECREF(ret);
     PyGILState_Release(state);

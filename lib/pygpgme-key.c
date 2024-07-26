@@ -86,7 +86,7 @@ pygpgme_subkey_get_can_authenticate(PyGpgmeSubkey *self)
 static PyObject *
 pygpgme_subkey_get_pubkey_algo(PyGpgmeSubkey *self)
 {
-    return PyLong_FromLong(self->subkey->pubkey_algo);
+    return pygpgme_enum_value_new(PyGpgmePubkeyAlgo_Type, self->subkey->pubkey_algo);
 }
 
 static PyObject *
@@ -192,7 +192,7 @@ pygpgme_key_sig_get_exportable(PyGpgmeKeySig *self)
 static PyObject *
 pygpgme_key_sig_get_pubkey_algo(PyGpgmeKeySig *self)
 {
-    return PyLong_FromLong(self->key_sig->pubkey_algo);
+    return pygpgme_enum_value_new(PyGpgmePubkeyAlgo_Type, self->key_sig->pubkey_algo);
 }
 
 static PyObject *
@@ -321,7 +321,7 @@ pygpgme_user_id_get_invalid(PyGpgmeUserId *self)
 static PyObject *
 pygpgme_user_id_get_validity(PyGpgmeUserId *self)
 {
-    return PyLong_FromLong(self->user_id->validity);
+    return pygpgme_enum_value_new(PyGpgmeValidity_Type, self->user_id->validity);
 }
 
 static PyObject *
@@ -477,7 +477,7 @@ pygpgme_key_get_can_authenticate(PyGpgmeKey *self)
 static PyObject *
 pygpgme_key_get_protocol(PyGpgmeKey *self)
 {
-    return PyLong_FromLong(self->key->protocol);
+    return pygpgme_enum_value_new(PyGpgmeProtocol_Type, self->key->protocol);
 }
 
 static PyObject *
@@ -517,7 +517,7 @@ pygpgme_key_get_chain_id(PyGpgmeKey *self)
 static PyObject *
 pygpgme_key_get_owner_trust(PyGpgmeKey *self)
 {
-    return PyLong_FromLong(self->key->owner_trust);
+    return pygpgme_enum_value_new(PyGpgmeValidity_Type, self->key->owner_trust);
 }
 
 static PyObject *
@@ -575,7 +575,7 @@ pygpgme_key_get_uids(PyGpgmeKey *self)
 static PyObject *
 pygpgme_key_get_keylist_mode(PyGpgmeKey *self)
 {
-    return PyLong_FromLong(self->key->keylist_mode);
+    return pygpgme_enum_value_new(PyGpgmeKeylistMode_Type, self->key->keylist_mode);
 }
 
 static PyGetSetDef pygpgme_key_getsets[] = {

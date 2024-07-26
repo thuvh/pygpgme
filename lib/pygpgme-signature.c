@@ -66,9 +66,9 @@ pygpgme_newsiglist_new(gpgme_new_signature_t siglist)
             Py_DECREF(list);
             return NULL;
         }
-        item->type = PyLong_FromLong(sig->type);
-        item->pubkey_algo = PyLong_FromLong(sig->pubkey_algo);
-        item->hash_algo = PyLong_FromLong(sig->hash_algo);
+        item->type = pygpgme_enum_value_new(PyGpgmeSigMode_Type, sig->type);
+        item->pubkey_algo = pygpgme_enum_value_new(PyGpgmePubkeyAlgo_Type, sig->pubkey_algo);
+        item->hash_algo = pygpgme_enum_value_new(PyGpgmeHashAlgo_Type, sig->hash_algo);
         item->timestamp = PyLong_FromLong(sig->timestamp);
         if (sig->fpr) {
             item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
@@ -145,7 +145,7 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
             Py_DECREF(list);
             return NULL;
         }
-        item->summary = PyLong_FromLong(sig->summary);
+        item->summary = pygpgme_enum_value_new(PyGpgmeSigsum_Type, sig->summary);
         if (sig->fpr) {
             item->fpr = PyUnicode_DecodeASCII(sig->fpr, strlen(sig->fpr),
                                               "replace");
@@ -171,7 +171,7 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
         item->timestamp = PyLong_FromLong(sig->timestamp);
         item->exp_timestamp = PyLong_FromLong(sig->exp_timestamp);
         item->wrong_key_usage = PyBool_FromLong(sig->wrong_key_usage);
-        item->validity = PyLong_FromLong(sig->validity);
+        item->validity = pygpgme_enum_value_new(PyGpgmeValidity_Type, sig->validity);
         item->validity_reason = pygpgme_error_object(sig->validity_reason);
         if (PyErr_Occurred()) {
             Py_DECREF(item);
