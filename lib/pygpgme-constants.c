@@ -179,9 +179,13 @@ pygpgme_add_constants (PyObject *mod)
     CONST(WITH_KEYGRIP);
     CONST(EPHEMERAL);
     CONST(VALIDATE);
-    CONST(FORCE_EXTERN);
+#if GPGME_VERSION_NUMBER >= VER(1, 11, 0)
     CONST(LOCATE);
+#endif
+#if GPGME_VERSION_NUMBER >= VER(1, 18, 0)
+    CONST(FORCE_EXTERN);
     CONST(LOCATE_EXTERNAL);
+#endif
     PyGpgmeKeylistMode_Type = make_enum(mod, "IntFlag", "KeylistMode", values);
     Py_DECREF(values);
 
@@ -206,8 +210,12 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SECRET);
     CONST(RAW);
     CONST(PKCS12);
+#if GPGME_VERSION_NUMBER >= VER(1, 14, 0)
     CONST(SSH);
+#endif
+#if GPGME_VERSION_NUMBER >= VER(1, 17, 0)
     CONST(SECRET_SUBKEY);
+#endif
     PyGpgmeExportMode_Type = make_enum(mod, "IntFlag", "ExportMode", values);
     Py_DECREF(values);
 
@@ -332,7 +340,9 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SYMMETRIC);
     CONST(THROW_KEYIDS);
     CONST(WRAP);
+#if GPGME_VERSION_NUMBER >= VER(1, 11, 0)
     CONST(WANT_ADDRESS);
+#endif
     PyGpgmeEncryptFlags_Type = make_enum(mod, "IntFlag", "EncryptFlags", values);
     Py_DECREF(values);
 
@@ -387,9 +397,13 @@ pygpgme_add_constants (PyObject *mod)
     CONST(KLEO);
     CONST(G13);
     CONST(ASSUAN);
+#if GPGME_VERSION_NUMBER >= VER(1, 42, 0)
     CONST(TPM2D);
+#endif
     CONST(TLS);
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 47, 0)
     CONST(TKD);
+#endif
     CONST(ANY);
     CONST(USER_1);
     CONST(USER_2);
@@ -693,16 +707,24 @@ pygpgme_add_constants (PyObject *mod)
     CONST(INV_ORDER);
     CONST(ALREADY_FETCHED);
     CONST(TRY_LATER);
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 27, 0)
     CONST(WRONG_NAME);
+#endif
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 36, 0)
     CONST(NO_AUTH);
     CONST(BAD_AUTH);
+#endif
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 37, 0)
     CONST(NO_KEYBOXD);
     CONST(KEYBOXD);
     CONST(NO_SERVICE);
     CONST(SERVICE);
+#endif
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 47, 0)
     CONST(BAD_PUK);
     CONST(NO_RESET_CODE);
     CONST(BAD_RESET_CODE);
+#endif
     CONST(SYSTEM_BUG);
     CONST(DNS_UNKNOWN);
     CONST(DNS_SECTION);
@@ -809,6 +831,7 @@ pygpgme_add_constants (PyObject *mod)
     CONST(USER_14);
     CONST(USER_15);
     CONST(USER_16);
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 37, 0)
     CONST(SQL_OK);
     CONST(SQL_ERROR);
     CONST(SQL_INTERNAL);
@@ -840,6 +863,7 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SQL_WARNING);
     CONST(SQL_ROW);
     CONST(SQL_DONE);
+#endif
     CONST(MISSING_ERRNO);
     CONST(UNKNOWN_ERRNO);
     CONST(EOF);

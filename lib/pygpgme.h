@@ -25,6 +25,8 @@
 
 #define HIDDEN __attribute__((visibility("hidden")))
 
+#define VER(major, minor, micro) ((major << 16) | (minor << 8) | micro)
+
 typedef struct {
     PyObject_HEAD
     gpgme_ctx_t ctx;
