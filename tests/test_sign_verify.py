@@ -55,7 +55,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].timestamp, 1137685189)
         self.assertEqual(sigs[0].exp_timestamp, 0)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_detached(self):
@@ -81,7 +81,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].timestamp, 1137685598)
         self.assertEqual(sigs[0].exp_timestamp, 0)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_clearsign(self):
@@ -112,7 +112,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].timestamp, 1137684706)
         self.assertEqual(sigs[0].exp_timestamp, 0)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_verify_multiple_sigs(self):
@@ -154,7 +154,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].timestamp, 1137685885)
         self.assertEqual(sigs[0].exp_timestamp, 0)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
         self.assertEqual(sigs[1].summary, 0)
@@ -165,7 +165,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[1].timestamp, 1137685885)
         self.assertEqual(sigs[1].exp_timestamp, 0)
         self.assertEqual(sigs[1].wrong_key_usage, False)
-        self.assertEqual(sigs[1].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[1].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[1].validity_reason, None)
 
     def test_verify_no_signature(self):
@@ -201,8 +201,8 @@ class SignVerifyTestCase(GpgHomeTestCase):
         try:
             ctx.verify(signature, None, plaintext)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_GPGME)
-            self.assertEqual(exc.args[1], gpgme.ERR_NO_DATA)
+            self.assertEqual(exc.args[0], gpgme.ErrSource.GPGME)
+            self.assertEqual(exc.args[1], gpgme.ErrCode.NO_DATA)
         else:
             self.fail('gpgme.GpgmeError not raised')
 
@@ -214,9 +214,9 @@ class SignVerifyTestCase(GpgHomeTestCase):
         plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
-        new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_NORMAL)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.NORMAL)
         self.assertEqual(len(new_sigs), 1)
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_NORMAL)
+        self.assertEqual(new_sigs[0].type, gpgme.SigMode.NORMAL)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -231,7 +231,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(sigs[0].status, None)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_sign_normal_armor(self):
@@ -242,9 +242,9 @@ class SignVerifyTestCase(GpgHomeTestCase):
         plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
-        new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_NORMAL)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.NORMAL)
         self.assertEqual(len(new_sigs), 1)
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_NORMAL)
+        self.assertEqual(new_sigs[0].type, gpgme.SigMode.NORMAL)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -259,7 +259,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(sigs[0].status, None)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_sign_detatch(self):
@@ -270,9 +270,9 @@ class SignVerifyTestCase(GpgHomeTestCase):
         plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
-        new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_DETACH)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.DETACH)
         self.assertEqual(len(new_sigs), 1)
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_DETACH)
+        self.assertEqual(new_sigs[0].type, gpgme.SigMode.DETACH)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -286,7 +286,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(sigs[0].status, None)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
     def test_sign_clearsign(self):
@@ -297,9 +297,9 @@ class SignVerifyTestCase(GpgHomeTestCase):
         plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
-        new_sigs = ctx.sign(plaintext, signature, gpgme.SIG_MODE_CLEAR)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.CLEAR)
         self.assertEqual(len(new_sigs), 1)
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_CLEAR)
+        self.assertEqual(new_sigs[0].type, gpgme.SigMode.CLEAR)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -314,7 +314,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(sigs[0].status, None)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
 def test_suite():

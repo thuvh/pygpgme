@@ -50,23 +50,23 @@ def key_editor(function):
             return
 
         def edit_callback(status, args, fd):
-            if status in (gpgme.STATUS_EOF,
-                          gpgme.STATUS_GOT_IT,
-                          gpgme.STATUS_NEED_PASSPHRASE,
-                          gpgme.STATUS_GOOD_PASSPHRASE,
-                          gpgme.STATUS_BAD_PASSPHRASE,
-                          gpgme.STATUS_USERID_HINT,
-                          gpgme.STATUS_SIGEXPIRED,
-                          gpgme.STATUS_KEYEXPIRED,
-                          gpgme.STATUS_PROGRESS,
-                          gpgme.STATUS_KEY_CREATED,
-                          gpgme.STATUS_ALREADY_SIGNED,
+            if status in (gpgme.Status.EOF,
+                          gpgme.Status.GOT_IT,
+                          gpgme.Status.NEED_PASSPHRASE,
+                          gpgme.Status.GOOD_PASSPHRASE,
+                          gpgme.Status.BAD_PASSPHRASE,
+                          gpgme.Status.USERID_HINT,
+                          gpgme.Status.SIGEXPIRED,
+                          gpgme.Status.KEYEXPIRED,
+                          gpgme.Status.PROGRESS,
+                          gpgme.Status.KEY_CREATED,
+                          gpgme.Status.ALREADY_SIGNED,
                           gpgme.Status.KEY_CONSIDERED):
                 return
             try:
                 data = gen.send((status, args))
             except StopIteration:
-                raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)
+                raise gpgme.error(gpgme.ErrSource.UNKNOWN, gpgme.ErrCode.GENERAL)
 
             if data is not None:
                 os.write(fd, data.encode('ASCII'))
@@ -83,11 +83,11 @@ def key_editor(function):
 @key_editor
 def edit_trust(ctx, key, trust):
     """Edit the trust level of the given key."""
-    if trust not in (gpgme.VALIDITY_UNDEFINED,
-                     gpgme.VALIDITY_NEVER,
-                     gpgme.VALIDITY_MARGINAL,
-                     gpgme.VALIDITY_FULL,
-                     gpgme.VALIDITY_ULTIMATE):
+    if trust not in (gpgme.Validity.UNDEFINED,
+                     gpgme.Validity.NEVER,
+                     gpgme.Validity.MARGINAL,
+                     gpgme.Validity.FULL,
+                     gpgme.Validity.ULTIMATE):
         raise ValueError('Bad trust value %d' % trust)
 
     status, args = yield None

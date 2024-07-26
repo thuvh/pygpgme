@@ -54,8 +54,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         signature = BytesIO()
 
         ctx.armor = True
-        new_sigs = ctx.sign(
-            plaintext, signature, gpgme.SIG_MODE_DETACH)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.DETACH)
 
         signature.seek(0)
         plaintext.seek(0)
@@ -77,13 +76,13 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.revoked, False)
         self.assertEqual(key.expired, False)
         self.assertEqual(key.secret, True)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
 
         # Single signing-only RSA key.
         self.assertEqual(len(key.subkeys), 1)
         subkey = key.subkeys[0]
         self.assertEqual(subkey.secret, True)
-        self.assertEqual(subkey.pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(subkey.pubkey_algo, gpgme.PubkeyAlgo.RSA)
         self.assertEqual(subkey.length, 1024)
 
         self.assertEqual(key.can_sign, True)

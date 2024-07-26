@@ -47,7 +47,7 @@ class ImportTestCase(GpgHomeTestCase):
         self.assertEqual(len(result.imports), 1)
         self.assertEqual(result.imports[0],
                          ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-                          None, gpgme.IMPORT_NEW))
+                          None, gpgme.Import.NEW))
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -72,9 +72,9 @@ class ImportTestCase(GpgHomeTestCase):
         self.assertEqual(len(result.imports), 2)
         self.assertEqual(sorted(result.imports), [
             ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-             None, gpgme.IMPORT_NEW),
+             None, gpgme.Import.NEW),
             ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-             None, gpgme.IMPORT_NEW | gpgme.IMPORT_SECRET),
+             None, gpgme.Import.NEW | gpgme.Import.SECRET),
         ])
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
@@ -90,7 +90,7 @@ class ImportTestCase(GpgHomeTestCase):
         self.assertEqual(len(result.imports), 1)
         self.assertEqual(result.imports[0],
                          ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-                          None, gpgme.IMPORT_NEW))
+                          None, gpgme.Import.NEW))
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -119,13 +119,13 @@ class ImportTestCase(GpgHomeTestCase):
         self.assertEqual(len(result.imports), 4)
         self.assertEqual(sorted(result.imports), [
             ('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F',
-             None, gpgme.IMPORT_NEW),
+             None, gpgme.Import.NEW),
             ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-             None, gpgme.IMPORT_NEW),
+             None, gpgme.Import.NEW),
             ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-             None, gpgme.IMPORT_SIG),
+             None, gpgme.Import.SIG),
             ('E79A842DA34A1CA383F64A1546BB55F0885C65A4',
-             None, gpgme.IMPORT_NEW | gpgme.IMPORT_SECRET),
+             None, gpgme.Import.NEW | gpgme.Import.SECRET),
         ])
         # can we get the public keys?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')

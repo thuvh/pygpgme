@@ -29,11 +29,11 @@ class ContextTestCase(GpgHomeTestCase):
     def test_protocol(self):
         ctx = gpgme.Context()
         # XXX: this should use symbolic constant names
-        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_OpenPGP)
-        ctx.protocol = gpgme.PROTOCOL_CMS
-        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_CMS)
-        ctx.protocol = gpgme.PROTOCOL_OpenPGP
-        self.assertEqual(ctx.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
+        ctx.protocol = gpgme.Protocol.CMS
+        self.assertEqual(ctx.protocol, gpgme.Protocol.CMS)
+        ctx.protocol = gpgme.Protocol.OpenPGP
+        self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
 
         # check error on setting to invalid protocol value
         def set_protocol(ctx, value):
@@ -83,12 +83,12 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_keylist_mode(self):
         ctx = gpgme.Context()
-        self.assertEqual(ctx.keylist_mode, gpgme.KEYLIST_MODE_LOCAL)
-        ctx.keylist_mode = gpgme.KEYLIST_MODE_EXTERN
-        self.assertEqual(ctx.keylist_mode, gpgme.KEYLIST_MODE_EXTERN)
-        ctx.keylist_mode = gpgme.KEYLIST_MODE_LOCAL | gpgme.KEYLIST_MODE_EXTERN
+        self.assertEqual(ctx.keylist_mode, gpgme.KeylistMode.LOCAL)
+        ctx.keylist_mode = gpgme.KeylistMode.EXTERN
+        self.assertEqual(ctx.keylist_mode, gpgme.KeylistMode.EXTERN)
+        ctx.keylist_mode = gpgme.KeylistMode.LOCAL | gpgme.KeylistMode.EXTERN
         self.assertEqual(ctx.keylist_mode,
-                         gpgme.KEYLIST_MODE_LOCAL | gpgme.KEYLIST_MODE_EXTERN)
+                         gpgme.KeylistMode.LOCAL | gpgme.KeylistMode.EXTERN)
 
         def del_keylist_mode(ctx):
             del ctx.keylist_mode
@@ -136,7 +136,7 @@ class ContextTestCase(GpgHomeTestCase):
         # But if we configure the context using set_engine_info(), it
         # will find the key.
         ctx = gpgme.Context()
-        ctx.set_engine_info(gpgme.PROTOCOL_OpenPGP, None, self._gpghome)
+        ctx.set_engine_info(gpgme.Protocol.OpenPGP, None, self._gpghome)
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertTrue(key)
 
