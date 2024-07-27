@@ -26,7 +26,7 @@ class ExportTestCase(GpgHomeTestCase):
 
     import_keys = ['signonly.pub', 'signonly.sec']
 
-    def test_export_by_fingerprint(self):
+    def test_export_by_fingerprint(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()
@@ -35,7 +35,7 @@ class ExportTestCase(GpgHomeTestCase):
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
-    def test_export_by_email(self):
+    def test_export_by_email(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()
@@ -44,7 +44,7 @@ class ExportTestCase(GpgHomeTestCase):
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
-    def test_export_by_name(self):
+    def test_export_by_name(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()

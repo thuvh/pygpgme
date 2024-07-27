@@ -27,7 +27,7 @@ class PassphraseTestCase(GpgHomeTestCase):
 
     import_keys = ['passphrase.pub', 'passphrase.sec']
 
-    def test_sign_without_passphrase_cb(self):
+    def test_sign_without_passphrase_cb(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]
@@ -42,13 +42,13 @@ class PassphraseTestCase(GpgHomeTestCase):
         else:
             self.fail('gpgme.GpgmeError not raised')
 
-    def passphrase_cb(self, uid_hint, passphrase_info, prev_was_bad, fd):
+    def passphrase_cb(self, uid_hint, passphrase_info, prev_was_bad, fd) -> None:
         self.uid_hint = uid_hint
         self.passphrase_info = passphrase_info
         self.prev_was_bad = prev_was_bad
         os.write(fd, b'test\n')
 
-    def test_sign_with_passphrase_cb(self):
+    def test_sign_with_passphrase_cb(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('EFB052B4230BBBC51914BCBB54DCBBC8DBFB9EB3')
         ctx.signers = [key]

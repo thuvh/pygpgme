@@ -23,10 +23,10 @@ from tests.util import GpgHomeTestCase
 
 class ContextTestCase(GpgHomeTestCase):
 
-    def test_constructor(self):
+    def test_constructor(self) -> None:
         ctx = gpgme.Context()
 
-    def test_protocol(self):
+    def test_protocol(self) -> None:
         ctx = gpgme.Context()
         # XXX: this should use symbolic constant names
         self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
@@ -36,15 +36,15 @@ class ContextTestCase(GpgHomeTestCase):
         self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
 
         # check error on setting to invalid protocol value
-        def set_protocol(ctx, value):
+        def set_protocol(ctx: gpgme.Context, value) -> None:
             ctx.protocol = value
         self.assertRaises(gpgme.GpgmeError, set_protocol, ctx, 999)
 
-        def del_protocol(ctx):
+        def del_protocol(ctx: gpgme.Context) -> None:
             del ctx.protocol
         self.assertRaises(AttributeError, del_protocol, ctx)
 
-    def test_armor(self):
+    def test_armor(self) -> None:
         ctx = gpgme.Context()
         self.assertEqual(ctx.armor, False)
         ctx.armor = True
@@ -52,11 +52,11 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.armor = False
         self.assertEqual(ctx.armor, False)
 
-        def del_armor(ctx):
+        def del_armor(ctx: gpgme.Context) -> None:
             del ctx.armor
         self.assertRaises(AttributeError, del_armor, ctx)
 
-    def test_textmode(self):
+    def test_textmode(self) -> None:
         ctx = gpgme.Context()
         self.assertEqual(ctx.textmode, False)
         ctx.textmode = True
@@ -64,11 +64,11 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.textmode = False
         self.assertEqual(ctx.textmode, False)
 
-        def del_textmode(ctx):
+        def del_textmode(ctx: gpgme.Context) -> None:
             del ctx.textmode
         self.assertRaises(AttributeError, del_textmode, ctx)
 
-    def test_include_certs(self):
+    def test_include_certs(self) -> None:
         ctx = gpgme.Context()
         # XXX: 20060413 jamesh
         # gpgme 1.0.x and 1.1.x have different default values for
@@ -77,11 +77,11 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.include_certs = 2
         self.assertEqual(ctx.include_certs, 2)
 
-        def del_include_certs(ctx):
+        def del_include_certs(ctx: gpgme.Context) -> None:
             del ctx.include_certs
         self.assertRaises(AttributeError, del_include_certs, ctx)
 
-    def test_keylist_mode(self):
+    def test_keylist_mode(self) -> None:
         ctx = gpgme.Context()
         self.assertEqual(ctx.keylist_mode, gpgme.KeylistMode.LOCAL)
         ctx.keylist_mode = gpgme.KeylistMode.EXTERN
@@ -90,13 +90,13 @@ class ContextTestCase(GpgHomeTestCase):
         self.assertEqual(ctx.keylist_mode,
                          gpgme.KeylistMode.LOCAL | gpgme.KeylistMode.EXTERN)
 
-        def del_keylist_mode(ctx):
+        def del_keylist_mode(ctx: gpgme.Context) -> None:
             del ctx.keylist_mode
         self.assertRaises(AttributeError, del_keylist_mode, ctx)
 
-    def test_passphrase_cb(self):
+    def test_passphrase_cb(self) -> None:
         ctx = gpgme.Context()
-        def passphrase_cb(uid_hint, passphrase_info, prev_was_bad, fd):
+        def passphrase_cb(uid_hint: str|None, passphrase_info: str|None, prev_was_bad: bool, fd: int) -> None:
             pass
         self.assertEqual(ctx.passphrase_cb, None)
         ctx.passphrase_cb = passphrase_cb
@@ -107,9 +107,9 @@ class ContextTestCase(GpgHomeTestCase):
         del ctx.passphrase_cb
         self.assertEqual(ctx.passphrase_cb, None)
 
-    def test_progress_cb(self):
+    def test_progress_cb(self) -> None:
         ctx = gpgme.Context()
-        def progress_cb(what, type, current, total):
+        def progress_cb(what: str|None, type: int, current: int, total: int) -> None:
             pass
         self.assertEqual(ctx.progress_cb, None)
         ctx.progress_cb = progress_cb
@@ -120,7 +120,7 @@ class ContextTestCase(GpgHomeTestCase):
         del ctx.progress_cb
         self.assertEqual(ctx.progress_cb, None)
 
-    def test_set_engine_info(self):
+    def test_set_engine_info(self) -> None:
         # Add a key using the default $GNUPGHOME based keyring.
         ctx = gpgme.Context()
         with self.keyfile('key1.pub') as fp:

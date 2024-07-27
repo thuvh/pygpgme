@@ -42,7 +42,7 @@ signing_only_param = """
 
 class GenerateKeyTestCase(GpgHomeTestCase):
 
-    def assertCanSign(self, key):
+    def assertCanSign(self, key: gpgme.Key) -> None:
         """Check that the given key can be used to create signatures."""
         ctx = gpgme.Context()
         ctx.signers = [key]
@@ -60,7 +60,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].fpr, key.subkeys[0].fpr)
 
-    def _test_generate_signing_only_keys(self):
+    def _test_generate_signing_only_keys(self) -> None:
         ctx = gpgme.Context()
         result = ctx.genkey(signing_only_param)
 
@@ -94,7 +94,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         # Finally check if the generated key can perform signatures.
         self.assertCanSign(key)
 
-    def test_invalid_parameters(self):
+    def test_invalid_parameters(self) -> None:
         ctx = gpgme.Context()
         try:
             ctx.genkey('garbage parameters')

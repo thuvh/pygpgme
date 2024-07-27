@@ -28,14 +28,17 @@ class EditKeyTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub',
                    'signonly.pub', 'signonly.sec']
 
-    def edit_quit_cb(self, status, args, fd):
+    status: gpgme.Status | None
+    args: str | None
+
+    def edit_quit_cb(self, status: gpgme.Status, args: str|None, fd: int) -> None:
         if status in [gpgme.Status.EOF, gpgme.Status.GOT_IT, gpgme.Status.KEY_CONSIDERED]:
             return
         self.status = status
         self.args = args
         os.write(fd, b'quit\n')
 
-    def test_edit_quit(self):
+    def test_edit_quit(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         output = BytesIO()
@@ -47,7 +50,7 @@ class EditKeyTestCase(GpgHomeTestCase):
         self.assertEqual(self.status, gpgme.Status.GET_LINE)
         self.assertEqual(self.args, 'keyedit.prompt')
 
-    def test_edit_ownertrust(self):
+    def test_edit_ownertrust(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
         self.assertEqual(key.owner_trust, gpgme.Validity.UNKNOWN)
@@ -61,7 +64,7 @@ class EditKeyTestCase(GpgHomeTestCase):
             key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
             self.assertEqual(key.owner_trust, trust)
 
-    def test_edit_sign(self):
+    def test_edit_sign(self) -> None:
         ctx = gpgme.Context()
         # we set the keylist mode so we can see signatures
         ctx.keylist_mode = gpgme.KeylistMode.SIGS

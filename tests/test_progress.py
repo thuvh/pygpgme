@@ -27,10 +27,10 @@ class ProgressTestCase(GpgHomeTestCase):
 
     import_keys = ['key1.pub', 'key1.sec']
 
-    def progress_cb(self, what, type_, current, total):
+    def progress_cb(self, what: str|None, type_: int, current: int, total: int) -> None:
         self.progress_cb_called = True
 
-    def test_sign_with_progress_cb(self):
+    def test_sign_with_progress_cb(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]

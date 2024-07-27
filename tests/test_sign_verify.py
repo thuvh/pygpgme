@@ -27,7 +27,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub', 'key2.sec',
                    'signonly.pub', 'signonly.sec']
 
-    def test_verify_normal(self):
+    def test_verify_normal(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -55,7 +55,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_verify_detached(self):
+    def test_verify_detached(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNATURE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -81,7 +81,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_verify_clearsign(self):
+    def test_verify_clearsign(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
@@ -112,7 +112,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_verify_multiple_sigs(self):
+    def test_verify_multiple_sigs(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
@@ -165,7 +165,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[1].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[1].validity_reason, None)
 
-    def test_verify_no_signature(self):
+    def test_verify_no_signature(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
@@ -181,7 +181,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(plaintext.getvalue(), b'')
         self.assertEqual(len(sigs), 0)
 
-    def test_verify_bad_signature(self):
+    def test_verify_bad_signature(self) -> None:
         signature = BytesIO(dedent('''
             -----BEGIN PGP SIGNED MESSAGE-----
             Hash: SHA1
@@ -203,7 +203,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         else:
             self.fail('gpgme.GpgmeError not raised')
 
-    def test_sign_normal(self):
+    def test_sign_normal(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = False
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
@@ -231,7 +231,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_sign_normal_armor(self):
+    def test_sign_normal_armor(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
@@ -259,7 +259,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_sign_detatch(self):
+    def test_sign_detatch(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
@@ -286,7 +286,7 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_sign_clearsign(self):
+    def test_sign_clearsign(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')

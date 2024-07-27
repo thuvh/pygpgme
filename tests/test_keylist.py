@@ -25,7 +25,7 @@ class KeylistTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key2.pub', 'revoked.pub', 'signonly.pub',
                    'key1.sec']
 
-    def test_listall(self):
+    def test_listall(self) -> None:
         ctx = gpgme.Context()
         keyids = set(key.subkeys[0].keyid for key in ctx.keylist())
         self.assertTrue(keyids, set(['46BB55F0885C65A4',
@@ -33,7 +33,7 @@ class KeylistTestCase(GpgHomeTestCase):
                                      'F540A569CB935A42',
                                      '2EF658C987754368']))
 
-    def test_list_by_email(self):
+    def test_list_by_email(self) -> None:
         ctx = gpgme.Context()
         keyids = set(key.subkeys[0].keyid
                      for key in ctx.keylist('key1@example.org'))
@@ -43,13 +43,13 @@ class KeylistTestCase(GpgHomeTestCase):
                                              'signonly@example.com']))
         self.assertTrue(keyids, set(['46BB55F0885C65A4', 'F540A569CB935A42']))
 
-    def test_list_by_name(self):
+    def test_list_by_name(self) -> None:
         ctx = gpgme.Context()
         keyids = set(key.subkeys[0].keyid
                      for key in ctx.keylist('Key 1'))
         self.assertTrue(keyids, set(['46BB55F0885C65A4']))
 
-    def test_list_by_email_substring(self):
+    def test_list_by_email_substring(self) -> None:
         ctx = gpgme.Context()
         keyids = set(key.subkeys[0].keyid
                      for key in ctx.keylist('@example.org'))
@@ -58,7 +58,7 @@ class KeylistTestCase(GpgHomeTestCase):
                                      'F540A569CB935A42',
                                      '2EF658C987754368']))
 
-    def test_list_secret(self):
+    def test_list_secret(self) -> None:
         ctx = gpgme.Context()
         keyids = set(key.subkeys[0].keyid
                      for key in ctx.keylist(None, True))

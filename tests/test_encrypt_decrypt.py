@@ -28,7 +28,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub', 'key2.sec',
                    'signonly.pub', 'signonly.sec']
 
-    def test_decrypt(self):
+    def test_decrypt(self) -> None:
         ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -54,7 +54,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'hello world\n')
 
-    def test_decrypt_verify(self):
+    def test_decrypt_verify(self) -> None:
         ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -93,7 +93,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_encrypt(self):
+    def test_encrypt(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
@@ -107,7 +107,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_armor(self):
+    def test_encrypt_armor(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
@@ -122,7 +122,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_symmetric(self):
+    def test_encrypt_symmetric(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         def passphrase(uid_hint, passphrase_info, prev_was_bad, fd):
@@ -140,7 +140,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_sign(self):
+    def test_encrypt_sign(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
@@ -170,7 +170,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_encrypt_to_signonly(self):
+    def test_encrypt_to_signonly(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()

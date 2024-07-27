@@ -1,5 +1,6 @@
 import enum
-from typing import BinaryIO, Callable, Iterator, Optional, Sequence, Union
+from typing import (
+    BinaryIO, Callable, Iterator, Literal, Optional, Sequence, Union)
 
 class Context:
     def __init__(self) -> None: ...
@@ -7,18 +8,18 @@ class Context:
                         home_dir: Optional[str]) -> None: ...
     def set_locale(self, category: int, value: Optional[str]) -> None: ...
     def get_key(self, fingerprint: str, secret: bool = False) -> Key: ...
-    def encrypt(self, recipients: Optional[Sequence[Key]], flags: EncryptFlags,
+    def encrypt(self, recipients: Optional[Sequence[Key]], flags: EncryptFlags | Literal[0],
                 plain: BinaryIO, cipher: BinaryIO) -> None: ...
-    def encrypt_sign(self, recipients: Optional[Sequence[Key]], flags: EncryptFlags,
+    def encrypt_sign(self, recipients: Optional[Sequence[Key]], flags: EncryptFlags | Literal[0],
                      plain: BinaryIO, cipher: BinaryIO) -> Sequence[NewSignature]: ...
     def decrypt(self, cipher: BinaryIO, plain: BinaryIO) -> None: ...
-    def decrypt_verify(self, cipher: BinaryIO, plain: BinaryIO) -> None: ...
+    def decrypt_verify(self, cipher: BinaryIO, plain: BinaryIO) -> Sequence[Signature]: ...
     def sign(self, plain: BinaryIO, sig: BinaryIO,
              sig_mode: SigMode = SigMode.NORMAL) -> Sequence[NewSignature]: ...
-    def verify(self, sig: BinaryIO, signed_test: BinaryIO, plaintext: BinaryIO) -> Sequence[Signature]: ...
+    def verify(self, sig: BinaryIO, signed_test: Optional[BinaryIO], plaintext: Optional[BinaryIO]) -> Sequence[Signature]: ...
     def import_(self, keydata: BinaryIO) -> ImportResult: ...
     def export(self, pattern: Union[None, str, Sequence[str]],
-               keydata: BinaryIO, export_mode: ExportMode = ExportMode(0)) -> None: ...
+               keydata: BinaryIO, export_mode: ExportMode | Literal[0] = 0) -> None: ...
     def genkey(self, params: Optional[str], pubkey: Optional[BinaryIO] = None,
                seckey: Optional[BinaryIO] = None) -> GenkeyResult: ...
     def delete(self, key: Key, allow_secret: bool = False) -> None: ...
@@ -32,10 +33,10 @@ class Context:
     armor: bool
     textmode: bool
     include_certs: int
-    keylist_mode: KeylistMode
+    keylist_mode: KeylistMode | Literal[0]
     pinentry_mode: PinentryMode
-    passphrase_cb: Callable[[Optional[str], Optional[str], bool, int], None]
-    progress_cb: Callable[[Optional[str], int, int, int], None]
+    passphrase_cb: Optional[Callable[[Optional[str], Optional[str], bool, int], None]]
+    progress_cb: Optional[Callable[[Optional[str], int, int, int], None]]
     signers: Sequence[Key]
 
 class Key:
@@ -55,7 +56,7 @@ class Key:
     owner_trust: Validity
     subkeys: Sequence[Subkey]
     uids: Sequence[UserId]
-    keylist_mode: KeylistMode
+    keylist_mode: KeylistMode | Literal[0]
 
 class Subkey:
     revoked: bool
@@ -109,7 +110,7 @@ class NewSignature:
     sig_class: int
 
 class Signature:
-    summary: Sigsum
+    summary: Sigsum | Literal[0]
     fpr: Optional[str]
     status: Optional[GpgmeError]
     notations: Sequence[tuple[str, bytes]]
@@ -145,7 +146,12 @@ class KeyIter:
     def __iter__(self) -> KeyIter: ...
     def __next__(self) -> Key: ...
 
-class GpgmeError(RuntimeError): ...
+class GpgmeError(RuntimeError):
+    def __init__(self, source: ErrSource, code: ErrCode, message: Optional[str] = None) -> None: ...
+    source: ErrSource
+    code: ErrCode
+    strerror: str
+    result: ImportResult | GenkeyResult
 
 class DataEncoding(enum.IntEnum):
     NONE: int

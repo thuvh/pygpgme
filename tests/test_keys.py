@@ -24,7 +24,7 @@ class KeyTestCase(GpgHomeTestCase):
 
     import_keys = ['key1.pub', 'key2.pub', 'revoked.pub', 'signonly.pub']
 
-    def test_key1(self):
+    def test_key1(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(key.revoked, False)
@@ -81,7 +81,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'key1@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_key2(self):
+    def test_key2(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
         self.assertEqual(key.revoked, False)
@@ -138,7 +138,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'key2@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_revoked(self):
+    def test_revoked(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('B6525A39EB81F88B4D2CFB3E2EF658C987754368')
         self.assertEqual(key.revoked, True)
@@ -195,7 +195,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'revoked@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_signonly(self):
+    def test_signonly(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
         self.assertEqual(key.revoked, False)

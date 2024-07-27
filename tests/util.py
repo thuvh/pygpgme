@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+from typing import BinaryIO
 import unittest
 
 import gpgme
@@ -31,7 +32,7 @@ class GpgHomeTestCase(unittest.TestCase):
 
     import_keys: list[str] = []
 
-    def keyfile(self, key: str):
+    def keyfile(self, key: str) -> BinaryIO:
         return open(os.path.join(keydir, key), 'rb')
 
     def setUp(self) -> None:

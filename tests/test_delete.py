@@ -24,7 +24,7 @@ class DeleteTestCase(GpgHomeTestCase):
 
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub']
 
-    def test_delete_public_key(self):
+    def test_delete_public_key(self) -> None:
         ctx = gpgme.Context()
         # key2
         key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
@@ -34,19 +34,19 @@ class DeleteTestCase(GpgHomeTestCase):
         self.assertRaises(gpgme.GpgmeError, ctx.get_key,
                           '93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
 
-    def test_delete_public_key_with_secret_key(self):
+    def test_delete_public_key_with_secret_key(self) -> None:
         ctx = gpgme.Context()
         # key1
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertRaises(gpgme.GpgmeError, ctx.delete, key)
 
-    def test_delete_secret_key(self):
+    def test_delete_secret_key(self) -> None:
         ctx = gpgme.Context()
         # key1
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.delete(key, True)
 
-    def test_delete_non_existant(self):
+    def test_delete_non_existant(self) -> None:
         ctx = gpgme.Context()
         # key2
         key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')

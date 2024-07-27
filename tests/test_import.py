@@ -23,7 +23,7 @@ from tests.util import GpgHomeTestCase
 
 class ImportTestCase(GpgHomeTestCase):
 
-    def test_import_file(self):
+    def test_import_file(self) -> None:
         ctx = gpgme.Context()
         with self.keyfile('key1.pub') as fp:
             result = ctx.import_(fp)
@@ -48,7 +48,7 @@ class ImportTestCase(GpgHomeTestCase):
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
-    def test_import_secret_file(self):
+    def test_import_secret_file(self) -> None:
         ctx = gpgme.Context()
         with self.keyfile('key1.sec') as fp:
             result = ctx.import_(fp)
@@ -78,7 +78,7 @@ class ImportTestCase(GpgHomeTestCase):
         # can we get the secret key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
-    def test_import_stringio(self):
+    def test_import_stringio(self) -> None:
         with self.keyfile('key1.pub') as fp:
             data = fp.read()
         fp = BytesIO(data)
@@ -91,7 +91,7 @@ class ImportTestCase(GpgHomeTestCase):
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
-    def test_import_concat(self):
+    def test_import_concat(self) -> None:
         keys = []
         for filename in ['key1.pub', 'key1.sec', 'key2.pub']:
             with self.keyfile(filename) as fp:
@@ -130,14 +130,14 @@ class ImportTestCase(GpgHomeTestCase):
         # can we get the secret key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4', True)
 
-    def test_import_empty(self):
+    def test_import_empty(self) -> None:
         fp = BytesIO(b'')
         ctx = gpgme.Context()
         result = ctx.import_(fp)
         self.assertEqual(result.considered, 0)
         self.assertEqual(len(result.imports), 0)
 
-    def test_import_twice(self):
+    def test_import_twice(self) -> None:
         ctx = gpgme.Context()
         with self.keyfile('key1.pub') as fp:
             result = ctx.import_(fp)
