@@ -6,12 +6,21 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - image: ubuntu-22.04
+            python: '3.10'
+          - image: ubuntu-24.04
+            python: '3.12'
+          - image: ubuntu-latest
+            python: '3.x'
+    runs-on: ${{ matrix.image }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
       - name: Install dependencies
         run: |
           sudo apt-get install libgpgme-dev
