@@ -45,7 +45,8 @@ class EditKeyTestCase(GpgHomeTestCase):
 
         self.status = None
         self.args = None
-        ctx.edit(key, self.edit_quit_cb, output)
+        with self.assertWarns(DeprecationWarning):
+            ctx.edit(key, self.edit_quit_cb, output)
 
         self.assertEqual(self.status, gpgme.Status.GET_LINE)
         self.assertEqual(self.args, 'keyedit.prompt')
@@ -60,7 +61,8 @@ class EditKeyTestCase(GpgHomeTestCase):
                       gpgme.Validity.MARGINAL,
                       gpgme.Validity.FULL,
                       gpgme.Validity.ULTIMATE]:
-            gpgme.editutil.edit_trust(ctx, key, trust)
+            with self.assertWarns(DeprecationWarning):
+                gpgme.editutil.edit_trust(ctx, key, trust)
             key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
             self.assertEqual(key.owner_trust, trust)
 
@@ -77,7 +79,8 @@ class EditKeyTestCase(GpgHomeTestCase):
                     if sig.keyid == 'F540A569CB935A42']
             self.assertEqual(len(sigs), 0)
 
-        gpgme.editutil.edit_sign(ctx, key, check=0)
+        with self.assertWarns(DeprecationWarning):
+            gpgme.editutil.edit_sign(ctx, key, check=0)
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
         # check that there is a signature from 0xCB935A42 on each UID

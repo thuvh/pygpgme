@@ -1312,6 +1312,8 @@ pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
                           &py_out))
         return NULL;
 
+    PyErr_WarnEx(PyExc_DeprecationWarning, "gpgme.Context.edit is deprecated", 1);
+
     if (pygpgme_data_new(&out, py_out))
         return NULL;
 
@@ -1338,6 +1340,8 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O!OO", &PyGpgmeKey_Type, &key, &callback,
                           &py_out))
         return NULL;
+
+    PyErr_WarnEx(PyExc_DeprecationWarning, "gpgme.Context.card_edit is deprecated", 1);
 
     if (pygpgme_data_new(&out, py_out))
         return NULL;
