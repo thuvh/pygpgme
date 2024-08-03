@@ -28,7 +28,6 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_protocol(self) -> None:
         ctx = gpgme.Context()
-        # XXX: this should use symbolic constant names
         self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
         ctx.protocol = gpgme.Protocol.CMS
         self.assertEqual(ctx.protocol, gpgme.Protocol.CMS)
@@ -70,10 +69,7 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_include_certs(self) -> None:
         ctx = gpgme.Context()
-        # XXX: 20060413 jamesh
-        # gpgme 1.0.x and 1.1.x have different default values for
-        # include_certs, so I am disabling this test for now.
-        #self.assertEqual(ctx.include_certs, 1)
+        self.assertEqual(ctx.include_certs, -256)
         ctx.include_certs = 2
         self.assertEqual(ctx.include_certs, 2)
 

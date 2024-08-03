@@ -28,3 +28,7 @@ jobs:
         run: pip install -U .
       - name: Run tests
         run: python -m unittest discover -v -t . tests
+      - name: Check types
+        run: |
+          pip install mypy
+          python -m mypy .

@@ -100,7 +100,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
             ctx.genkey('garbage parameters')
         except gpgme.GpgmeError as exc:
             self.assertTrue(hasattr(exc, "result"))
-            result = exc.result
+            result: gpgme.GenkeyResult = exc.result # type: ignore[assignment]
             self.assertEqual(result.primary, False)
             self.assertEqual(result.sub, False)
             self.assertEqual(result.fpr, None)

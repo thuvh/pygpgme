@@ -27,3 +27,12 @@ packages = ["gpgme"]
 
 [tool.setuptools.package-data]
 gpgme = ["*.pyi", "py.typed"]
+
+[tool.mypy]
+exclude = ["setup.py", "build", "dist"]
+explicit_package_bases = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["gpgme", "tests"]
+disallow_untyped_defs = true

@@ -39,11 +39,7 @@ def key_editor(function):
         # Start the generator and run it once.
         gen = function(ctx, key, *args, **kwargs)
         try:
-            # XXX: this is for Python 2.x compatibility.
-            try:
-                gen.__next__()
-            except AttributeError:
-                gen.next()
+            gen.__next__()
         except StopIteration:
             return
 

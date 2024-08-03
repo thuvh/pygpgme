@@ -245,21 +245,12 @@ static const char pygpgme_context_pinentry_mode_doc[] =
 static PyObject *
 pygpgme_context_get_pinentry_mode(PyGpgmeContext *self)
 {
-#if GPGME_VERSION_NUMBER < 0x010400
-    return pygpgme_enum_value_new(PyGpgmePinentryMode_Type, GPGME_PINENTRY_MODE_DEFAULT);
-#else  /* gpgme >= 1.4.0 */
     return pygpgme_enum_value_new(PyGpgmePinentryMode_Type, gpgme_get_pinentry_mode(self->ctx));
-#endif /* gpgme >= 1.4.0 */
 }
 
 static int
 pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
 {
-#if GPGME_VERSION_NUMBER < 0x010400
-    PyErr_SetString(PyExc_AttributeError,
-                    "Not supported by this version of GPGME");
-    return -1;
-#else /* gpgme >= 1.4.0 */
     gpgme_pinentry_mode_t pinentry_mode;
 
     if (value == NULL) {
@@ -275,7 +266,6 @@ pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
 
     return 0;
-#endif /* gpgme >= 1.4.0 */
 }
 
 static const char pygpgme_context_passphrase_cb_doc[] =
