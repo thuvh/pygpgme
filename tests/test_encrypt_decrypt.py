@@ -125,7 +125,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
     def test_encrypt_symmetric(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
-        def passphrase(uid_hint, passphrase_info, prev_was_bad, fd):
+        def passphrase(uid_hint: str | None, passphrase_info: str | None, prev_was_bad: bool, fd: int) -> None:
             os.write(fd, b'Symmetric passphrase\n')
         ctx = gpgme.Context()
         ctx.armor = True

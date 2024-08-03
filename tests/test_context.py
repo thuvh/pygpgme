@@ -35,7 +35,7 @@ class ContextTestCase(GpgHomeTestCase):
         self.assertEqual(ctx.protocol, gpgme.Protocol.OpenPGP)
 
         # check error on setting to invalid protocol value
-        def set_protocol(ctx: gpgme.Context, value) -> None:
+        def set_protocol(ctx: gpgme.Context, value: gpgme.Protocol) -> None:
             ctx.protocol = value
         self.assertRaises(gpgme.GpgmeError, set_protocol, ctx, 999)
 

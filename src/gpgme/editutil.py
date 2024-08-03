@@ -28,14 +28,19 @@ __all__ = ['edit_sign', 'edit_trust']
 import functools
 import io
 import os
+from typing import Callable, Concatenate, Generator, ParamSpec
 
 import gpgme
 
 
-def key_editor(function):
+P = ParamSpec("P")
+KeyEditorGen = Generator[str | None, tuple[gpgme.Status, str | None], None]
+
+
+def key_editor(function: Callable[Concatenate[gpgme.Context, gpgme.Key, P], KeyEditorGen]) -> Callable[Concatenate[gpgme.Context, gpgme.Key, P], None]:
     """A decorator that lets key editor callbacks be written as generators."""
     @functools.wraps(function)
-    def wrapper(ctx: gpgme.Context, key: gpgme.Key, *args, **kwargs):
+    def wrapper(ctx: gpgme.Context, key: gpgme.Key, *args: P.args, **kwargs: P.kwargs) -> None:
         # Start the generator and run it once.
         gen = function(ctx, key, *args, **kwargs)
         try:
@@ -43,7 +48,7 @@ def key_editor(function):
         except StopIteration:
             return
 
-        def edit_callback(status: gpgme.Status, args: str | None, fd: int):
+        def edit_callback(status: gpgme.Status, args: str | None, fd: int) -> None:
             if status in (gpgme.Status.EOF,
                           gpgme.Status.GOT_IT,
                           gpgme.Status.NEED_PASSPHRASE,
@@ -75,7 +80,7 @@ def key_editor(function):
 
 
 @key_editor
-def edit_trust(ctx, key, trust):
+def edit_trust(ctx: gpgme.Context, key: gpgme.Key, trust: gpgme.Validity) -> KeyEditorGen:
     """Edit the trust level of the given key."""
     if trust not in (gpgme.Validity.UNDEFINED,
                      gpgme.Validity.NEVER,
@@ -103,8 +108,9 @@ def edit_trust(ctx, key, trust):
 
 
 @key_editor
-def edit_sign(ctx, key, index=0, local=False, norevoke=False,
-              expire=True, check=0):
+def edit_sign(ctx: gpgme.Context, key: gpgme.Key, index: int = 0,
+              local: bool = False, norevoke: bool = False,
+              expire: bool = True, check: int = 0) -> KeyEditorGen:
     """Sign the given key.
 
     index:    the index of the user ID to sign, starting at 1.  Sign all

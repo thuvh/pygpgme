@@ -33,6 +33,7 @@ exclude = ["setup.py", "build", "dist"]
 explicit_package_bases = true
 mypy_path = "src"
 
-[[tool.mypy.overrides]]
-module = ["gpgme", "tests"]
+disallow_incomplete_defs = true
 disallow_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
