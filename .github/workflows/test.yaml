@@ -6,29 +6,13 @@ on:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        include:
-          - image: ubuntu-22.04
-            python: '3.10'
-          - image: ubuntu-24.04
-            python: '3.12'
-          - image: ubuntu-latest
-            python: '3.x'
-    runs-on: ${{ matrix.image }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: pypa/cibuildwheel@v2.19.2
+      - uses: actions/upload-artifact@v4
         with:
-          python-version: ${{ matrix.python }}
-      - name: Install dependencies
-        run: |
-          sudo apt-get install libgpgme-dev
-      - name: Build extension
-        run: pip install -U .
-      - name: Run tests
-        run: python -m unittest discover -v -t . tests
-      - name: Check types
-        run: |
-          pip install mypy
-          python -m mypy .
+          name: wheels
+          path: ./wheelhouse/*.whl
+          compression-level: 0
+          retention-days: 7

@@ -176,11 +176,13 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SIG_NOTATIONS);
     CONST(WITH_SECRET);
     CONST(WITH_TOFU);
-    CONST(WITH_KEYGRIP);
     CONST(EPHEMERAL);
     CONST(VALIDATE);
 #if GPGME_VERSION_NUMBER >= VER(1, 11, 0)
     CONST(LOCATE);
+#endif
+#if GPGME_VERSION_NUMBER >= VER(1, 14, 0)
+    CONST(WITH_KEYGRIP);
 #endif
 #if GPGME_VERSION_NUMBER >= VER(1, 18, 0)
     CONST(FORCE_EXTERN);
@@ -324,7 +326,9 @@ pygpgme_add_constants (PyObject *mod)
     CONST(NOTATION_FLAGS);
     CONST(DECRYPTION_COMPLIANCE_MODE);
     CONST(VERIFICATION_COMPLIANCE_MODE);
+#if GPGME_VERSION_NUMBER >= VER(1, 15, 0)
     CONST(CANCELED_BY_USER);
+#endif
     PyGpgmeStatus_Type = make_enum(mod, "IntEnum", "Status", values);
     Py_DECREF(values);
 

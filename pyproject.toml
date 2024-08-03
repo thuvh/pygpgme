@@ -11,9 +11,10 @@ authors = [
 description = "A Python module for working with OpenPGP messages"
 
 license = {text = "LGPL"}
+requires-python = ">= 3.10"
 classifiers = [
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+    'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
     'Operating System :: POSIX',
     'Programming Language :: C',
     'Programming Language :: Python :: 3',
@@ -37,3 +38,17 @@ disallow_incomplete_defs = true
 disallow_untyped_defs = true
 disallow_untyped_calls = true
 disallow_untyped_decorators = true
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"
+musllinux-x86_64-image = "musllinux_1_2"
+
+test-command = "python -m unittest discover -v -t {project} {project}/tests"
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+before-all = "yum install -y gpgme-devel"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = "apk add gpgme-dev"
