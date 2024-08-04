@@ -9,8 +9,9 @@ authors = [
     {name = "James Henstridge", email="james@jamesh.id.au"},
 ]
 description = "A Python module for working with OpenPGP messages"
+readme = "README.md"
 
-license = {text = "LGPL"}
+license = {file = "LICENSE.txt"}
 requires-python = ">= 3.10"
 classifiers = [
     'Intended Audience :: Developers',
@@ -21,6 +22,9 @@ classifiers = [
     'Topic :: Security :: Cryptography',
     'Topic :: Software Development :: Libraries :: Python Modules'
 ]
+
+[project.urls]
+Repository = "https://github.com/jhenstridge/pygpgme"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
