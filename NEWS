@@ -1,3 +1,19 @@
+pygpgme-0.4: 2024-08-07
+
+ * Modernise build system of the project and drop Python 2 support. We
+   now require Python >= 3.10 to build.
+ * Add documentation comments (Tim Allen)
+ * Add support for pinentry mode (Werner Koch)
+ * Extend gpgme.Context.export() to take an export_mode parameter
+   (Daniele Ricci)
+ * Add pubkey_algo and hash_algo attributes to Signature objects (Till Maas)
+ * Convert enumeration and flag constants to use enum module
+   types. All constants from 0.3 remain available under their old
+   names for compatibility.
+ * The module provides type information, including a stub for the C
+   extension. This enables mypy type checking for users of the package.
+ * The test suite has been updated to pass with modern GPG.
+
 pygpgme-0.3: 2012-03-08
 
  * Add support for Python 3 (tested with Python 3.2).  Data being

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygpgme"
-version = "0.3"
+version = "0.4"
 authors = [
     {name = "James Henstridge", email="james@jamesh.id.au"},
 ]
