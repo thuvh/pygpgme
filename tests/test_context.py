@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+from typing import Optional
 import unittest
 
 import gpgme
@@ -92,7 +93,7 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_passphrase_cb(self) -> None:
         ctx = gpgme.Context()
-        def passphrase_cb(uid_hint: str|None, passphrase_info: str|None, prev_was_bad: bool, fd: int) -> None:
+        def passphrase_cb(uid_hint: Optional[str], passphrase_info: Optional[str], prev_was_bad: bool, fd: int) -> None:
             pass
         self.assertEqual(ctx.passphrase_cb, None)
         ctx.passphrase_cb = passphrase_cb
@@ -105,7 +106,7 @@ class ContextTestCase(GpgHomeTestCase):
 
     def test_progress_cb(self) -> None:
         ctx = gpgme.Context()
-        def progress_cb(what: str|None, type: int, current: int, total: int) -> None:
+        def progress_cb(what: Optional[str], type: int, current: int, total: int) -> None:
             pass
         self.assertEqual(ctx.progress_cb, None)
         ctx.progress_cb = progress_cb

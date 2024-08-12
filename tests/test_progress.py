@@ -18,6 +18,7 @@
 import os
 from io import BytesIO
 from textwrap import dedent
+from typing import Optional
 import unittest
 
 import gpgme
@@ -27,7 +28,7 @@ class ProgressTestCase(GpgHomeTestCase):
 
     import_keys = ['key1.pub', 'key1.sec']
 
-    def progress_cb(self, what: str|None, type_: int, current: int, total: int) -> None:
+    def progress_cb(self, what: Optional[str], type_: int, current: int, total: int) -> None:
         self.progress_cb_called = True
 
     def test_sign_with_progress_cb(self) -> None:

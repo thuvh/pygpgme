@@ -18,6 +18,7 @@
 from io import BytesIO
 import os
 from textwrap import dedent
+from typing import Optional
 import unittest
 
 import gpgme
@@ -125,7 +126,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
     def test_encrypt_symmetric(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
-        def passphrase(uid_hint: str | None, passphrase_info: str | None, prev_was_bad: bool, fd: int) -> None:
+        def passphrase(uid_hint: Optional[str], passphrase_info: Optional[str], prev_was_bad: bool, fd: int) -> None:
             os.write(fd, b'Symmetric passphrase\n')
         ctx = gpgme.Context()
         ctx.armor = True

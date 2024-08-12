@@ -17,6 +17,7 @@
 
 from io import BytesIO
 import os
+from typing import Optional
 import unittest
 
 import gpgme
@@ -28,10 +29,10 @@ class EditKeyTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub',
                    'signonly.pub', 'signonly.sec']
 
-    status: gpgme.Status | None
-    args: str | None
+    status: Optional[gpgme.Status]
+    args: Optional[str]
 
-    def edit_quit_cb(self, status: gpgme.Status, args: str|None, fd: int) -> None:
+    def edit_quit_cb(self, status: gpgme.Status, args: Optional[str], fd: int) -> None:
         if status in [gpgme.Status.EOF, gpgme.Status.GOT_IT, gpgme.Status.KEY_CONSIDERED]:
             return
         self.status = status

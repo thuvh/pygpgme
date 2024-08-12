@@ -28,13 +28,18 @@ __all__ = ['edit_sign', 'edit_trust']
 import functools
 import io
 import os
-from typing import Callable, Concatenate, Generator, ParamSpec
+import sys
+from typing import Callable, Generator, Optional
+if sys.version_info >= (3, 10):
+    from typing import Concatenate, ParamSpec
+else:
+    from typing_extensions import Concatenate, ParamSpec
 
 import gpgme
 
 
 P = ParamSpec("P")
-KeyEditorGen = Generator[str | None, tuple[gpgme.Status, str | None], None]
+KeyEditorGen = Generator[Optional[str], tuple[gpgme.Status, Optional[str]], None]
 
 
 def key_editor(function: Callable[Concatenate[gpgme.Context, gpgme.Key, P], KeyEditorGen]) -> Callable[Concatenate[gpgme.Context, gpgme.Key, P], None]:
@@ -48,7 +53,7 @@ def key_editor(function: Callable[Concatenate[gpgme.Context, gpgme.Key, P], KeyE
         except StopIteration:
             return
 
-        def edit_callback(status: gpgme.Status, args: str | None, fd: int) -> None:
+        def edit_callback(status: gpgme.Status, args: Optional[str], fd: int) -> None:
             if status in (gpgme.Status.EOF,
                           gpgme.Status.GOT_IT,
                           gpgme.Status.NEED_PASSPHRASE,

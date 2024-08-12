@@ -12,7 +12,7 @@ description = "A Python module for working with OpenPGP messages"
 readme = "README.md"
 
 license = {file = "LICENSE.txt"}
-requires-python = ">= 3.10"
+requires-python = ">= 3.9"
 classifiers = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
@@ -21,6 +21,10 @@ classifiers = [
     'Programming Language :: Python :: 3',
     'Topic :: Security :: Cryptography',
     'Topic :: Software Development :: Libraries :: Python Modules'
+]
+
+dependencies = [
+    'typing_extensions; python_version < "3.10"'
 ]
 
 [project.urls]
