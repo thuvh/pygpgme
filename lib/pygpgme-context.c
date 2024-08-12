@@ -494,7 +494,8 @@ pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_get_key_doc[] =
-    "get_key(fingerprint[, secret]) -> Key instance\n\n"
+    "get_key($self, fingerprint, secret=False, /)\n"
+    "--\n\n"
     "Finds a key with the given fingerprint (a string of hex digits) in\n"
     "the user's keyring. If secret is 1, only private keys will be\n"
     "returned.\n\nIf no key can be found, raises GpgmeError.";
@@ -569,7 +570,8 @@ decode_encrypt_result(PyGpgmeContext *self)
 }
 
 static const char pygpgme_context_encrypt_doc[] =
-    "encrypt(recipients, flags, plaintext, ciphertext)\n\n"
+    "encrypt($self, recipients, flags, plaintext, ciphertext, /)\n"
+    "--\n\n"
     "Encrypts plaintext so it can only be read by the given recipients.\n\n"
     "recipients: A list of Key objects. Only people in posession of the\n"
     "  corresponding private key (for public key encryption) or passphrase\n"
@@ -789,7 +791,8 @@ decode_decrypt_result(PyGpgmeContext *self)
 }
 
 static const char pygpgme_context_decrypt_doc[] =
-    "decrypt(ciphertext, plaintext)\n\n"
+    "decrypt($self, ciphertext, plaintext, /)\n"
+    "--\n\n"
     "Decrypts the ciphertext and writes out the plaintext.\n\n"
     "ciphertext: A file-like object opened for reading, containing the\n"
     "  encrypted data.\n\n"
@@ -1349,7 +1352,8 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_keylist_doc[] =
-    "keylist([strOrSeq[, secret]]) -> KeyIter instance\n\n"
+    "keylist($self, strOrSeq=None, secret=False, /)\n"
+    "--\n\n"
     "Searches for keys matching the given pattern(s).\n\n"
     "strOrSeq: If None or not supplied, the KeyIter fetches all available\n"
     "  keys. If a string, it fetches keys matching the given pattern (such\n"
@@ -1399,7 +1403,7 @@ static PyMethodDef pygpgme_context_methods[] = {
     { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS,
       pygpgme_context_get_key_doc },
-    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS, 
+    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS,
       pygpgme_context_encrypt_doc },
     { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
     { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS,
