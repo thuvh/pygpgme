@@ -7,6 +7,7 @@ setup(ext_modules=[
          'lib/pygpgme-error.c',
          'lib/pygpgme-data.c',
          'lib/pygpgme-context.c',
+         'lib/pygpgme-engine-info.c',
          'lib/pygpgme-key.c',
          'lib/pygpgme-signature.c',
          'lib/pygpgme-import.c',

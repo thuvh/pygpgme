@@ -549,77 +549,8 @@ static PyObject *
 pygpgme_context_get_engine_info(PyGpgmeContext *self)
 {
     gpgme_engine_info_t info = gpgme_ctx_get_engine_info(self->ctx);
-    PyObject* list = PyList_New(0);
-    
-    while (info) {
-        PyObject* tuple = PyTuple_New(5);
-        /* protocol */
-        {
-            gpgme_protocol_t p = info->protocol;
-            PyObject* info_py = PyInt_FromLong (p);
-            
-            PyTuple_SetItem (tuple, 0, info_py);
-        }
 
-        /* file_name */
-        {
-            PyObject* file_name_item;
-            if (info->file_name == NULL) {
-                file_name_item = Py_None;
-                Py_INCREF (file_name_item);
-            } else {
-                file_name_item = PyString_FromString (info->file_name);
-            }
-            
-            PyTuple_SetItem (tuple, 1, file_name_item);
-        }
-
-        /* home dir */
-        {
-            PyObject* home_dir_item;
-            if (info->home_dir == NULL) {
-                home_dir_item = Py_None;
-                Py_INCREF (home_dir_item);
-            } else {
-                home_dir_item = PyString_FromString (info->home_dir);
-            }
-            
-            PyTuple_SetItem (tuple, 2, home_dir_item);
-        }
-
-        /* version */
-        {
-            PyObject* version_item;
-            if (info->version == NULL) {
-                version_item = Py_None;
-                Py_INCREF (version_item);
-            } else {
-                version_item = PyString_FromString (info->version);
-            }
-            
-            PyTuple_SetItem (tuple, 3, version_item);
-        }
-
-        /* req_version */
-        {
-            PyObject* req_version_item;
-            if (info->req_version == NULL) {
-                req_version_item = Py_None;
-                Py_INCREF (req_version_item);
-            } else {
-                req_version_item = PyString_FromString (info->req_version);
-            }
-    
-            PyTuple_SetItem (tuple, 4, req_version_item);
-        }
-
-        PyList_Append (list, tuple);
-        
-        info=info->next;
-    }
-    
-
-    return list;
+    return pygpgme_engine_info_list_new(info);
 }
 
 static PyObject *

@@ -35,6 +35,15 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
+    PyObject *protocol;
+    PyObject *file_name;
+    PyObject *version;
+    PyObject *req_version;
+    PyObject *home_dir;
+} PyGpgmeEngineInfo;
+
+typedef struct {
+    PyObject_HEAD
     gpgme_key_t key;
 } PyGpgmeKey;
 
@@ -121,6 +130,7 @@ typedef struct {
 
 extern HIDDEN PyObject *pygpgme_error;
 extern HIDDEN PyTypeObject PyGpgmeContext_Type;
+extern HIDDEN PyTypeObject PyGpgmeEngineInfo_Type;
 extern HIDDEN PyTypeObject PyGpgmeKey_Type;
 extern HIDDEN PyTypeObject PyGpgmeSubkey_Type;
 extern HIDDEN PyTypeObject PyGpgmeUserId_Type;
@@ -155,6 +165,7 @@ HIDDEN gpgme_error_t pygpgme_check_pyerror  (void);
 HIDDEN int           pygpgme_no_constructor (PyObject *self, PyObject *args,
                                              PyObject *kwargs);
 
+HIDDEN PyObject     *pygpgme_engine_info_list_new(gpgme_engine_info_t info);
 HIDDEN int           pygpgme_data_new       (gpgme_data_t *dh, PyObject *fp);
 HIDDEN PyObject     *pygpgme_key_new        (gpgme_key_t key);
 HIDDEN PyObject     *pygpgme_newsiglist_new (gpgme_new_signature_t siglist);

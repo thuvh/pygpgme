@@ -4,6 +4,7 @@ from typing import (
 
 class Context:
     def __init__(self) -> None: ...
+    def get_engine_info(self) -> Sequence[EngineInfo]: ...
     def set_engine_info(self, protocol: Protocol, file_name: Optional[str],
                         home_dir: Optional[str]) -> None: ...
     def set_locale(self, category: int, value: Optional[str]) -> None: ...
@@ -39,6 +40,13 @@ class Context:
     progress_cb: Optional[Callable[[Optional[str], int, int, int], None]]
     signers: Sequence[Key]
     sig_notations: Sequence[SigNotation]
+
+class EngineInfo:
+    protocol: Protocol
+    file_name: Optional[str]
+    version: Optional[str]
+    req_version: Optional[str]
+    home_dir: Optional[str]
 
 class Key:
     revoked: bool

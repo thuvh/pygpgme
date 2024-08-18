@@ -56,6 +56,7 @@ PyInit__gpgme(void)
     PyModule_AddObject(mod, #type, (PyObject *)&PyGpgme ## type ## _Type)
 
     INIT_TYPE(PyGpgmeContext_Type);
+    INIT_TYPE(PyGpgmeEngineInfo_Type);
     INIT_TYPE(PyGpgmeKey_Type);
     INIT_TYPE(PyGpgmeSubkey_Type);
     INIT_TYPE(PyGpgmeUserId_Type);
@@ -70,6 +71,7 @@ PyInit__gpgme(void)
     mod = PyModule_Create(&pygpgme_module);
 
     ADD_TYPE(Context);
+    ADD_TYPE(EngineInfo);
     ADD_TYPE(Key);
     ADD_TYPE(Subkey);
     ADD_TYPE(UserId);

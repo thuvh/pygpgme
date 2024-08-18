@@ -117,6 +117,16 @@ class ContextTestCase(GpgHomeTestCase):
         del ctx.progress_cb
         self.assertEqual(ctx.progress_cb, None)
 
+    def test_get_engine_info(self) -> None:
+        ctx = gpgme.Context()
+        for info in ctx.get_engine_info():
+            self.assertIsInstance(info, gpgme.EngineInfo)
+            self.assertIsInstance(info.protocol, gpgme.Protocol)
+            self.assertIsInstance(info.file_name, (str, type(None)))
+            self.assertIsInstance(info.version, (str, type(None)))
+            self.assertIsInstance(info.req_version, (str, type(None)))
+            self.assertIsInstance(info.home_dir, (str, type(None)))
+
     def test_set_engine_info(self) -> None:
         # Add a key using the default $GNUPGHOME based keyring.
         ctx = gpgme.Context()
@@ -136,3 +146,7 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.set_engine_info(gpgme.Protocol.OpenPGP, None, self._gpghome)
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertTrue(key)
+
+        info = [info for info in ctx.get_engine_info()
+                if info.protocol == gpgme.Protocol.OpenPGP].pop()
+        self.assertEqual(info.home_dir, self._gpghome)
