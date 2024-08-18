@@ -528,6 +528,10 @@ static PyGetSetDef pygpgme_context_getsets[] = {
     { NULL, (getter)0, (setter)0 }
 };
 
+static const char pygpgme_context_set_engine_info_doc[] =
+    "set_engine_info($self, protocol, file_name, home_dir, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
 {
@@ -544,6 +548,9 @@ pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static const char pygpgme_context_get_engine_info_doc[] =
+    "get_engine_info($self)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_get_engine_info(PyGpgmeContext *self)
@@ -552,6 +559,10 @@ pygpgme_context_get_engine_info(PyGpgmeContext *self)
 
     return pygpgme_engine_info_list_new(info);
 }
+
+static const char pygpgme_context_set_locale_doc[] =
+    "set_locale($self, category, value, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
@@ -720,6 +731,10 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
 
     return result;
 }
+
+static const char pygpgme_context_encrypt_sign_doc[] =
+    "encrypt_sign($self, recipients, flags, plain, cipher, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
@@ -912,6 +927,10 @@ pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static const char pygpgme_context_decrypt_verify_doc[] =
+    "decrypt_verify($self, cipher, plain, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
 {
@@ -973,6 +992,10 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
     else
         return PyList_New(0);
 }
+
+static const char pygpgme_context_sign_doc[] =
+    "sign($self, plain, sig, sig_mode=0, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
@@ -1051,6 +1074,10 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
         return PyList_New(0);
 }
 
+static const char pygpgme_context_verify_doc[] =
+    "verify($self, sig, signed_text, plaintext, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
 {
@@ -1113,6 +1140,10 @@ pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
     else
         return PyList_New(0);
 }
+
+static const char pygpgme_context_import_doc[] =
+    "import_($self, keydata, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_import(PyGpgmeContext *self, PyObject *args)
@@ -1247,6 +1278,10 @@ parse_key_patterns(PyObject *py_pattern, char ***patterns)
     return result;
 }
 
+static const char pygpgme_context_export_doc[] =
+    "export($self, pattern, keydata, export_mode=0, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 {
@@ -1279,6 +1314,10 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
         return NULL;
     Py_RETURN_NONE;
 }
+
+static const char pygpgme_context_genkey_doc[] =
+    "genkey($self, params, pubkey=None, seckey=None, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
@@ -1329,6 +1368,9 @@ pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
     return (PyObject *) result;
 }
 
+static const char pygpgme_context_delete_doc[] =
+    "delete($self, key, allow_secret=False, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
@@ -1368,6 +1410,10 @@ pygpgme_edit_cb(void *user_data, gpgme_status_code_t status,
     return err;
 }
 
+static const char pygpgme_context_edit_doc[] =
+    "edit($self, key, callaback, out, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
 {
@@ -1396,6 +1442,10 @@ pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
         return NULL;
     Py_RETURN_NONE;
 }
+
+static const char pygpgme_context_card_edit_doc[] =
+    "card_edit($self, key, callaback, out, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
@@ -1474,25 +1524,38 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
 // pygpgme_context_trustlist
 
 static PyMethodDef pygpgme_context_methods[] = {
-    { "get_engine_info", (PyCFunction)pygpgme_context_get_engine_info, METH_VARARGS },
-    { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS },
-    { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
+    { "get_engine_info", (PyCFunction)pygpgme_context_get_engine_info, METH_VARARGS,
+      pygpgme_context_get_engine_info_doc },
+    { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS,
+      pygpgme_context_set_engine_info_doc },
+    { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS,
+      pygpgme_context_set_locale_doc },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS,
       pygpgme_context_get_key_doc },
     { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS,
       pygpgme_context_encrypt_doc },
-    { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
+    { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS,
+      pygpgme_context_encrypt_sign_doc },
     { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS,
       pygpgme_context_decrypt_doc },
-    { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
-    { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
-    { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
-    { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS },
-    { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
-    { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS },
-    { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
-    { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS },
-    { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS },
+    { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS,
+      pygpgme_context_decrypt_verify_doc },
+    { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS,
+      pygpgme_context_sign_doc },
+    { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS,
+      pygpgme_context_verify_doc },
+    { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS,
+      pygpgme_context_import_doc },
+    { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS,
+      pygpgme_context_export_doc },
+    { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS,
+      pygpgme_context_genkey_doc },
+    { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS,
+      pygpgme_context_delete_doc },
+    { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS,
+      pygpgme_context_edit_doc },
+    { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS,
+      pygpgme_context_card_edit_doc },
     { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS,
       pygpgme_context_keylist_doc },
     // trustlist
