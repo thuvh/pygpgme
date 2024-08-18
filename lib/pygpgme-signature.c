@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "pygpgme.h"
+#include <gpgme.h>
 #include <structmember.h>
 
 static void
@@ -139,7 +140,6 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
 {
     PyObject *list;
     gpgme_signature_t sig;
-    gpgme_sig_notation_t not;
 
     list = PyList_New(0);
     for (sig = siglist; sig != NULL; sig = sig->next) {
@@ -158,20 +158,7 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
             item->fpr = Py_None;
         }
         item->status = pygpgme_error_object(sig->status);
-        item->notations = PyList_New(0);
-        for (not = sig->notations; not != NULL; not = not->next) {
-            PyObject *py_name, *py_value, *py_not;
-
-            py_name = PyUnicode_DecodeUTF8(not->name, not->name_len,
-                                           "replace");
-            py_value = PyBytes_FromStringAndSize(not->value, not->value_len);
-            py_not = Py_BuildValue("(NN)", py_name, py_value);
-
-            if (!py_not)
-                break;
-            PyList_Append(item->notations, py_not);
-            Py_DECREF(py_not);
-        }
+        item->notations = pygpgme_sig_notation_list_new(sig->notations);
         item->timestamp = PyLong_FromLong(sig->timestamp);
         item->exp_timestamp = PyLong_FromLong(sig->exp_timestamp);
         item->wrong_key_usage = PyBool_FromLong(sig->wrong_key_usage);
@@ -184,6 +171,155 @@ pygpgme_siglist_new(gpgme_signature_t siglist)
             Py_DECREF(list);
             return NULL;
         }
+        PyList_Append(list, (PyObject *)item);
+        Py_DECREF(item);
+    }
+    return list;
+}
+
+static int
+pygpgme_sig_notation_init(PyGpgmeSigNotation *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "name", "value", "flags", NULL };
+    PyObject *name = NULL, *value = NULL;
+    gpgme_sig_notation_flags_t flags = GPGME_SIG_NOTATION_HUMAN_READABLE;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|I", kwlist,
+                                     &name, &value, &flags))
+        return -1;
+
+    if (!(name == Py_None || PyUnicode_Check(name))) {
+        PyErr_SetString(PyExc_TypeError, "name must be a str or None");
+        return -1;
+    }
+    if ((flags & GPGME_SIG_NOTATION_HUMAN_READABLE) != 0) {
+        if (!PyUnicode_Check(value)) {
+            PyErr_SetString(PyExc_TypeError, "value must be a str for human readable notations");
+            return -1;
+        }
+    } else {
+        if (!PyBytes_Check(value)) {
+            PyErr_SetString(PyExc_TypeError, "value must be bytes for non-human readable notations");
+            return -1;
+        }
+    }
+
+    Py_XDECREF(self->name);
+    Py_INCREF(name);
+    self->name = name;
+    Py_XDECREF(self->value);
+    Py_INCREF(value);
+    self->value = value;
+    self->flags = flags;
+
+    return 0;
+}
+
+static void
+pygpgme_sig_notation_dealloc(PyGpgmeSigNotation *self)
+{
+    Py_XDECREF(self->name);
+    Py_XDECREF(self->value);
+}
+
+static Py_ssize_t
+pygpgme_sig_notation_length(PyGpgmeSigNotation *self)
+{
+    return 2;
+}
+
+static PyObject *
+pygpgme_sig_notation_item(PyGpgmeSigNotation *self, Py_ssize_t index)
+{
+    switch (index) {
+    case 0:
+        Py_INCREF(self->name);
+        return self->name;
+    case 1:
+        Py_INCREF(self->value);
+        return self->value;
+    default:
+        PyErr_SetString(PyExc_IndexError, "index out of range");
+        return NULL;
+    }
+}
+
+static PySequenceMethods pygpgme_sig_notation_as_sequence = {
+    .sq_length = (lenfunc)pygpgme_sig_notation_length,
+    .sq_item = (ssizeargfunc)pygpgme_sig_notation_item,
+};
+
+static PyMemberDef pygpgme_sig_notation_members[] = {
+    { "name", T_OBJECT, offsetof(PyGpgmeSigNotation, name), READONLY},
+    { "value", T_OBJECT, offsetof(PyGpgmeSigNotation, value), READONLY},
+    { NULL, 0, 0, 0}
+};
+
+static PyObject *
+pygpgme_sig_notation_get_flags(PyGpgmeSigNotation *self)
+{
+    return pygpgme_enum_value_new(PyGpgmeSigNotationFlags_Type, self->flags);
+}
+
+static PyObject *
+pygpgme_sig_notation_get_human_readable(PyGpgmeSigNotation *self)
+{
+    return PyBool_FromLong((self->flags & GPGME_SIG_NOTATION_HUMAN_READABLE) != 0);
+}
+
+static PyObject *
+pygpgme_sig_notation_get_critical(PyGpgmeSigNotation *self)
+{
+    return PyBool_FromLong((self->flags & GPGME_SIG_NOTATION_CRITICAL) != 0);
+}
+
+static PyGetSetDef pygpgme_sig_notation_getsets[] = {
+    { "flags", (getter)pygpgme_sig_notation_get_flags, NULL, NULL },
+    { "human_readable", (getter)pygpgme_sig_notation_get_human_readable, NULL, NULL },
+    { "critical", (getter)pygpgme_sig_notation_get_critical, NULL, NULL },
+};
+
+PyTypeObject PyGpgmeSigNotation_Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "gpgme.SigNotation",
+    sizeof(PyGpgmeSigNotation),
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_init = (initproc)pygpgme_sig_notation_init,
+    .tp_dealloc = (destructor)pygpgme_sig_notation_dealloc,
+    .tp_as_sequence = &pygpgme_sig_notation_as_sequence,
+    .tp_members = pygpgme_sig_notation_members,
+    .tp_getset = pygpgme_sig_notation_getsets,
+};
+
+PyObject *
+pygpgme_sig_notation_list_new(gpgme_sig_notation_t notations)
+{
+    gpgme_sig_notation_t not;
+    PyObject *list;
+
+    list = PyList_New(0);
+    for (not = notations; not != NULL; not = not->next) {
+        PyGpgmeSigNotation *item = PyObject_New(PyGpgmeSigNotation,
+                                                &PyGpgmeSigNotation_Type);
+        if (item == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+
+        if (not->name != NULL) {
+            item->name = PyUnicode_DecodeUTF8(
+                not->name, not->name_len, "replace");
+        } else {
+            Py_INCREF(Py_None);
+            item->name = Py_None;
+        }
+        if ((not->flags & GPGME_SIG_NOTATION_HUMAN_READABLE) != 0) {
+            item->value = PyUnicode_DecodeUTF8(
+                not->value, not->value_len, "replace");
+        } else {
+            item->value = PyBytes_FromStringAndSize(not->value, not->value_len);
+        }
+        item->flags = not->flags;
         PyList_Append(list, (PyObject *)item);
         Py_DECREF(item);
     }

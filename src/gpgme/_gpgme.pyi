@@ -38,6 +38,7 @@ class Context:
     passphrase_cb: Optional[Callable[[Optional[str], Optional[str], bool, int], None]]
     progress_cb: Optional[Callable[[Optional[str], int, int, int], None]]
     signers: Sequence[Key]
+    sig_notations: Sequence[SigNotation]
 
 class Key:
     revoked: bool
@@ -113,7 +114,7 @@ class Signature:
     summary: Sigsum | Literal[0]
     fpr: Optional[str]
     status: Optional[GpgmeError]
-    notations: Sequence[tuple[str, bytes]]
+    notations: Sequence[SigNotation]
     timestamp: int
     exp_timestamp: int
     wrong_key_usage: bool
@@ -121,6 +122,14 @@ class Signature:
     validity_reason: Optional[GpgmeError]
     pubkey_algo: PubkeyAlgo
     hash_algo: HashAlgo
+
+class SigNotation:
+    def __init__(self, name: Optional[str], value: str | bytes, flags: SigNotationFlags = SigNotationFlags.HUMAN_READABLE) -> None: ...
+    name: Optional[str]
+    value: str | bytes
+    flags: SigNotationFlags | Literal[0]
+    human_readable: bool
+    critical: bool
 
 class ImportResult:
     considered: int
@@ -241,6 +250,10 @@ class ExportMode(enum.IntFlag):
     PKCS12: int
     SSH: int
     SECRET_SUBKEY: int
+
+class SigNotationFlags(enum.IntFlag):
+    HUMAN_READABLE: int
+    CRITICAL: int
 
 class Status(enum.IntEnum):
     EOF: int

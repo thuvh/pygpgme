@@ -62,6 +62,7 @@ PyInit__gpgme(void)
     INIT_TYPE(PyGpgmeKeySig_Type);
     INIT_TYPE(PyGpgmeNewSignature_Type);
     INIT_TYPE(PyGpgmeSignature_Type);
+    INIT_TYPE(PyGpgmeSigNotation_Type);
     INIT_TYPE(PyGpgmeImportResult_Type);
     INIT_TYPE(PyGpgmeGenkeyResult_Type);
     INIT_TYPE(PyGpgmeKeyIter_Type);
@@ -75,6 +76,7 @@ PyInit__gpgme(void)
     ADD_TYPE(KeySig);
     ADD_TYPE(NewSignature);
     ADD_TYPE(Signature);
+    ADD_TYPE(SigNotation);
     ADD_TYPE(ImportResult);
     ADD_TYPE(GenkeyResult);
     ADD_TYPE(KeyIter);

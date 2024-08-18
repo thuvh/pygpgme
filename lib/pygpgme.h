@@ -20,6 +20,7 @@
 #ifndef PYGPGME_H
 #define PYGPGME_H
 
+#define PY_SSIZE_T_CLEAN 1
 #include <Python.h>
 #include <gpgme.h>
 
@@ -82,6 +83,13 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
+    PyObject *name;
+    PyObject *value;
+    gpgme_sig_notation_flags_t flags;
+} PyGpgmeSigNotation;
+
+typedef struct {
+    PyObject_HEAD
     PyObject *considered;
     PyObject *no_user_id;
     PyObject *imported;
@@ -119,6 +127,7 @@ extern HIDDEN PyTypeObject PyGpgmeUserId_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeySig_Type;
 extern HIDDEN PyTypeObject PyGpgmeNewSignature_Type;
 extern HIDDEN PyTypeObject PyGpgmeSignature_Type;
+extern HIDDEN PyTypeObject PyGpgmeSigNotation_Type;
 extern HIDDEN PyTypeObject PyGpgmeImportResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeGenkeyResult_Type;
 extern HIDDEN PyTypeObject PyGpgmeKeyIter_Type;
@@ -132,6 +141,7 @@ extern HIDDEN PyObject *PyGpgmeProtocol_Type;
 extern HIDDEN PyObject *PyGpgmeKeylistMode_Type;
 extern HIDDEN PyObject *PyGpgmePinentryMode_Type;
 extern HIDDEN PyObject *PyGpgmeExportMode_Type;
+extern HIDDEN PyObject *PyGpgmeSigNotationFlags_Type;
 extern HIDDEN PyObject *PyGpgmeStatus_Type;
 extern HIDDEN PyObject *PyGpgmeEncryptFlags_Type;
 extern HIDDEN PyObject *PyGpgmeSigsum_Type;
@@ -149,6 +159,7 @@ HIDDEN int           pygpgme_data_new       (gpgme_data_t *dh, PyObject *fp);
 HIDDEN PyObject     *pygpgme_key_new        (gpgme_key_t key);
 HIDDEN PyObject     *pygpgme_newsiglist_new (gpgme_new_signature_t siglist);
 HIDDEN PyObject     *pygpgme_siglist_new    (gpgme_signature_t siglist);
+HIDDEN PyObject     *pygpgme_sig_notation_list_new (gpgme_sig_notation_t notations);
 HIDDEN PyObject     *pygpgme_import_result  (gpgme_ctx_t ctx);
 HIDDEN PyObject     *pygpgme_genkey_result  (gpgme_ctx_t ctx);
 

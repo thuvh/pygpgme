@@ -28,6 +28,7 @@ PyObject *PyGpgmeProtocol_Type;
 PyObject *PyGpgmeKeylistMode_Type;
 PyObject *PyGpgmePinentryMode_Type;
 PyObject *PyGpgmeExportMode_Type;
+PyObject *PyGpgmeSigNotationFlags_Type;
 PyObject *PyGpgmeStatus_Type;
 PyObject *PyGpgmeEncryptFlags_Type;
 PyObject *PyGpgmeSigsum_Type;
@@ -219,6 +220,15 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SECRET_SUBKEY);
 #endif
     PyGpgmeExportMode_Type = make_enum(mod, "IntFlag", "ExportMode", values);
+    Py_DECREF(values);
+
+    /* gpgme_sig_notation_flags_t */
+    values = PyDict_New();
+#undef CONST
+#define CONST(name) add_enum_value(values, #name, GPGME_SIG_NOTATION_##name)
+    CONST(HUMAN_READABLE);
+    CONST(CRITICAL);
+    PyGpgmeSigNotationFlags_Type = make_enum(mod, "IntFlag", "SigNotationFlags", values);
     Py_DECREF(values);
 
     /* gpgme_status_code_t */

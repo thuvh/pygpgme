@@ -328,7 +328,10 @@ class SignVerifyTestCase(GpgHomeTestCase):
         ctx = gpgme.Context()
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         ctx.signers = [key]
-        ctx.notations = [('test@example.com', 'test value'), ('unicode@example.com', '\xa7v1')]
+        ctx.sig_notations = [
+            gpgme.SigNotation('test@example.com', 'test value'),
+            gpgme.SigNotation('unicode@example.com', '\xa7v1'),
+            gpgme.SigNotation(None, 'http://example.com')]
         plaintext = BytesIO(b'Hello World\n')
         signature = BytesIO()
 
@@ -345,4 +348,14 @@ class SignVerifyTestCase(GpgHomeTestCase):
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].fpr,
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-        self.assertEqual(sigs[0].notations, [('test@example.com', b'test value'), ('unicode@example.com', b'\xc2\xa7v1')])
+        notations = sorted(sigs[0].notations, key=lambda n: n.name or '')
+        self.assertEqual(len(notations), 3)
+        self.assertEqual(notations[0].name, None)
+        self.assertEqual(notations[0].value, b'http://example.com')
+        self.assertEqual(notations[0].flags, 0)
+        self.assertEqual(notations[1].name, 'test@example.com')
+        self.assertEqual(notations[1].value, 'test value')
+        self.assertEqual(notations[1].flags, gpgme.SigNotationFlags.HUMAN_READABLE)
+        self.assertEqual(notations[2].name, 'unicode@example.com')
+        self.assertEqual(notations[2].value, '\xa7v1')
+        self.assertEqual(notations[2].flags, gpgme.SigNotationFlags.HUMAN_READABLE)
