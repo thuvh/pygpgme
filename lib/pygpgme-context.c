@@ -181,6 +181,33 @@ pygpgme_context_set_textmode(PyGpgmeContext *self, PyObject *value)
     return 0;
 }
 
+static const char pygpgme_context_offline_doc[] =
+    "Whether GPG should operate in offline mode.";
+
+static PyObject *
+pygpgme_context_get_offline(PyGpgmeContext *self)
+{
+    return PyBool_FromLong(gpgme_get_offline(self->ctx));
+}
+
+static int
+pygpgme_context_set_offline(PyGpgmeContext *self, PyObject *value)
+{
+    int offline;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
+    offline = PyLong_AsLong(value) != 0;
+    if (PyErr_Occurred())
+        return -1;
+
+    gpgme_set_offline(self->ctx, offline);
+    return 0;
+}
+
 static const char pygpgme_context_include_certs_doc[] =
     "How many certificates will be included in an S/MIME signed message.\n\n"
     "See GPGME docs for details.";
@@ -495,36 +522,78 @@ pygpgme_context_set_sig_notations(PyGpgmeContext *self, PyObject *value)
     return ret;
 }
 
+static const char pygpgme_context_sender_doc[] =
+    "The sender address to include in signatures.";
+
+static PyObject *
+pygpgme_context_get_sender(PyGpgmeContext *self)
+{
+    const char *sender = gpgme_get_sender(self->ctx);
+
+    if (sender == NULL) {
+        Py_RETURN_NONE;
+    }
+    return PyUnicode_FromString(sender);
+}
+
+static int
+pygpgme_context_set_sender(PyGpgmeContext *self, PyObject *value)
+{
+    const char *address;
+    gpgme_error_t err;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    } else if (value == Py_None) {
+        address = NULL;
+    } else if (PyUnicode_Check(value)) {
+        address = PyUnicode_AsUTF8AndSize(value, NULL);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "sender must be a string or None");
+        return -1;
+    }
+
+    err = gpgme_set_sender(self->ctx, address);
+    return pygpgme_check_error(err);
+}
+
 static PyGetSetDef pygpgme_context_getsets[] = {
     { "protocol", (getter)pygpgme_context_get_protocol,
       (setter)pygpgme_context_set_protocol,
-      (char *)pygpgme_context_protocol_doc },
+      pygpgme_context_protocol_doc },
     { "armor", (getter)pygpgme_context_get_armor,
       (setter)pygpgme_context_set_armor,
-      (char *)pygpgme_context_armor_doc },
+      pygpgme_context_armor_doc },
     { "textmode", (getter)pygpgme_context_get_textmode,
       (setter)pygpgme_context_set_textmode,
-      (char *)pygpgme_context_textmode_doc },
+      pygpgme_context_textmode_doc },
+    { "offline", (getter)pygpgme_context_get_offline,
+      (setter)pygpgme_context_set_offline,
+      pygpgme_context_offline_doc },
     { "include_certs", (getter)pygpgme_context_get_include_certs,
       (setter)pygpgme_context_set_include_certs,
-      (char *)pygpgme_context_include_certs_doc },
+      pygpgme_context_include_certs_doc },
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
       (setter)pygpgme_context_set_keylist_mode,
-      (char *)pygpgme_context_keylist_mode_doc },
+      pygpgme_context_keylist_mode_doc },
     { "pinentry_mode", (getter)pygpgme_context_get_pinentry_mode,
       (setter)pygpgme_context_set_pinentry_mode,
-      (char *)pygpgme_context_pinentry_mode_doc },
+      pygpgme_context_pinentry_mode_doc },
     { "passphrase_cb", (getter)pygpgme_context_get_passphrase_cb,
       (setter)pygpgme_context_set_passphrase_cb,
-      (char *)pygpgme_context_passphrase_cb_doc },
+      pygpgme_context_passphrase_cb_doc },
     { "progress_cb", (getter)pygpgme_context_get_progress_cb,
       (setter)pygpgme_context_set_progress_cb },
     { "signers", (getter)pygpgme_context_get_signers,
       (setter)pygpgme_context_set_signers,
-      (char *)pygpgme_context_signers_doc },
+      pygpgme_context_signers_doc },
     { "sig_notations", (getter)pygpgme_context_get_sig_notations,
       (setter)pygpgme_context_set_sig_notations,
-      (char *)pygpgme_context_sig_notations_doc},
+      pygpgme_context_sig_notations_doc},
+    { "sender", (getter)pygpgme_context_get_sender,
+      (setter)pygpgme_context_set_sender,
+      pygpgme_context_sender_doc },
     { NULL, (getter)0, (setter)0 }
 };
 

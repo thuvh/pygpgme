@@ -35,6 +35,7 @@ class Context:
     protocol: Protocol
     armor: bool
     textmode: bool
+    offline: bool
     include_certs: int
     keylist_mode: KeylistMode | Literal[0]
     pinentry_mode: PinentryMode
@@ -42,6 +43,7 @@ class Context:
     progress_cb: Optional[Callable[[Optional[str], int, int, int], None]]
     signers: Sequence[Key]
     sig_notations: Sequence[SigNotation]
+    sender: Optional[str]
 
 class EngineInfo:
     protocol: Protocol

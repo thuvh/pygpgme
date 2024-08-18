@@ -68,6 +68,16 @@ class ContextTestCase(GpgHomeTestCase):
             del ctx.textmode
         self.assertRaises(AttributeError, del_textmode, ctx)
 
+    def test_offline(self) -> None:
+        ctx = gpgme.Context()
+        self.assertEqual(ctx.offline, False)
+        ctx.offline = True
+        self.assertEqual(ctx.offline, True)
+        ctx.offline = False
+        self.assertEqual(ctx.offline, False)
+        with self.assertRaises(AttributeError):
+            del ctx.offline
+
     def test_include_certs(self) -> None:
         ctx = gpgme.Context()
         self.assertEqual(ctx.include_certs, -256)
@@ -116,6 +126,18 @@ class ContextTestCase(GpgHomeTestCase):
         ctx.progress_cb = progress_cb
         del ctx.progress_cb
         self.assertEqual(ctx.progress_cb, None)
+
+    def test_sender(self) -> None:
+        ctx = gpgme.Context()
+        self.assertEqual(ctx.sender, None)
+        ctx.sender = 'test@example.org'
+        self.assertEqual(ctx.sender, 'test@example.org')
+        ctx.sender = 'Test <test@example.org>'
+        self.assertEqual(ctx.sender, 'test@example.org')
+        ctx.sender = None
+        self.assertEqual(ctx.sender, None)
+        with self.assertRaises(AttributeError):
+            del ctx.sender
 
     def test_get_engine_info(self) -> None:
         ctx = gpgme.Context()
