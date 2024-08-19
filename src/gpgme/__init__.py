@@ -28,6 +28,8 @@ All interaction begins by creating a Context.
 
 from gpgme._gpgme import *
 
+__version__ = '0.4'
+
 DATA_ENCODING_NONE = DataEncoding.NONE
 DATA_ENCODING_BINARY = DataEncoding.BINARY
 DATA_ENCODING_BASE64 = DataEncoding.BASE64

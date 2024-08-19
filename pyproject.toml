@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygpgme"
-version = "0.4"
 authors = [
     {name = "James Henstridge", email="james@jamesh.id.au"},
 ]
@@ -27,12 +26,17 @@ dependencies = [
     'typing_extensions; python_version < "3.10"'
 ]
 
+dynamic = ["version"]
+
 [project.urls]
 Repository = "https://github.com/jhenstridge/pygpgme"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = ["gpgme"]
+
+[tool.setuptools.dynamic]
+version = {attr = "gpgme.__version__"}
 
 [tool.setuptools.package-data]
 gpgme = ["*.pyi", "py.typed"]
