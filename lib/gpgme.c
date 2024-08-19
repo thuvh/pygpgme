@@ -22,21 +22,18 @@
 #include "pygpgme.h"
 
 static PyMethodDef pygpgme_functions[] = {
-    { "make_constants", (PyCFunction)pygpgme_make_constants, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
-#if PY_VERSION_HEX >= 0x03000000
 static PyModuleDef pygpgme_module = {
     PyModuleDef_HEAD_INIT,
     "gpgme._gpgme",
     .m_size = -1,
     .m_methods = pygpgme_functions
 };
-#endif
 
-static PyObject *
-create_module(void)
+PyMODINIT_FUNC
+PyInit__gpgme(void)
 {
     const char *gpgme_version;
     PyObject *mod;
@@ -45,8 +42,8 @@ create_module(void)
                                        PyExc_RuntimeError, NULL);
 
 #define INIT_TYPE(type)                      \
-    if (!Py_TYPE(&type))                      \
-        Py_TYPE(&type) = &PyType_Type;        \
+    if (!Py_TYPE(&type))                     \
+        Py_SET_TYPE(&type, &PyType_Type);    \
     if (!type.tp_alloc)                      \
         type.tp_alloc = PyType_GenericAlloc; \
     if (!type.tp_new)                        \
@@ -59,35 +56,37 @@ create_module(void)
     PyModule_AddObject(mod, #type, (PyObject *)&PyGpgme ## type ## _Type)
 
     INIT_TYPE(PyGpgmeContext_Type);
+    INIT_TYPE(PyGpgmeEngineInfo_Type);
     INIT_TYPE(PyGpgmeKey_Type);
     INIT_TYPE(PyGpgmeSubkey_Type);
     INIT_TYPE(PyGpgmeUserId_Type);
     INIT_TYPE(PyGpgmeKeySig_Type);
     INIT_TYPE(PyGpgmeNewSignature_Type);
     INIT_TYPE(PyGpgmeSignature_Type);
+    INIT_TYPE(PyGpgmeSigNotation_Type);
     INIT_TYPE(PyGpgmeImportResult_Type);
     INIT_TYPE(PyGpgmeGenkeyResult_Type);
     INIT_TYPE(PyGpgmeKeyIter_Type);
 
-#if PY_VERSION_HEX >= 0x03000000
     mod = PyModule_Create(&pygpgme_module);
-#else
-    mod = Py_InitModule("gpgme._gpgme", pygpgme_functions);
-#endif
 
     ADD_TYPE(Context);
+    ADD_TYPE(EngineInfo);
     ADD_TYPE(Key);
     ADD_TYPE(Subkey);
     ADD_TYPE(UserId);
     ADD_TYPE(KeySig);
     ADD_TYPE(NewSignature);
     ADD_TYPE(Signature);
+    ADD_TYPE(SigNotation);
     ADD_TYPE(ImportResult);
     ADD_TYPE(GenkeyResult);
     ADD_TYPE(KeyIter);
 
     Py_INCREF(pygpgme_error);
     PyModule_AddObject(mod, "GpgmeError", pygpgme_error);
+
+    pygpgme_add_constants(mod);
 
     gpgme_version = gpgme_check_version(NULL);
     if (gpgme_version == NULL) {
@@ -101,17 +100,3 @@ create_module(void)
 
     return mod;
 }
-
-#if PY_VERSION_HEX >= 0x03000000
-PyMODINIT_FUNC
-PyInit__gpgme(void)
-{
-    return create_module();
-}
-#else
-PyMODINIT_FUNC
-init_gpgme(void)
-{
-    create_module();
-}
-#endif

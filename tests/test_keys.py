@@ -24,7 +24,7 @@ class KeyTestCase(GpgHomeTestCase):
 
     import_keys = ['key1.pub', 'key2.pub', 'revoked.pub', 'signonly.pub']
 
-    def test_key1(self):
+    def test_key1(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(key.revoked, False)
@@ -35,7 +35,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.can_certify, True)
         self.assertEqual(key.secret, False)
         self.assertEqual(key.can_authenticate, False)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
         self.assertEqual(len(key.subkeys), 2)
         self.assertEqual(len(key.uids), 1)
 
@@ -48,7 +48,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[0].can_certify, True)
         self.assertEqual(key.subkeys[0].secret, False)
         self.assertEqual(key.subkeys[0].can_authenticate, False)
-        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PK_DSA)
+        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
         self.assertEqual(key.subkeys[0].length, 1024)
         self.assertEqual(key.subkeys[0].keyid, '46BB55F0885C65A4')
         self.assertEqual(key.subkeys[0].fpr,
@@ -65,7 +65,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].can_certify, False)
         self.assertEqual(key.subkeys[1].secret, False)
         self.assertEqual(key.subkeys[1].can_authenticate, False)
-        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_ELG_E)
+        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PubkeyAlgo.ELG_E)
         self.assertEqual(key.subkeys[1].length, 2048)
         self.assertEqual(key.subkeys[1].keyid, '659A6AC69BC3B085')
         # Some versions of libgpgme fill this one in and others don't
@@ -81,7 +81,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'key1@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_key2(self):
+    def test_key2(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
         self.assertEqual(key.revoked, False)
@@ -92,7 +92,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.can_certify, True)
         self.assertEqual(key.secret, False)
         self.assertEqual(key.can_authenticate, False)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
         self.assertEqual(len(key.subkeys), 2)
         self.assertEqual(len(key.uids), 1)
 
@@ -105,7 +105,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[0].can_certify, True)
         self.assertEqual(key.subkeys[0].secret, False)
         self.assertEqual(key.subkeys[0].can_authenticate, False)
-        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PubkeyAlgo.RSA)
         self.assertEqual(key.subkeys[0].length, 4096)
         self.assertEqual(key.subkeys[0].keyid, '2CF46B7FC97E6B0F')
         self.assertEqual(key.subkeys[0].fpr,
@@ -122,7 +122,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].can_certify, False)
         self.assertEqual(key.subkeys[1].secret, False)
         self.assertEqual(key.subkeys[1].can_authenticate, False)
-        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PubkeyAlgo.RSA)
         self.assertEqual(key.subkeys[1].length, 4096)
         self.assertEqual(key.subkeys[1].keyid, 'A95221D00DCBDD64')
         # Some versions of libgpgme fill this one in and others don't
@@ -138,7 +138,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'key2@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_revoked(self):
+    def test_revoked(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('B6525A39EB81F88B4D2CFB3E2EF658C987754368')
         self.assertEqual(key.revoked, True)
@@ -149,7 +149,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.can_certify, True)
         self.assertEqual(key.secret, False)
         self.assertEqual(key.can_authenticate, False)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
         self.assertEqual(len(key.subkeys), 2)
         self.assertEqual(len(key.uids), 1)
 
@@ -162,7 +162,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[0].can_certify, True)
         self.assertEqual(key.subkeys[0].secret, False)
         self.assertEqual(key.subkeys[0].can_authenticate, False)
-        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PK_DSA)
+        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PubkeyAlgo.DSA)
         self.assertEqual(key.subkeys[0].length, 1024)
         self.assertEqual(key.subkeys[0].keyid, '2EF658C987754368')
         self.assertEqual(key.subkeys[0].fpr,
@@ -179,7 +179,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[1].can_certify, False)
         self.assertEqual(key.subkeys[1].secret, False)
         self.assertEqual(key.subkeys[1].can_authenticate, False)
-        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PK_ELG_E)
+        self.assertEqual(key.subkeys[1].pubkey_algo, gpgme.PubkeyAlgo.ELG_E)
         self.assertEqual(key.subkeys[1].length, 1024)
         self.assertEqual(key.subkeys[1].keyid, 'E50B59CF50CE4D54')
         # Some versions of libgpgme fill this one in and others don't
@@ -195,7 +195,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[0].email, 'revoked@example.org')
         self.assertEqual(key.uids[0].comment, '')
 
-    def test_signonly(self):
+    def test_signonly(self) -> None:
         ctx = gpgme.Context()
         key = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
         self.assertEqual(key.revoked, False)
@@ -206,7 +206,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.can_certify, True)
         self.assertEqual(key.secret, False)
         self.assertEqual(key.can_authenticate, False)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
         self.assertEqual(len(key.subkeys), 1)
         self.assertEqual(len(key.uids), 2)
 
@@ -219,7 +219,7 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.subkeys[0].can_certify, True)
         self.assertEqual(key.subkeys[0].secret, False)
         self.assertEqual(key.subkeys[0].can_authenticate, False)
-        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(key.subkeys[0].pubkey_algo, gpgme.PubkeyAlgo.RSA)
         self.assertEqual(key.subkeys[0].length, 4096)
         self.assertEqual(key.subkeys[0].keyid, 'F540A569CB935A42')
         self.assertEqual(key.subkeys[0].fpr,
@@ -243,8 +243,3 @@ class KeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.uids[1].name, 'Sign Only')
         self.assertEqual(key.uids[1].email, 'signonly@example.com')
         self.assertEqual(key.uids[1].comment, 'work address')
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

@@ -17,7 +17,9 @@
 
 import os
 import shutil
+import subprocess
 import tempfile
+from typing import BinaryIO
 import unittest
 
 import gpgme
@@ -28,18 +30,21 @@ keydir = os.path.join(os.path.dirname(__file__), 'keys')
 
 class GpgHomeTestCase(unittest.TestCase):
 
-    gpg_conf_contents = ''
-    import_keys = []
+    import_keys: list[str] = []
 
-    def keyfile(self, key):
+    def keyfile(self, key: str) -> BinaryIO:
         return open(os.path.join(keydir, key), 'rb')
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._gpghome = tempfile.mkdtemp(prefix='tmp.gpghome')
         os.environ['GNUPGHOME'] = self._gpghome
-        fp = open(os.path.join(self._gpghome, 'gpg.conf'), 'wb')
-        fp.write(self.gpg_conf_contents.encode('UTF-8'))
-        fp.close()
+        with open(os.path.join(self._gpghome, 'gpg.conf'), 'w') as fp:
+            fp.write('pinentry-mode loopback\n')
+        with open(os.path.join(self._gpghome, 'gpg-agent.conf'), 'w') as fp:
+            fp.write('allow-loopback-pinentry\n')
+        subprocess.check_call(['gpg-connect-agent', '/bye'],
+                              stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL)
 
         # import requested keys into the keyring
         ctx = gpgme.Context()
@@ -47,6 +52,10 @@ class GpgHomeTestCase(unittest.TestCase):
             with self.keyfile(key) as fp:
                 ctx.import_(fp)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
+        # May fail if the agent is not currently running.
+        subprocess.call(['gpg-connect-agent', 'KILLAGENT', '/bye'],
+                              stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL)
         del os.environ['GNUPGHOME']
         shutil.rmtree(self._gpghome, ignore_errors=True)

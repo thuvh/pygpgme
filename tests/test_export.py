@@ -15,12 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+from io import BytesIO
 from textwrap import dedent
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -29,7 +26,7 @@ class ExportTestCase(GpgHomeTestCase):
 
     import_keys = ['signonly.pub', 'signonly.sec']
 
-    def test_export_by_fingerprint(self):
+    def test_export_by_fingerprint(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()
@@ -38,7 +35,7 @@ class ExportTestCase(GpgHomeTestCase):
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
-    def test_export_by_email(self):
+    def test_export_by_email(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()
@@ -47,7 +44,7 @@ class ExportTestCase(GpgHomeTestCase):
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
 
-    def test_export_by_name(self):
+    def test_export_by_name(self) -> None:
         ctx = gpgme.Context()
         ctx.armor = True
         keydata = BytesIO()
@@ -55,8 +52,3 @@ class ExportTestCase(GpgHomeTestCase):
 
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

@@ -104,7 +104,7 @@ static const char pygpgme_context_protocol_doc[] =
 static PyObject *
 pygpgme_context_get_protocol(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_protocol(self->ctx));
+    return pygpgme_enum_value_new(PyGpgmeProtocol_Type, gpgme_get_protocol(self->ctx));
 }
 
 static int
@@ -117,7 +117,7 @@ pygpgme_context_set_protocol(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    protocol = PyInt_AsLong(value);
+    protocol = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -146,7 +146,7 @@ pygpgme_context_set_armor(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    armor = PyInt_AsLong(value) != 0;
+    armor = PyLong_AsLong(value) != 0;
     if (PyErr_Occurred())
         return -1;
 
@@ -173,11 +173,38 @@ pygpgme_context_set_textmode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    textmode = PyInt_AsLong(value) != 0;
+    textmode = PyLong_AsLong(value) != 0;
     if (PyErr_Occurred())
         return -1;
 
     gpgme_set_textmode(self->ctx, textmode);
+    return 0;
+}
+
+static const char pygpgme_context_offline_doc[] =
+    "Whether GPG should operate in offline mode.";
+
+static PyObject *
+pygpgme_context_get_offline(PyGpgmeContext *self)
+{
+    return PyBool_FromLong(gpgme_get_offline(self->ctx));
+}
+
+static int
+pygpgme_context_set_offline(PyGpgmeContext *self, PyObject *value)
+{
+    int offline;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    }
+
+    offline = PyLong_AsLong(value) != 0;
+    if (PyErr_Occurred())
+        return -1;
+
+    gpgme_set_offline(self->ctx, offline);
     return 0;
 }
 
@@ -188,7 +215,7 @@ static const char pygpgme_context_include_certs_doc[] =
 static PyObject *
 pygpgme_context_get_include_certs(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_include_certs(self->ctx));
+    return PyLong_FromLong(gpgme_get_include_certs(self->ctx));
 }
 
 static int
@@ -201,7 +228,7 @@ pygpgme_context_set_include_certs(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    nr_of_certs = PyInt_AsLong(value);
+    nr_of_certs = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -216,7 +243,7 @@ static const char pygpgme_context_keylist_mode_doc[] =
 static PyObject *
 pygpgme_context_get_keylist_mode(PyGpgmeContext *self)
 {
-    return PyInt_FromLong(gpgme_get_keylist_mode(self->ctx));
+    return pygpgme_enum_value_new(PyGpgmeKeylistMode_Type, gpgme_get_keylist_mode(self->ctx));
 }
 
 static int
@@ -229,7 +256,7 @@ pygpgme_context_set_keylist_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    keylist_mode = PyInt_AsLong(value);
+    keylist_mode = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -245,21 +272,12 @@ static const char pygpgme_context_pinentry_mode_doc[] =
 static PyObject *
 pygpgme_context_get_pinentry_mode(PyGpgmeContext *self)
 {
-#if GPGME_VERSION_NUMBER < 0x010400
-    return PyInt_FromLong(GPGME_PINENTRY_MODE_DEFAULT);
-#else  /* gpgme >= 1.4.0 */
-    return PyInt_FromLong(gpgme_get_pinentry_mode(self->ctx));
-#endif /* gpgme >= 1.4.0 */
+    return pygpgme_enum_value_new(PyGpgmePinentryMode_Type, gpgme_get_pinentry_mode(self->ctx));
 }
 
 static int
 pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
 {
-#if GPGME_VERSION_NUMBER < 0x010400
-    PyErr_SetString(PyExc_AttributeError,
-                    "Not supported by this version of GPGME");
-    return -1;
-#else /* gpgme >= 1.4.0 */
     gpgme_pinentry_mode_t pinentry_mode;
 
     if (value == NULL) {
@@ -267,7 +285,7 @@ pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
     }
 
-    pinentry_mode = PyInt_AsLong(value);
+    pinentry_mode = PyLong_AsLong(value);
     if (PyErr_Occurred())
         return -1;
 
@@ -275,7 +293,6 @@ pygpgme_context_set_pinentry_mode(PyGpgmeContext *self, PyObject *value)
         return -1;
 
     return 0;
-#endif /* gpgme >= 1.4.0 */
 }
 
 static const char pygpgme_context_passphrase_cb_doc[] =
@@ -442,35 +459,147 @@ pygpgme_context_set_signers(PyGpgmeContext *self, PyObject *value)
     return ret;
 }
 
+static const char pygpgme_context_sig_notations_doc[] =
+    "A tuple of notations added to signatures using the .sign() method.";
+
+static PyObject *
+pygpgme_context_get_sig_notations(PyGpgmeContext *self)
+{
+    PyObject *list, *tuple;
+
+    list = pygpgme_sig_notation_list_new(gpgme_sig_notation_get(self->ctx));
+    tuple = PySequence_Tuple(list);
+    Py_DECREF(list);
+    return tuple;
+}
+
+static int
+pygpgme_context_set_sig_notations(PyGpgmeContext *self, PyObject *value)
+{
+    PyObject *notations = NULL;
+    int i, length, ret = -1;
+    gpgme_error_t err;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        goto end;
+    }
+
+    notations = PySequence_Fast(value, "notations must be a sequence of tuples");
+    if (!notations ) {
+        goto end;
+    }
+
+    gpgme_sig_notation_clear(self->ctx);
+    length = PySequence_Fast_GET_SIZE(notations);
+    for (i = 0; i < length; i++) {
+        PyGpgmeSigNotation *item = (PyGpgmeSigNotation *)PySequence_Fast_GET_ITEM(notations, i);
+        const char *name = NULL, *value = NULL;
+
+        if (!PyObject_IsInstance((PyObject *)item, (PyObject *)&PyGpgmeSigNotation_Type)) {
+            PyErr_SetString(PyExc_TypeError, "sig_notations items must be gpgme.SigNotation objects");
+            goto end;
+        }
+
+        if (item->name != Py_None) {
+            name = PyUnicode_AsUTF8AndSize(item->name, NULL);
+        }
+        if ((item->flags & GPGME_SIG_NOTATION_HUMAN_READABLE) != 0) {
+            value = PyUnicode_AsUTF8AndSize(item->value, NULL);
+        } else {
+            value = PyBytes_AsString(item->value);
+        }
+
+        err = gpgme_sig_notation_add(self->ctx, name, value, item->flags);
+        if (pygpgme_check_error(err)) {
+            goto end;
+        }
+    }
+    ret = 0;
+
+ end:
+    Py_XDECREF(notations);
+    return ret;
+}
+
+static const char pygpgme_context_sender_doc[] =
+    "The sender address to include in signatures.";
+
+static PyObject *
+pygpgme_context_get_sender(PyGpgmeContext *self)
+{
+    const char *sender = gpgme_get_sender(self->ctx);
+
+    if (sender == NULL) {
+        Py_RETURN_NONE;
+    }
+    return PyUnicode_FromString(sender);
+}
+
+static int
+pygpgme_context_set_sender(PyGpgmeContext *self, PyObject *value)
+{
+    const char *address;
+    gpgme_error_t err;
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "Can not delete attribute");
+        return -1;
+    } else if (value == Py_None) {
+        address = NULL;
+    } else if (PyUnicode_Check(value)) {
+        address = PyUnicode_AsUTF8AndSize(value, NULL);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "sender must be a string or None");
+        return -1;
+    }
+
+    err = gpgme_set_sender(self->ctx, address);
+    return pygpgme_check_error(err);
+}
+
 static PyGetSetDef pygpgme_context_getsets[] = {
     { "protocol", (getter)pygpgme_context_get_protocol,
       (setter)pygpgme_context_set_protocol,
-      (char *)pygpgme_context_protocol_doc },
+      pygpgme_context_protocol_doc },
     { "armor", (getter)pygpgme_context_get_armor,
       (setter)pygpgme_context_set_armor,
-      (char *)pygpgme_context_armor_doc },
+      pygpgme_context_armor_doc },
     { "textmode", (getter)pygpgme_context_get_textmode,
       (setter)pygpgme_context_set_textmode,
-      (char *)pygpgme_context_textmode_doc },
+      pygpgme_context_textmode_doc },
+    { "offline", (getter)pygpgme_context_get_offline,
+      (setter)pygpgme_context_set_offline,
+      pygpgme_context_offline_doc },
     { "include_certs", (getter)pygpgme_context_get_include_certs,
       (setter)pygpgme_context_set_include_certs,
-      (char *)pygpgme_context_include_certs_doc },
+      pygpgme_context_include_certs_doc },
     { "keylist_mode", (getter)pygpgme_context_get_keylist_mode,
       (setter)pygpgme_context_set_keylist_mode,
-      (char *)pygpgme_context_keylist_mode_doc },
+      pygpgme_context_keylist_mode_doc },
     { "pinentry_mode", (getter)pygpgme_context_get_pinentry_mode,
       (setter)pygpgme_context_set_pinentry_mode,
-      (char *)pygpgme_context_pinentry_mode_doc },
+      pygpgme_context_pinentry_mode_doc },
     { "passphrase_cb", (getter)pygpgme_context_get_passphrase_cb,
       (setter)pygpgme_context_set_passphrase_cb,
-      (char *)pygpgme_context_passphrase_cb_doc },
+      pygpgme_context_passphrase_cb_doc },
     { "progress_cb", (getter)pygpgme_context_get_progress_cb,
       (setter)pygpgme_context_set_progress_cb },
     { "signers", (getter)pygpgme_context_get_signers,
       (setter)pygpgme_context_set_signers,
-      (char *)pygpgme_context_signers_doc },
+      pygpgme_context_signers_doc },
+    { "sig_notations", (getter)pygpgme_context_get_sig_notations,
+      (setter)pygpgme_context_set_sig_notations,
+      pygpgme_context_sig_notations_doc},
+    { "sender", (getter)pygpgme_context_get_sender,
+      (setter)pygpgme_context_set_sender,
+      pygpgme_context_sender_doc },
     { NULL, (getter)0, (setter)0 }
 };
+
+static const char pygpgme_context_set_engine_info_doc[] =
+    "set_engine_info($self, protocol, file_name, home_dir, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
@@ -488,6 +617,22 @@ pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static const char pygpgme_context_get_engine_info_doc[] =
+    "get_engine_info($self)\n"
+    "--\n\n";
+
+static PyObject *
+pygpgme_context_get_engine_info(PyGpgmeContext *self)
+{
+    gpgme_engine_info_t info = gpgme_ctx_get_engine_info(self->ctx);
+
+    return pygpgme_engine_info_list_new(info);
+}
+
+static const char pygpgme_context_set_locale_doc[] =
+    "set_locale($self, category, value, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 {
@@ -504,7 +649,8 @@ pygpgme_context_set_locale(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_get_key_doc[] =
-    "get_key(fingerprint[, secret]) -> Key instance\n\n"
+    "get_key($self, fingerprint, secret=False, /)\n"
+    "--\n\n"
     "Finds a key with the given fingerprint (a string of hex digits) in\n"
     "the user's keyring. If secret is 1, only private keys will be\n"
     "returned.\n\nIf no key can be found, raises GpgmeError.";
@@ -579,7 +725,8 @@ decode_encrypt_result(PyGpgmeContext *self)
 }
 
 static const char pygpgme_context_encrypt_doc[] =
-    "encrypt(recipients, flags, plaintext, ciphertext)\n\n"
+    "encrypt($self, recipients, flags, plaintext, ciphertext, /)\n"
+    "--\n\n"
     "Encrypts plaintext so it can only be read by the given recipients.\n\n"
     "recipients: A list of Key objects. Only people in posession of the\n"
     "  corresponding private key (for public key encryption) or passphrase\n"
@@ -653,6 +800,10 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
 
     return result;
 }
+
+static const char pygpgme_context_encrypt_sign_doc[] =
+    "encrypt_sign($self, recipients, flags, plain, cipher, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
@@ -799,7 +950,8 @@ decode_decrypt_result(PyGpgmeContext *self)
 }
 
 static const char pygpgme_context_decrypt_doc[] =
-    "decrypt(ciphertext, plaintext)\n\n"
+    "decrypt($self, ciphertext, plaintext, /)\n"
+    "--\n\n"
     "Decrypts the ciphertext and writes out the plaintext.\n\n"
     "ciphertext: A file-like object opened for reading, containing the\n"
     "  encrypted data.\n\n"
@@ -843,6 +995,10 @@ pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
 
     Py_RETURN_NONE;
 }
+
+static const char pygpgme_context_decrypt_verify_doc[] =
+    "decrypt_verify($self, cipher, plain, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
@@ -905,6 +1061,10 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
     else
         return PyList_New(0);
 }
+
+static const char pygpgme_context_sign_doc[] =
+    "sign($self, plain, sig, sig_mode=0, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
@@ -983,6 +1143,10 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
         return PyList_New(0);
 }
 
+static const char pygpgme_context_verify_doc[] =
+    "verify($self, sig, signed_text, plaintext, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
 {
@@ -1045,6 +1209,10 @@ pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
     else
         return PyList_New(0);
 }
+
+static const char pygpgme_context_import_doc[] =
+    "import_($self, keydata, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_import(PyGpgmeContext *self, PyObject *args)
@@ -1179,15 +1347,20 @@ parse_key_patterns(PyObject *py_pattern, char ***patterns)
     return result;
 }
 
+static const char pygpgme_context_export_doc[] =
+    "export($self, pattern, keydata, export_mode=0, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 {
     PyObject *py_pattern, *py_keydata;
     char **patterns = NULL;
+    int export_mode = 0;
     gpgme_data_t keydata;
     gpgme_error_t err;
 
-    if (!PyArg_ParseTuple(args, "OO", &py_pattern, &py_keydata))
+    if (!PyArg_ParseTuple(args, "OO|i", &py_pattern, &py_keydata, &export_mode))
         return NULL;
 
     if (parse_key_patterns(py_pattern, &patterns) < 0)
@@ -1200,7 +1373,7 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
     }
 
     Py_BEGIN_ALLOW_THREADS;
-    err = gpgme_op_export_ext(self->ctx, (const char **)patterns, 0, keydata);
+    err = gpgme_op_export_ext(self->ctx, (const char **)patterns, export_mode, keydata);
     Py_END_ALLOW_THREADS;
 
     if (patterns)
@@ -1210,6 +1383,10 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
         return NULL;
     Py_RETURN_NONE;
 }
+
+static const char pygpgme_context_genkey_doc[] =
+    "genkey($self, params, pubkey=None, seckey=None, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
@@ -1260,6 +1437,9 @@ pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
     return (PyObject *) result;
 }
 
+static const char pygpgme_context_delete_doc[] =
+    "delete($self, key, allow_secret=False, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
@@ -1284,18 +1464,24 @@ static gpgme_error_t
 pygpgme_edit_cb(void *user_data, gpgme_status_code_t status,
                 const char *args, int fd)
 {
-    PyObject *callback, *ret;
+    PyObject *callback, *py_status, *ret;
     PyGILState_STATE state;
     gpgme_error_t err;
 
     state = PyGILState_Ensure();
     callback = (PyObject *)user_data;
-    ret = PyObject_CallFunction(callback, "lzi", (long)status, args, fd);
+    py_status = pygpgme_enum_value_new(PyGpgmeStatus_Type, status);
+    ret = PyObject_CallFunction(callback, "Ozi", py_status, args, fd);
+    Py_DECREF(py_status);
     err = pygpgme_check_pyerror();
     Py_XDECREF(ret);
     PyGILState_Release(state);
     return err;
 }
+
+static const char pygpgme_context_edit_doc[] =
+    "edit($self, key, callaback, out, /)\n"
+    "--\n\n";
 
 static PyObject *
 pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
@@ -1308,6 +1494,8 @@ pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O!OO", &PyGpgmeKey_Type, &key, &callback,
                           &py_out))
         return NULL;
+
+    PyErr_WarnEx(PyExc_DeprecationWarning, "gpgme.Context.edit is deprecated", 1);
 
     if (pygpgme_data_new(&out, py_out))
         return NULL;
@@ -1324,6 +1512,10 @@ pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static const char pygpgme_context_card_edit_doc[] =
+    "card_edit($self, key, callaback, out, /)\n"
+    "--\n\n";
+
 static PyObject *
 pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
 {
@@ -1335,6 +1527,8 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O!OO", &PyGpgmeKey_Type, &key, &callback,
                           &py_out))
         return NULL;
+
+    PyErr_WarnEx(PyExc_DeprecationWarning, "gpgme.Context.card_edit is deprecated", 1);
 
     if (pygpgme_data_new(&out, py_out))
         return NULL;
@@ -1352,7 +1546,8 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_keylist_doc[] =
-    "keylist([strOrSeq[, secret]]) -> KeyIter instance\n\n"
+    "keylist($self, strOrSeq=None, secret=False, /)\n"
+    "--\n\n"
     "Searches for keys matching the given pattern(s).\n\n"
     "strOrSeq: If None or not supplied, the KeyIter fetches all available\n"
     "  keys. If a string, it fetches keys matching the given pattern (such\n"
@@ -1398,24 +1593,38 @@ pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
 // pygpgme_context_trustlist
 
 static PyMethodDef pygpgme_context_methods[] = {
-    { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS },
-    { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS },
+    { "get_engine_info", (PyCFunction)pygpgme_context_get_engine_info, METH_VARARGS,
+      pygpgme_context_get_engine_info_doc },
+    { "set_engine_info", (PyCFunction)pygpgme_context_set_engine_info, METH_VARARGS,
+      pygpgme_context_set_engine_info_doc },
+    { "set_locale", (PyCFunction)pygpgme_context_set_locale, METH_VARARGS,
+      pygpgme_context_set_locale_doc },
     { "get_key", (PyCFunction)pygpgme_context_get_key, METH_VARARGS,
       pygpgme_context_get_key_doc },
-    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS, 
+    { "encrypt", (PyCFunction)pygpgme_context_encrypt, METH_VARARGS,
       pygpgme_context_encrypt_doc },
-    { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS },
+    { "encrypt_sign", (PyCFunction)pygpgme_context_encrypt_sign, METH_VARARGS,
+      pygpgme_context_encrypt_sign_doc },
     { "decrypt", (PyCFunction)pygpgme_context_decrypt, METH_VARARGS,
       pygpgme_context_decrypt_doc },
-    { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS },
-    { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS },
-    { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS },
-    { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS },
-    { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS },
-    { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS },
-    { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS },
-    { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS },
-    { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS },
+    { "decrypt_verify", (PyCFunction)pygpgme_context_decrypt_verify, METH_VARARGS,
+      pygpgme_context_decrypt_verify_doc },
+    { "sign", (PyCFunction)pygpgme_context_sign, METH_VARARGS,
+      pygpgme_context_sign_doc },
+    { "verify", (PyCFunction)pygpgme_context_verify, METH_VARARGS,
+      pygpgme_context_verify_doc },
+    { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS,
+      pygpgme_context_import_doc },
+    { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS,
+      pygpgme_context_export_doc },
+    { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS,
+      pygpgme_context_genkey_doc },
+    { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS,
+      pygpgme_context_delete_doc },
+    { "edit", (PyCFunction)pygpgme_context_edit, METH_VARARGS,
+      pygpgme_context_edit_doc },
+    { "card_edit", (PyCFunction)pygpgme_context_card_edit, METH_VARARGS,
+      pygpgme_context_card_edit_doc },
     { "keylist", (PyCFunction)pygpgme_context_keylist, METH_VARARGS,
       pygpgme_context_keylist_doc },
     // trustlist

@@ -26,51 +26,56 @@ __metaclass__ = type
 __all__ = ['edit_sign', 'edit_trust']
 
 import functools
+import io
 import os
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+import sys
+from typing import Callable, Generator, Optional
+if sys.version_info >= (3, 10):
+    from typing import Concatenate, ParamSpec
+else:
+    from typing_extensions import Concatenate, ParamSpec
+
 import gpgme
 
 
-def key_editor(function):
+P = ParamSpec("P")
+KeyEditorGen = Generator[Optional[str], tuple[gpgme.Status, Optional[str]], None]
+
+
+def key_editor(function: Callable[Concatenate[gpgme.Context, gpgme.Key, P], KeyEditorGen]) -> Callable[Concatenate[gpgme.Context, gpgme.Key, P], None]:
     """A decorator that lets key editor callbacks be written as generators."""
     @functools.wraps(function)
-    def wrapper(ctx, key, *args, **kwargs):
+    def wrapper(ctx: gpgme.Context, key: gpgme.Key, *args: P.args, **kwargs: P.kwargs) -> None:
         # Start the generator and run it once.
         gen = function(ctx, key, *args, **kwargs)
         try:
-            # XXX: this is for Python 2.x compatibility.
-            try:
-                gen.__next__()
-            except AttributeError:
-                gen.next()
+            gen.__next__()
         except StopIteration:
             return
 
-        def edit_callback(status, args, fd):
-            if status in (gpgme.STATUS_EOF,
-                          gpgme.STATUS_GOT_IT,
-                          gpgme.STATUS_NEED_PASSPHRASE,
-                          gpgme.STATUS_GOOD_PASSPHRASE,
-                          gpgme.STATUS_BAD_PASSPHRASE,
-                          gpgme.STATUS_USERID_HINT,
-                          gpgme.STATUS_SIGEXPIRED,
-                          gpgme.STATUS_KEYEXPIRED,
-                          gpgme.STATUS_PROGRESS,
-                          gpgme.STATUS_KEY_CREATED,
-                          gpgme.STATUS_ALREADY_SIGNED):
+        def edit_callback(status: gpgme.Status, args: Optional[str], fd: int) -> None:
+            if status in (gpgme.Status.EOF,
+                          gpgme.Status.GOT_IT,
+                          gpgme.Status.NEED_PASSPHRASE,
+                          gpgme.Status.GOOD_PASSPHRASE,
+                          gpgme.Status.BAD_PASSPHRASE,
+                          gpgme.Status.USERID_HINT,
+                          gpgme.Status.SIGEXPIRED,
+                          gpgme.Status.KEYEXPIRED,
+                          gpgme.Status.PROGRESS,
+                          gpgme.Status.KEY_CREATED,
+                          gpgme.Status.ALREADY_SIGNED,
+                          gpgme.Status.KEY_CONSIDERED):
                 return
             try:
                 data = gen.send((status, args))
             except StopIteration:
-                raise gpgme.error(gpgme.ERR_SOURCE_UNKNOWN, gpgme.ERR_GENERAL)
+                raise gpgme.GpgmeError(gpgme.ErrSource.UNKNOWN, gpgme.ErrCode.GENERAL)
 
             if data is not None:
                 os.write(fd, data.encode('ASCII'))
 
-        output = BytesIO()
+        output = io.BytesIO()
         try:
             ctx.edit(key, edit_callback, output)
         finally:
@@ -80,13 +85,13 @@ def key_editor(function):
 
 
 @key_editor
-def edit_trust(ctx, key, trust):
+def edit_trust(ctx: gpgme.Context, key: gpgme.Key, trust: gpgme.Validity) -> KeyEditorGen:
     """Edit the trust level of the given key."""
-    if trust not in (gpgme.VALIDITY_UNDEFINED,
-                     gpgme.VALIDITY_NEVER,
-                     gpgme.VALIDITY_MARGINAL,
-                     gpgme.VALIDITY_FULL,
-                     gpgme.VALIDITY_ULTIMATE):
+    if trust not in (gpgme.Validity.UNDEFINED,
+                     gpgme.Validity.NEVER,
+                     gpgme.Validity.MARGINAL,
+                     gpgme.Validity.FULL,
+                     gpgme.Validity.ULTIMATE):
         raise ValueError('Bad trust value %d' % trust)
 
     status, args = yield None
@@ -108,8 +113,9 @@ def edit_trust(ctx, key, trust):
 
 
 @key_editor
-def edit_sign(ctx, key, index=0, local=False, norevoke=False,
-              expire=True, check=0):
+def edit_sign(ctx: gpgme.Context, key: gpgme.Key, index: int = 0,
+              local: bool = False, norevoke: bool = False,
+              expire: bool = True, check: int = 0) -> KeyEditorGen:
     """Sign the given key.
 
     index:    the index of the user ID to sign, starting at 1.  Sign all

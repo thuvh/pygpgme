@@ -1,8 +1,5 @@
 import gpgme
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
+from io import BytesIO
 
 ctx = gpgme.Context()
 ctx.armor = True

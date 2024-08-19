@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygpgme"
+authors = [
+    {name = "James Henstridge", email="james@jamesh.id.au"},
+]
+description = "A Python module for working with OpenPGP messages"
+readme = "README.md"
+
+license = {file = "LICENSE.txt"}
+requires-python = ">= 3.9"
+classifiers = [
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
+    'Operating System :: POSIX',
+    'Programming Language :: C',
+    'Programming Language :: Python :: 3',
+    'Topic :: Security :: Cryptography',
+    'Topic :: Software Development :: Libraries :: Python Modules'
+]
+
+dependencies = [
+    'typing_extensions; python_version < "3.10"'
+]
+
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/jhenstridge/pygpgme"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["gpgme"]
+
+[tool.setuptools.dynamic]
+version = {attr = "gpgme.__version__"}
+
+[tool.setuptools.package-data]
+gpgme = ["*.pyi", "py.typed"]
+
+[tool.mypy]
+exclude = ["setup.py", "build", "dist"]
+explicit_package_bases = true
+mypy_path = "src"
+
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"
+musllinux-x86_64-image = "musllinux_1_2"
+
+test-command = "python -m unittest discover -v -t {project} {project}/tests"
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+before-all = "yum install -y gpgme-devel"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = "apk add gpgme-dev"

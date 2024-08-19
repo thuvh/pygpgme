@@ -33,8 +33,8 @@ set_errno(void)
     /* if we have an IOError, try and get the actual errno */
     if (PyErr_GivenExceptionMatches(exc, PyExc_IOError) && value != NULL) {
         py_errno = PyObject_GetAttrString(value, "errno");
-        if (py_errno != NULL && PyInt_Check(py_errno)) {
-            errno = PyInt_AsLong(py_errno);
+        if (py_errno != NULL && PyLong_Check(py_errno)) {
+            errno = PyLong_AsLong(py_errno);
         } else {
             PyErr_Clear();
             errno = EINVAL;
@@ -54,7 +54,7 @@ read_cb(void *handle, void *buffer, size_t size)
     PyGILState_STATE state;
     PyObject *fp = handle;
     PyObject *result;
-    int result_size;
+    ssize_t result_size;
 
     state = PyGILState_Ensure();
     result = PyObject_CallMethod(fp, "read", "l", (long)size);
@@ -73,7 +73,7 @@ read_cb(void *handle, void *buffer, size_t size)
     }
     /* copy the result into the given buffer */
     result_size = PyBytes_Size(result);
-    if (result_size > size)
+    if ((size_t)result_size > size)
         result_size = size;
     memcpy(buffer, PyBytes_AsString(result), result_size);
     Py_DECREF(result);
@@ -133,13 +133,13 @@ seek_cb(void *handle, off_t offset, int whence)
         offset = -1;
         goto end;
     }
-    if (!PyInt_Check(result)) {
+    if (!PyLong_Check(result)) {
         Py_DECREF(result);
         errno = EINVAL;
         offset = -1;
         goto end;
     }
-    offset = PyInt_AsLong(result);
+    offset = PyLong_AsLong(result);
     Py_DECREF(result);
  end:
     PyGILState_Release(state);

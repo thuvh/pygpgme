@@ -15,11 +15,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from io import BytesIO
 import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -45,7 +42,7 @@ signing_only_param = """
 
 class GenerateKeyTestCase(GpgHomeTestCase):
 
-    def assertCanSign(self, key):
+    def assertCanSign(self, key: gpgme.Key) -> None:
         """Check that the given key can be used to create signatures."""
         ctx = gpgme.Context()
         ctx.signers = [key]
@@ -54,8 +51,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         signature = BytesIO()
 
         ctx.armor = True
-        new_sigs = ctx.sign(
-            plaintext, signature, gpgme.SIG_MODE_DETACH)
+        new_sigs = ctx.sign(plaintext, signature, gpgme.SigMode.DETACH)
 
         signature.seek(0)
         plaintext.seek(0)
@@ -64,7 +60,7 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(len(sigs), 1)
         self.assertEqual(sigs[0].fpr, key.subkeys[0].fpr)
 
-    def _test_generate_signing_only_keys(self):
+    def _test_generate_signing_only_keys(self) -> None:
         ctx = gpgme.Context()
         result = ctx.genkey(signing_only_param)
 
@@ -77,13 +73,13 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         self.assertEqual(key.revoked, False)
         self.assertEqual(key.expired, False)
         self.assertEqual(key.secret, True)
-        self.assertEqual(key.protocol, gpgme.PROTOCOL_OpenPGP)
+        self.assertEqual(key.protocol, gpgme.Protocol.OpenPGP)
 
         # Single signing-only RSA key.
         self.assertEqual(len(key.subkeys), 1)
         subkey = key.subkeys[0]
         self.assertEqual(subkey.secret, True)
-        self.assertEqual(subkey.pubkey_algo, gpgme.PK_RSA)
+        self.assertEqual(subkey.pubkey_algo, gpgme.PubkeyAlgo.RSA)
         self.assertEqual(subkey.length, 1024)
 
         self.assertEqual(key.can_sign, True)
@@ -98,24 +94,15 @@ class GenerateKeyTestCase(GpgHomeTestCase):
         # Finally check if the generated key can perform signatures.
         self.assertCanSign(key)
 
-    def test_invalid_parameters(self):
+    def test_invalid_parameters(self) -> None:
         ctx = gpgme.Context()
         try:
             ctx.genkey('garbage parameters')
         except gpgme.GpgmeError as exc:
             self.assertTrue(hasattr(exc, "result"))
-            result = exc.result
+            result: gpgme.GenkeyResult = exc.result # type: ignore[assignment]
             self.assertEqual(result.primary, False)
             self.assertEqual(result.sub, False)
             self.assertEqual(result.fpr, None)
         else:
             self.fail("GpgmeError not raised")
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)
-
-
-if __name__ == '__main__':
-    unittest.main()

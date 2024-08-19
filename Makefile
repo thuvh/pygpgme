@@ -1,10 +1,10 @@
-PYTHON = python
+PYTHON = python3
 
 build:
 	$(PYTHON) setup.py build_ext -i
 
 check: build
-	GPG_AGENT_INFO= $(PYTHON) test_all.py -v
+	PYTHONPATH=./src $(PYTHON) -m unittest discover -v -t . tests
 
 clean:
 	$(PYTHON) setup.py clean

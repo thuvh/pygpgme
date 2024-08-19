@@ -15,13 +15,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from io import BytesIO
 import os
-import unittest
-try:
-    from io import BytesIO
-except ImportError:
-    from StringIO import StringIO as BytesIO
 from textwrap import dedent
+from typing import Optional
+import unittest
 
 import gpgme
 from tests.util import GpgHomeTestCase
@@ -31,7 +29,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
     import_keys = ['key1.pub', 'key1.sec', 'key2.pub', 'key2.sec',
                    'signonly.pub', 'signonly.sec']
 
-    def test_decrypt(self):
+    def test_decrypt(self) -> None:
         ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -57,7 +55,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'hello world\n')
 
-    def test_decrypt_verify(self):
+    def test_decrypt_verify(self) -> None:
         ciphertext = BytesIO(dedent('''
             -----BEGIN PGP MESSAGE-----
             Version: GnuPG v1.4.1 (GNU/Linux)
@@ -93,15 +91,15 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         self.assertEqual(sigs[0].timestamp, 1138049495)
         self.assertEqual(sigs[0].exp_timestamp, 0)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_encrypt(self):
+    def test_encrypt(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
-        ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+        ctx.encrypt([recipient], gpgme.EncryptFlags.ALWAYS_TRUST,
                     plaintext, ciphertext)
 
         # rewind ciphertext buffer, and try to decrypt:
@@ -110,13 +108,13 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_armor(self):
+    def test_encrypt_armor(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         ctx.armor = True
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
-        ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+        ctx.encrypt([recipient], gpgme.EncryptFlags.ALWAYS_TRUST,
                     plaintext, ciphertext)
 
         # rewind ciphertext buffer, and try to decrypt:
@@ -125,10 +123,10 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_symmetric(self):
+    def test_encrypt_symmetric(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
-        def passphrase(uid_hint, passphrase_info, prev_was_bad, fd):
+        def passphrase(uid_hint: Optional[str], passphrase_info: Optional[str], prev_was_bad: bool, fd: int) -> None:
             os.write(fd, b'Symmetric passphrase\n')
         ctx = gpgme.Context()
         ctx.armor = True
@@ -143,7 +141,7 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         ctx.decrypt(ciphertext, plaintext)
         self.assertEqual(plaintext.getvalue(), b'Hello World\n')
 
-    def test_encrypt_sign(self):
+    def test_encrypt_sign(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
@@ -151,11 +149,11 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
         signer = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         recipient = ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
         ctx.signers = [signer]
-        new_sigs = ctx.encrypt_sign([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+        new_sigs = ctx.encrypt_sign([recipient], gpgme.EncryptFlags.ALWAYS_TRUST,
                                     plaintext, ciphertext)
 
         self.assertEqual(len(new_sigs), 1)
-        self.assertEqual(new_sigs[0].type, gpgme.SIG_MODE_NORMAL)
+        self.assertEqual(new_sigs[0].type, gpgme.SigMode.NORMAL)
         self.assertEqual(new_sigs[0].fpr,
                         'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
 
@@ -170,24 +168,19 @@ class EncryptDecryptTestCase(GpgHomeTestCase):
                          'E79A842DA34A1CA383F64A1546BB55F0885C65A4')
         self.assertEqual(sigs[0].status, None)
         self.assertEqual(sigs[0].wrong_key_usage, False)
-        self.assertEqual(sigs[0].validity, gpgme.VALIDITY_UNKNOWN)
+        self.assertEqual(sigs[0].validity, gpgme.Validity.UNKNOWN)
         self.assertEqual(sigs[0].validity_reason, None)
 
-    def test_encrypt_to_signonly(self):
+    def test_encrypt_to_signonly(self) -> None:
         plaintext = BytesIO(b'Hello World\n')
         ciphertext = BytesIO()
         ctx = gpgme.Context()
         recipient = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
         try:
-            ctx.encrypt([recipient], gpgme.ENCRYPT_ALWAYS_TRUST,
+            ctx.encrypt([recipient], gpgme.EncryptFlags.ALWAYS_TRUST,
                         plaintext, ciphertext)
         except gpgme.GpgmeError as exc:
-            self.assertEqual(exc.args[0], gpgme.ERR_SOURCE_UNKNOWN)
-            self.assertEqual(exc.args[1], gpgme.ERR_GENERAL)
+            self.assertEqual(exc.args[0], gpgme.ErrSource.GPGME)
+            self.assertEqual(exc.args[1], gpgme.ErrCode.UNUSABLE_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError not raised')
-
-
-def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromName(__name__)

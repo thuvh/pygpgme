@@ -93,7 +93,7 @@ pygpgme_import_result(gpgme_ctx_t ctx)
         return NULL;
 
 #define ADD_INT(name) \
-    self->name = PyInt_FromLong(result->name)
+    self->name = PyLong_FromLong(result->name)
 
     ADD_INT(considered);
     ADD_INT(no_user_id);
@@ -123,10 +123,10 @@ pygpgme_import_result(gpgme_ctx_t ctx)
             py_fpr = Py_None;
             Py_INCREF(py_fpr);
         }
-        item = Py_BuildValue("(NNi)",
+        item = Py_BuildValue("(NNN)",
                              py_fpr,
                              pygpgme_error_object(status->result),
-                             status->status);
+                             pygpgme_enum_value_new(PyGpgmeImport_Type, status->status));
         if (!item) {
             Py_DECREF(self);
             return NULL;
@@ -134,6 +134,6 @@ pygpgme_import_result(gpgme_ctx_t ctx)
         PyList_Append(self->imports, item);
         Py_DECREF(item);
     }
-    
+
     return (PyObject *)self;
 }
