@@ -1,18 +1,3 @@
-# PyGPGME
-
-**Note:** This is a fork of the original project hosted on launchpad:
-https://launchpad.net/pygpgme
-
-The goal here is mainly to add docstrings to methods and generate some
-actual documentation of the Python library (w/o making users guess
-arguments by reading documentation of the C library..)
-
-## Documentation
-
-http://pygpgme.readthedocs.org/en/latest/
-
-## About pygpgme
-
 A Python binding for the gpgme library, used to drive the gpg command
 line program.
 
