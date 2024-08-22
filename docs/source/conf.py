@@ -9,7 +9,9 @@
 project = 'PyGPGME'
 copyright = '2024, PyGPGME contributors'
 author = 'PyGPGME contributors'
-release = '0.3'
+
+import gpgme
+release = gpgme.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -17,17 +19,18 @@ release = '0.3'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    'sphinx.ext.napoleon',
     'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-
+autodoc_default_options = {
+    'member-order': 'groupwise',
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
