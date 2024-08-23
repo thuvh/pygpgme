@@ -31,65 +31,17 @@ Key
 NewSignature
 ============
 
-.. py:class:: NewSignature
-
-    Data for newly created signatures.
-
-    Instances of this class are usually obtained as the result value of
-    :py:meth:`Context.sign` or :py:meth:`Context.encrypt_sign`.
+.. autoclass:: NewSignature
+   :members:
+   :undoc-members:
 
 
 Signature
 =========
 
-.. py:class:: Signature
-
-    Signature verification data.
-
-    Instances of this class are usually obtained as the return value of
-    :py:meth:`Context.verify` or :py:meth:`Context.decrypt_verify`.
-
-    .. py:attribute:: exp_timestamp
-
-        Expiration timestamp of the signature, or 0 if the signature does
-        not expire.
-
-    .. py:attribute:: fpr
-
-        Fingerprint string.
-
-    .. py:attribute:: notations
-
-        A list of notation data in the form of tuples ``(name, value)``.
-
-    .. py:attribute:: status
-
-        If an error occurred during verification (for example because the
-        signature is not valid) then this attribute contains a corresponding
-        :py:class:`GpgmeError` instance. Otherwise it is ``None``.
-
-    .. py:attribute:: summary
-
-        A bit array encoded as an integer containing general information
-        about the signature. Combine this value with one of the ``SIGSUM_*``
-        constants using bitwise AND.
-
-    .. py:attribute:: timestamp
-
-        Creation timestamp of the signature.
-
-    .. py:attribute:: validity
-
-        Validity of the signature. See :py:attr:`Signature.validity_reason`.
-
-    .. py:attribute:: validity_reason
-
-        If a signature is not valid this may provide a reason why. See
-        :py:attr:`Signature.validity`.
-
-    .. py:attribute:: wrong_key_usage
-
-        True if the key was not used according to its policy.
+.. autoclass:: Signature
+   :members:
+   :undoc-members:
 
 
 Helper Objects
