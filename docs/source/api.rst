@@ -122,39 +122,38 @@ Protocol Selection
 The following constants can be used as value for :py:attr:`Context.protocol`.
 They are also returned via :py:attr:`Key.protocol`.
 
-.. py:data:: PROTOCOL_OpenPGP
+.. autoclass:: Protocol(enum.IntEnum)
+
+  .. autoattribute:: OpenPGP
 
     This specifies the OpenPGP protocol.
 
-.. py:data:: PROTOCOL_CMS
+  .. autoattribute:: CMS
 
     This specifies the Cryptographic Message Syntax.
 
-.. py:data:: PROTOCOL_ASSUAN
+  .. autoattribute:: ASSUAN
 
-     [#missing-const]_ Under development. Please ask on
-     gnupg-devel@gnupg.org for help.
+     Under development. Please ask on  gnupg-devel@gnupg.org for help.
 
-.. py:data:: PROTOCOL_G13
+  .. autoattribute:: G13
 
-     [#missing-const]_ Under development. Please ask on
-     gnupg-devel@gnupg.org for help.
+     Under development. Please ask on gnupg-devel@gnupg.org for help.
 
-.. py:data:: PROTOCOL_UISERVER
+  .. autoattribute:: UISERVER
 
-     [#missing-const]_ Under development. Please ask on
-     gnupg-devel@gnupg.org for help.
+     Under development. Please ask on gnupg-devel@gnupg.org for help.
 
-.. py:data:: PROTOCOL_SPAWN
+  .. autoattribute:: SPAWN
 
-     [#missing-const]_ Special protocol for use with ``gpgme_op_spawn``.
+     Special protocol for use with ``gpgme_op_spawn``.
 
-.. py:data:: PROTOCOL_UNKNOWN
+  .. autoattribute:: UNKNOWN
 
-     [#missing-const]_ Reserved for future extension. You may use this to
-     indicate that the used protocol is not known to the application.
-     Currently, GPGME does not accept this value in any operation, though,
-     except for ``gpgme_get_protocol_name``.
+     Reserved for future extension. You may use this to indicate that
+     the used protocol is not known to the application.  Currently,
+     GPGME does not accept this value in any operation, though, except
+     for ``gpgme_get_protocol_name``.
 
 
 Key Listing Mode
@@ -163,46 +162,49 @@ Key Listing Mode
 Bitwise OR combinations of the following constants can be used as values for
 :py:attr:`Context.keylist_mode`.
 
-.. py:data:: KEYLIST_MODE_LOCAL
+.. autoclass:: KeylistMode(enum.IntFlag)
+
+  .. autoattribute:: LOCAL
 
     Specifies that the local keyring should be searched. This is the default.
 
-.. py:data:: KEYLIST_MODE_EXTERN
+  .. autoattribute:: EXTERN
 
     Specifies that an external source should be searched. The type of external
     source is dependant on the crypto engine used and whether it is combined
-    with :py:data:`KEYLIST_MODE_LOCAL`. For example, it can be a remote
-    keyserver or LDAP certificate server.
+    with :py:data:`LOCAL`. For example, it can be a remote keyserver or LDAP
+    certificate server.
 
-.. py:data:: KEYLIST_MODE_SIGS
+  .. autoattribute:: SIGS
 
     Specifies that the key signatures should be included in the listed keys.
 
-.. py:data:: KEYLIST_MODE_SIG_NOTATIONS
+  .. autoattribute:: SIG_NOTATIONS
 
-    [#missing-const]_ Specifies that the signature notations on key signatures
-    should be included in the listed keys. This only works if
-    :py:data:`KEYLIST_MODE_SIGS` is also enabled.
+    Specifies that the signature notations on key signatures should be
+    included in the listed keys. This only works if :py:data:`SIGS` is
+    also enabled.
 
-.. py:data:: KEYLIST_MODE_WITH_SECRET
+  .. autoattribute:: WITH_SECRET
 
-    [#missing-const]_ Returns information about the presence of a corresponding
-    secret key in a public key listing. A public key listing with this mode is
-    slower than a standard listing but can be used instead of a second run to
-    list the secret keys. This is only supported for GnuPG versions >= 2.1.
+    Returns information about the presence of a corresponding secret
+    key in a public key listing. A public key listing with this mode
+    is slower than a standard listing but can be used instead of a
+    second run to list the secret keys. This is only supported for
+    GnuPG versions >= 2.1.
 
-.. py:data:: KEYLIST_MODE_EPHEMERAL
+  .. autoattribute:: EPHEMERAL
 
-    [#missing-const]_ Specifies that keys flagged as ephemeral are included in
-    the listing.
+    Specifies that keys flagged as ephemeral are included in the
+    listing.
 
-.. py:data:: KEYLIST_MODE_VALIDATE
+  .. autoattribute:: VALIDATE
 
-    [#missing-const]_ Specifies that the backend should do key or certificate
-    validation and not just get the validity information from an internal
-    cache. This might be an expensive operation and is in general not useful.
-    Currently only implemented for the S/MIME backend and ignored for other
-    backends.
+    Specifies that the backend should do key or certificate validation
+    and not just get the validity information from an internal
+    cache. This might be an expensive operation and is in general not
+    useful.  Currently only implemented for the S/MIME backend and
+    ignored for other backends.
 
 
 Encryption Flags
@@ -212,33 +214,35 @@ Bitwise OR combinations of the following constants can be used for the
 ``flags`` parameter of :py:meth:`Context.encrypt` and
 :py:meth:`Context.encrypt_sign`.
 
-.. py:data:: ENCRYPT_ALWAYS_TRUST
+.. autoclass:: EncryptFlags(enum.IntFlags)
+
+  .. autoattribute:: ALWAYS_TRUST
 
   Specifies that all the recipients in recp should be trusted, even if
   the keys do not have a high enough validity in the keyring. This
   flag should be used with care; in general it is not a good idea to
   use any untrusted keys.
 
-.. py:data:: ENCRYPT_NO_ENCRYPT_TO
+  .. autoattribute:: NO_ENCRYPT_TO
 
-  [#missing-const]_ Specifies that no default or hidden default recipients as
-  configured in the crypto backend should be included. This can be useful for
+  Specifies that no default or hidden default recipients as configured
+  in the crypto backend should be included. This can be useful for
   managing different user profiles.
 
-.. py:data:: ENCRYPT_NO_COMPRESS
+  .. autoattribute:: PREPARE
 
-  [#missing-const]_ Specifies that the plaintext shall not be compressed before
-  it is encrypted. This is in some cases useful if the length of the encrypted
-  message may reveal information about the plaintext.
+  Used with the UI Server protocol to prepare an encryption.
 
-.. py:data:: ENCRYPT_PREPARE
+  .. autoattribute:: EXPECT_SIGN
 
-  [#missing-const]_ Used with the UI Server protocol to prepare an encryption.
+  Used with the UI Server protocol to advise the UI server to expect a
+  sign command.
 
-.. py:data:: ENCRYPT_EXPECT_SIGN
+  .. autoattribute:: NO_COMPRESS
 
-  [#missing-const]_ Used with the UI Server protocol to advise the UI server to
-  expect a sign command.
+  Specifies that the plaintext shall not be compressed before it is
+  encrypted. This is in some cases useful if the length of the
+  encrypted message may reveal information about the plaintext.
 
 
 Signing Modes
@@ -247,16 +251,18 @@ Signing Modes
 The following constants can be used for the ``mode`` parameter of
 :py:meth:`Context.sign`.
 
-.. py:data:: SIG_MODE_NORMAL
+.. autoclass:: SigMode(enum.IntEnum)
+
+  .. autoattribute:: NORMAL
 
     A normal signature is made, the output includes the plaintext and the
     signature. :py:attr:`Context.armor` is respected.
 
-.. py:data:: SIG_MODE_DETACHED
+  .. autoattribute:: DETACH
 
     A detached signature is created. :py:attr:`Context.armor` is respected.
 
-.. py:data:: SIG_MODE_CLEAR
+  .. autoattribute:: CLEAR
 
     A cleartext signature is created. :py:attr:`Context.armor` is ignored.
 
@@ -267,55 +273,53 @@ Signature Verification
 The following bit masks can be used to extract individual bits from
 :py:attr:`Signature.summary` using bitwise AND.
 
-.. py:data:: SIGSUM_VALID
+.. autoclass:: Sigsum(enum.IntFlag)
+
+  .. autoattribute:: VALID
 
     The signature is fully valid.
 
-.. py:data:: SIGSUM_GREEN
+  .. autoattribute:: GREEN
 
     The signature is good but one might want to display some extra information.
     Check the other bits.
 
-.. py:data:: SIGSUM_RED
+  .. autoattribute:: RED
 
     The signature is bad. It might be useful to check other bits and display
     more information, i.e. a revoked certificate might not render a signature
     invalid when the message was received prior to the cause for the
     revocation.
 
-.. py:data:: SIGSUM_KEY_REVOKED
+  .. autoattribute:: KEY_REVOKED
 
     The key or at least one certificate has been revoked.
 
-.. py:data:: SIGSUM_KEY_EXPIRED
+  .. autoattribute:: KEY_EXPIRED
 
     The key or one of the certificates has expired.
 
-.. py:data:: SIGSUM_SIG_EXPIRED
+  .. autoattribute:: SIG_EXPIRED
 
     The signature has expired.
 
-.. py:data:: SIGSUM_KEY_MISSING
+  .. autoattribute:: KEY_MISSING
 
     Can’t verify due to a missing key or certificate.
 
-.. py:data:: SIGSUM_CRL_MISSING
+  .. autoattribute:: CRL_MISSING
 
     The certificate revocation list (or an equivalent mechanism) is not
     available.
 
-.. py:data:: SIGSUM_CRL_TOO_OLD
+  .. autoattribute:: CRL_TOO_OLD
 
     The available certificate revocation list is too old.
 
-.. py:data:: SIGSUM_BAD_POLICY
+  .. autoattribute:: BAD_POLICY
 
     A policy requirement was not met.
 
-.. py:data:: SIGSUM_SYS_ERROR
+  .. autoattribute:: SYS_ERROR
 
     A system error occured.
-
-
-.. [#missing-const] This constant is defined by the gpgme library, but
-                    is currently missing in pygpgme.
