@@ -29,12 +29,34 @@ pygpgme_genkey_result_dealloc(PyGpgmeGenkeyResult *self)
     PyObject_Del(self);
 }
 
+static const char pygpgme_genkey_result_primary_doc[] =
+    "True if a primary key was generated.";
+
+static const char pygpgme_genkey_result_sub_doc[] =
+    "True if a subkey was generated.";
+
+static const char pygpgme_genkey_result_fpr_doc[] =
+    "String containing the fingerprint of the generated key.\n"
+    "\n"
+    "If both a primary and a subkey were generated then this is the\n"
+    "fingerprint of the primary key. For crypto backends that do not\n"
+    "provide key fingerprints this is ``None``.";
+
 static PyMemberDef pygpgme_genkey_result_members[] = {
-    { "primary", T_OBJECT, offsetof(PyGpgmeGenkeyResult, primary), READONLY},
-    { "sub", T_OBJECT, offsetof(PyGpgmeGenkeyResult, sub), READONLY},
-    { "fpr", T_OBJECT, offsetof(PyGpgmeGenkeyResult, fpr), READONLY},
-    { NULL, 0, 0, 0}
+    { "primary", T_OBJECT, offsetof(PyGpgmeGenkeyResult, primary), READONLY,
+      pygpgme_genkey_result_primary_doc },
+    { "sub", T_OBJECT, offsetof(PyGpgmeGenkeyResult, sub), READONLY,
+      pygpgme_genkey_result_sub_doc },
+    { "fpr", T_OBJECT, offsetof(PyGpgmeGenkeyResult, fpr), READONLY,
+      pygpgme_genkey_result_fpr_doc },
+    { NULL, 0, 0, 0 },
 };
+
+static const char pygpgme_genkey_result_doc[] =
+    "Key generation result.\n"
+    "\n"
+    "Instances of this class are usually obtained as the return value\n"
+    "of :meth:`Context.genkey`.\n";
 
 PyTypeObject PyGpgmeGenkeyResult_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -44,6 +66,7 @@ PyTypeObject PyGpgmeGenkeyResult_Type = {
     .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_genkey_result_dealloc,
     .tp_members = pygpgme_genkey_result_members,
+    .tp_doc = pygpgme_genkey_result_doc,
 };
 
 PyObject *

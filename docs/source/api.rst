@@ -15,117 +15,17 @@ Context
 GenkeyResult
 ============
 
-.. py:class:: GenkeyResult
-
-    Key generation result.
-
-    Instances of this class are usually obtained as the return value
-    of :py:meth:`Context.genkey`.
-
-    .. py:attribute:: fpr
-
-        String containing the fingerprint of the generated key. If both a
-        primary and a subkey were generated then this is the fingerprint of
-        the primary key. For crypto backends that do not provide key
-        fingerprints this is ``None``.
-
-    .. py:attribute:: primary
-
-        True if a primary key was generated.
-
-    .. py:attribute:: sub
-
-        True if a sub key was generated.
+.. autoclass:: GenkeyResult
+   :members:
+   :undoc-members:
 
 
 Key
 ===
 
-.. py:class:: Key
-
-    .. py:attribute:: revoked
-
-        True if the key has been revoked.
-
-    .. py:attribute:: expired
-
-        True if the key has expired.
-
-    .. py:attribute:: disabled
-
-        True if the key is disabled.
-
-    .. py:attribute:: invalid
-
-       True if the key is invalid. This might have several reasons. For
-       example, for the S/MIME backend it will be set during key listing if the
-       key could not be validated due to a missing certificates or unmatched
-       policies.
-
-    .. py:attribute:: can_encrypt
-
-       True if the key (i.e. one of its subkeys) can be used for encryption.
-
-    .. py:attribute:: can_sign
-
-       True if the key (i.e. one of its subkeys) can be used to create
-       signatures.
-
-    .. py:attribute:: can_certify
-
-       True if the key (i.e. one of its subkeys) can be used to create key
-       certificates.
-
-    .. py:attribute:: secret
-
-       True if the key is a secret key. Note that this will always be true even
-       if the corresponding subkey flag may be false (offline/stub keys). This
-       is only set if a listing of secret keys has been requested or if
-       :py:data:`KEYLIST_MODE_WITH_SECRET` is active.
-
-    .. py:attribute:: can_authenticate
-
-       True if the key (i.e. one of its subkeys) can be used for
-       authentication.
-
-    .. py:attribute:: protocol
-
-       The protocol supported by this key. See the ``PROTOCOL_*`` constants.
-
-    .. py:attribute:: issuer_serial
-
-       If :py:attr:`Key.protocol` is :py:data:`PROTOCOL_CMS` then this is the
-       issuer serial.
-
-    .. py:attribute:: issuer_name
-
-       If :py:attr:`Key.protocol` is :py:data:`PROTOCOL_CMS` then this is the
-       issuer name.
-
-    .. py:attribute:: chain_id
-
-       If :py:attr:`Key.protocol` is :py:data:`PROTOCOL_CMS` then this is the
-       chain ID, which can be used to built the certificate chain.
-
-    .. py:attribute:: owner_trust
-
-       If :py:attr:`Key.protocol` is :py:data:`PROTOCOL_OpenPGP` then this is
-       the owner trust.
-
-    .. py:attribute:: subkeys
-
-       List of the key's subkeys as instances of :py:class:`Subkey`. The first
-       subkey in the list is the primary key and usually available.
-
-    .. py:attribute:: uids
-
-       List of the key's user IDs as instances of :py:class:`UserId`. The first
-       user ID in the list is the main (or primary) user ID.
-
-    .. py:attribute:: keylist_mode
-
-        The keylist mode that was active when the key was retrieved. See
-        :py:attr:`Context.keylist_mode`.
+.. autoclass:: Key
+   :members:
+   :undoc-members:
 
 
 NewSignature
