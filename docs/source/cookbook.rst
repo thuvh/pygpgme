@@ -10,7 +10,6 @@ Listing All Keys
 
 Use :py:meth:`Context.keylist` without arguments to get all keys::
 
-    from __future__ import print_function
     import gpgme
 
     c = gpgme.Context()
@@ -36,7 +35,6 @@ Searching for a Specific Key
 To search for a key using parts of the key owner's name or e-mail address, pass
 a query to :py:meth:`gpgme.Context.keylist`::
 
-    from __future__ import print_function
     import gpgme
 
     c = gpgme.Context()
@@ -46,7 +44,6 @@ a query to :py:meth:`gpgme.Context.keylist`::
 To get a key via its fingerprint, use :py:meth:`gpgme.Context.get_key` instead
 (note that you must pass the full fingerprint)::
 
-    from __future__ import print_function
     import gpgme
 
     c = gpgme.Context()
@@ -70,13 +67,13 @@ form, so make sure to open the ciphertext files in binary mode::
     recipient = c.get_key("fingerprint of recipient's key")
 
     # Encrypt
-    with open('foo.txt', 'r') as input_file:
+    with open('foo.txt', 'rb') as input_file:
         with open('foo.txt.gpg', 'wb') as output_file:
             c.encrypt([recipient], 0, input_file, output_file)
 
     # Decrypt
     with open('foo.txt.gpg', 'rb') as input_file:
-        with open('foo2.txt', 'w') as output_file:
+        with open('foo2.txt', 'wb') as output_file:
             c.decrypt(input_file, output_file)
 
 If you set :py:attr:`gpgme.Context.armor` to ``True`` then the ciphertext is
@@ -145,8 +142,6 @@ To encrypt string data, you therefore need to encode it to binary first::
 Even if :py:attr:`gpgme.Context.armor` is true and the encrypted output is text
 you still need to use binary buffers. That is not a problem, however, since the
 armor uses plain ASCII::
-
-    from __future__ import print_function
 
     import io
     import gpgme
