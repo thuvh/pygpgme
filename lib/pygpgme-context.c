@@ -99,7 +99,7 @@ pygpgme_context_init(PyGpgmeContext *self, PyObject *args, PyObject *kwargs)
 }
 
 static const char pygpgme_context_protocol_doc[] =
-    "The encryption system for this context (one of the PROTOCOL_* constants).";
+    "The encryption system for this context (one of the :class:`Protocol` constants).";
 
 static PyObject *
 pygpgme_context_get_protocol(PyGpgmeContext *self)
@@ -128,7 +128,9 @@ pygpgme_context_set_protocol(PyGpgmeContext *self, PyObject *value)
 }
 
 static const char pygpgme_context_armor_doc[] =
-    "Whether encrypted data should be ASCII-armored.";
+    "Whether encrypted data should be ASCII-armored or not.\n"
+    "\n"
+    "Used by :meth:`encrypt`, meth:`encrypt_sign`, and :meth:`sign`.";
 
 static PyObject *
 pygpgme_context_get_armor(PyGpgmeContext *self)
@@ -237,8 +239,11 @@ pygpgme_context_set_include_certs(PyGpgmeContext *self, PyObject *value)
 }
 
 static const char pygpgme_context_keylist_mode_doc[] =
-    "Set to KEYLIST_MODE_* constants added together.\n\nSee GPGME docs "
-    "for details.";
+    "Default key listing behaviour.\n"
+    "\n"
+    "Controls which keys :meth:`keylist` returns. The value is a bitwise\n"
+    "OR combination of one or multiple of the :class:`KeylistMode`\n"
+    "constants. Defaults to :data:`KeylistMode.LOCAL`.";
 
 static PyObject *
 pygpgme_context_get_keylist_mode(PyGpgmeContext *self)
@@ -395,7 +400,9 @@ pygpgme_context_set_progress_cb(PyGpgmeContext *self, PyObject *value)
 }
 
 static const char pygpgme_context_signers_doc[] =
-    "A list of Key objects, used to sign data with the .sign() method.";
+    "List of :class:`Key` instances used for signing.\n"
+    "\n"
+    "See also :meth:`sign` and :meth:`encrypt_sign`.";
 
 static PyObject *
 pygpgme_context_get_signers(PyGpgmeContext *self)
@@ -599,7 +606,22 @@ static PyGetSetDef pygpgme_context_getsets[] = {
 
 static const char pygpgme_context_set_engine_info_doc[] =
     "set_engine_info($self, protocol, file_name, home_dir, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Configure a crypto backend.\n"
+    "\n"
+    "Updates the configuration of the crypto backend for the given protocol.\n"
+    "If this function is used then it must be called before any crypto\n"
+    "operation is performed on the context.\n"
+    "\n"
+    "Args:\n"
+    "  protocol(Protocol): One of the :class:``Protocol`` constants\n"
+    "    specifying which crypto backend is to be configured. Note that\n"
+    "    this does not change which crypto backend is actually used, see\n"
+    "    :attr:`Context.protocol` for that.\n"
+    "  file_name(str): The path to the executable implementing the protocol.\n"
+    "    If ``None`` then the default will be used.\n"
+    "  home_dir(str): The path of the configuration directory of the crypto\n"
+    "    backend. If ``None`` then the default will be used.\n";
 
 static PyObject *
 pygpgme_context_set_engine_info(PyGpgmeContext *self, PyObject *args)
@@ -652,8 +674,15 @@ static const char pygpgme_context_get_key_doc[] =
     "get_key($self, fingerprint, secret=False, /)\n"
     "--\n\n"
     "Finds a key with the given fingerprint (a string of hex digits) in\n"
-    "the user's keyring. If secret is 1, only private keys will be\n"
-    "returned.\n\nIf no key can be found, raises GpgmeError.";
+    "the user's keyring.\n"
+    "\n"
+    "Args:\n"
+    "  fingerprint(str): Fingerprint of the key to look for\n"
+    "  secret(bool): If True, only private keys will be returned.\n"
+    "Returns:\n"
+    "  Key: the key matching the fingerprint.\n"
+    "\n"
+    "If no key can be found, raises :exc:`GpgmeError`.\n";
 
 static PyObject *
 pygpgme_context_get_key(PyGpgmeContext *self, PyObject *args)
@@ -727,17 +756,20 @@ decode_encrypt_result(PyGpgmeContext *self)
 static const char pygpgme_context_encrypt_doc[] =
     "encrypt($self, recipients, flags, plaintext, ciphertext, /)\n"
     "--\n\n"
-    "Encrypts plaintext so it can only be read by the given recipients.\n\n"
-    "recipients: A list of Key objects. Only people in posession of the\n"
-    "  corresponding private key (for public key encryption) or passphrase\n"
-    "  (for symmetric encryption) will be able to decrypt the result.\n\n"
-    "flags: ENCRYPT_* constants added together. See GPGME docs for\n"
-    "  details.\n\n"
-    "plaintext: A file-like object opened for reading, containing the data\n"
-    "  to be encrypted.\n\n"
-    "ciphertext: A file-like object opened for writing, where the\n"
-    "  encrypted data will be written. If the Context's .armor property is\n"
-    "  False, this file should be opened in binary mode.";
+    "Encrypts plaintext so it can only be read by the given recipients.\n"
+    "\n"
+    "Args:\n"
+    "  recipients(list[Key]): A list of :class:`Key` objects. Only people in\n"
+    "    posession of the corresponding private key (for public key\n"
+    "    encryption) or passphrase (for symmetric encryption) will be able\n"
+    "    to decrypt the result.\n\n"
+    "  flags(EncryptFlags): See GPGME docs for details.\n"
+    "  plaintext(file): A file-like object opened for reading, containing\n"
+    "    the data to be encrypted.\n"
+    "  ciphertext(file): A file-like object opened for writing, where the\n"
+    "    encrypted data will be written.\n"
+    "\n"
+    "See also :meth:`encrypt_sign` and :meth:`decrypt`.\n";
 
 static PyObject *
 pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
@@ -803,7 +835,27 @@ pygpgme_context_encrypt(PyGpgmeContext *self, PyObject *args)
 
 static const char pygpgme_context_encrypt_sign_doc[] =
     "encrypt_sign($self, recipients, flags, plain, cipher, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Encrypt and sign plaintext.\n"
+    "\n"
+    "Works like :meth:`encrypt`, but the ciphertext is also signed using\n"
+    "all keys listed in :attr:`Context.signers`.\n"
+    "\n"
+    "Args:\n"
+    "  recipients(list[Key]): A list of :class:`Key` objects. Only people in\n"
+    "    posession of the corresponding private key (for public key\n"
+    "    encryption) or passphrase (for symmetric encryption) will be able\n"
+    "    to decrypt the result.\n\n"
+    "  flags(EncryptFlags): See GPGME docs for details.\n"
+    "  plaintext(file): A file-like object opened for reading, containing\n"
+    "    the data to be encrypted.\n"
+    "  ciphertext(file): A file-like object opened for writing, where the\n"
+    "    encrypted data will be written.\n"
+    "Returns:\n"
+    "  list[NewSignature]: A list of :class:`NewSignature` instances (one\n"
+    "    for each key in :attr:`Context.signers`).\n"
+    "\n"
+    "See also :meth:`decrypt_verify`.\n";
 
 static PyObject *
 pygpgme_context_encrypt_sign(PyGpgmeContext *self, PyObject *args)
@@ -950,17 +1002,22 @@ decode_decrypt_result(PyGpgmeContext *self)
 }
 
 static const char pygpgme_context_decrypt_doc[] =
-    "decrypt($self, ciphertext, plaintext, /)\n"
+    "decrypt($self, cipher, plain, /)\n"
     "--\n\n"
-    "Decrypts the ciphertext and writes out the plaintext.\n\n"
-    "ciphertext: A file-like object opened for reading, containing the\n"
-    "  encrypted data.\n\n"
-    "plaintext: A file-like object opened for writing, where the decrypted\n"
-    "  data will be written.\n\n"
+    "Decrypts the ciphertext and writes out the plaintext.\n"
+    "\n"
     "To decrypt data, you must have one of the recipients' private keys in\n"
-    "your keyring (for public key encryption) or the passphrase (for \n"
+    "your keyring (for public key encryption) or the passphrase (for\n"
     "symmetric encryption). If gpg finds the key but needs a passphrase to\n"
-    "unlock it, the .passphrase_cb callback will be used to ask for it.";
+    "unlock it, the .passphrase_cb callback will be used to ask for it.\n"
+    "\n"
+    "Args:\n"
+    "  cipher(file): A file-like object opened for reading, containing\n"
+    "    the encrypted data.\n"
+    "  plain(file): A file-like object opened for writing, where the\n"
+    "    decrypted data will be written.\n"
+    "\n"
+    "See also :meth:`decrypt_verify` and :meth:`encrypt`.\n";
 
 static PyObject *
 pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
@@ -998,7 +1055,24 @@ pygpgme_context_decrypt(PyGpgmeContext *self, PyObject *args)
 
 static const char pygpgme_context_decrypt_verify_doc[] =
     "decrypt_verify($self, cipher, plain, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Decrypt ciphertext and verify signatures.\n"
+    "\n"
+    "Like :meth:`decrypt`, but also checks the signatures of the ciphertext.\n"
+    "\n"
+    "Args:\n"
+    "  cipher(file): A file-like object opened for reading, containing\n"
+    "    the encrypted data.\n"
+    "  plain(file): A file-like object opened for writing, where the\n"
+    "    decrypted data will be written.\n"
+    "Returns:\n"
+    "   list[Signature]: A list of :class:`Signature` instances (one for\n"
+    "   each key that was used in the signature). Note that you need to\n"
+    "   inspect the return value to check whether the signatures are valid\n"
+    "   -- a syntactically correct but invalid signature does not raise an\n"
+    "   error!\n"
+    "\n"
+    "See also :py:meth:`encrypt_sign`.";
 
 static PyObject *
 pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
@@ -1064,7 +1138,22 @@ pygpgme_context_decrypt_verify(PyGpgmeContext *self, PyObject *args)
 
 static const char pygpgme_context_sign_doc[] =
     "sign($self, plain, sig, sig_mode=0, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Sign plaintext to certify and timestamp it.\n"
+    "\n"
+    "The plaintext is signed using all keys listed in\n"
+    ":attr:`Context.signers`.\n"
+    "\n"
+    "Args:\n"
+    "  plain(file): A file-like object opened for reading, containing the\n"
+    "    plaintext to be signed.\n"
+    "  sig(file): A file-like object opened for writing, where the signature\n"
+    "    data will be written. The signature data may contain the plaintext\n"
+    "    or not, see the ``mode`` parameter.\n"
+    "  sig_mode(SigMode): One of the :class:``SigMode`` constants.\n"
+    "Returns:\n"
+    "  list[NewSignature]: A list of :class:`NewSignature` instances (one\n"
+    "    for each key in :attr:`Context.signers`).\n";
 
 static PyObject *
 pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
@@ -1145,7 +1234,26 @@ pygpgme_context_sign(PyGpgmeContext *self, PyObject *args)
 
 static const char pygpgme_context_verify_doc[] =
     "verify($self, sig, signed_text, plaintext, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Verify signature(s) and extract plaintext.\n"
+    "\n"
+    "Args:\n"
+    "  sig(file): a file-like object opened for reading, containing the\n"
+    "    signature data.\n"
+    "  signed_text(file | None): If ``sig`` contains a detached signature\n"
+    "    (i.e. created using :data:`SigMode.DETACHED`) then ``signed_text``\n"
+    "    should be a file-like object opened for reading containing the text\n"
+    "    covered by the signature.\n"
+    "  plaintext(file | None): If ``sig`` contains a normal or cleartext\n"
+    "    signature (i.e. created using :data:`SigMode.NORMAL` or\n"
+    "    :data:`SigMode.CLEAR`) then ``plaintext`` should be a file-like\n"
+    "    object opened for writing that will receive the extracted plaintext.\n"
+    "Returns:\n"
+    "  list[Signature]: A list of :class:`Signature` instances (one for each\n"
+    "    key that was used in ``sig``). Note that you need to inspect the\n"
+    "    return value to check whether the signatures are valid -- a\n"
+    "    syntactically correct but invalid signature does not raise an\n"
+    "    error!\n";
 
 static PyObject *
 pygpgme_context_verify(PyGpgmeContext *self, PyObject *args)
@@ -1386,7 +1494,37 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 
 static const char pygpgme_context_genkey_doc[] =
     "genkey($self, params, pubkey=None, seckey=None, /)\n"
-    "--\n\n";
+    "--\n\n"
+    "Generate a new key pair.\n"
+    "\n"
+    "The functionality of this method depends on the crypto backend set\n"
+    "via :attr:`Context.protocol`. This documentation only covers PGP/GPG\n"
+    "(i.e. :data:`Protocol.OpenPGP`).\n"
+    "\n"
+    "The generated key pair is automatically added to the key ring. Use\n"
+    ":meth:`set_engine_info` to configure the location of the key ring\n"
+    "files.\n"
+    "\n"
+    "Args:\n"
+    "  params(str): A string containing the parameters for key generation.\n"
+    "    The general syntax is as follows::\n"
+    "\n"
+    "      <GnupgKeyParms format=\"internal\">\n"
+    "        Key-Type: RSA\n"
+    "        Key-Length: 2048\n"
+    "        Name-Real: Jim Joe\n"
+    "        Passphrase: secret passphrase\n"
+    "        Expire-Date: 0\n"
+    "      </GnupgKeyParms>\n"
+    "\n"
+    "    For a detailed listing of the available options please refer to the\n"
+    "    `GPG key generation documentation`_.\n"
+    "  public(file): Must be ``None``.\n"
+    "  secret(file): Must be ``None``.\n"
+    "Returns:\n"
+    "  GenkeyResult: An instance of :class:`gpgme.GenkeyResult`.\n"
+    "\n"
+    ".. _`GPG key generation documentation`: https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html\n";
 
 static PyObject *
 pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
@@ -1546,14 +1684,20 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_keylist_doc[] =
-    "keylist($self, strOrSeq=None, secret=False, /)\n"
+    "keylist($self, query=None, secret=False, /)\n"
     "--\n\n"
-    "Searches for keys matching the given pattern(s).\n\n"
-    "strOrSeq: If None or not supplied, the KeyIter fetches all available\n"
-    "  keys. If a string, it fetches keys matching the given pattern (such\n"
-    "  as a name or email address). If a sequence of strings, it fetches\n"
-    "  keys matching at least one of the given patterns.\n\n"
-    "secret: If True, only secret keys will be returned (like 'gpg -K').";
+    "Searches for keys matching the given pattern(s).\n"
+    "\n"
+    "Args:\n"
+    "  query(str | list[str] | None): If ``None`` or not supplied, the\n"
+    "    :class:`KeyIter` fetches all available keys. If a string, it\n"
+    "    fetches keys matching the given pattern (such as a name or email\n"
+    "    address). If a sequence of strings, it fetches keys matching at\n"
+    "    least one of the given patterns.\n"
+    "  secret(bool): If ``True``, only secret keys will be returned (like\n"
+    "    'gpg -K').\n"
+    "Returns:\n"
+    "  KeyIter: an iterator over the matching :class:`Key` objects.\n";
 
 static PyObject *
 pygpgme_context_keylist(PyGpgmeContext *self, PyObject *args)
@@ -1632,8 +1776,12 @@ static PyMethodDef pygpgme_context_methods[] = {
 };
 
 static const char pygpgme_context_doc[] =
-    "The settings and methods for interacting with GPG.\n\n"
-    "Context() -> Context instance";
+    "Configuration and internal state for cryptographic operations.\n"
+    "\n"
+    "This is the main class of :mod:`gpgme`. The constructor takes\n"
+    "no arguments::\n"
+    "\n"
+    "    ctx = gpgme.Context()\n";
 
 PyTypeObject PyGpgmeContext_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)

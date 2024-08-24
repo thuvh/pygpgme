@@ -420,11 +420,17 @@ pygpgme_key_dealloc(PyGpgmeKey *self)
     PyObject_Del(self);
 }
 
+static const char pygpgme_key_revoked_doc[] =
+    "True if the key has been revoked.";
+
 static PyObject *
 pygpgme_key_get_revoked(PyGpgmeKey *self)
 {
     return PyBool_FromLong(self->key->revoked);
 }
+
+static const char pygpgme_key_expired_doc[] =
+    "True if the key has expired.";
 
 static PyObject *
 pygpgme_key_get_expired(PyGpgmeKey *self)
@@ -432,11 +438,21 @@ pygpgme_key_get_expired(PyGpgmeKey *self)
     return PyBool_FromLong(self->key->expired);
 }
 
+static const char pygpgme_key_disabled_doc[] =
+    "True if the key is disabled.";
+
 static PyObject *
 pygpgme_key_get_disabled(PyGpgmeKey *self)
 {
     return PyBool_FromLong(self->key->disabled);
 }
+
+static const char pygpgme_key_invalid_doc[] =
+    "True if the key is invalid.\n"
+    "\n"
+    "This might have several reasons. For example, for the S/MIME backend\n"
+    "it will be set during key listing if the key could not be validated\n"
+    "due to a missing certificates or unmatched policies.\n";
 
 static PyObject *
 pygpgme_key_get_invalid(PyGpgmeKey *self)
@@ -444,11 +460,17 @@ pygpgme_key_get_invalid(PyGpgmeKey *self)
     return PyBool_FromLong(self->key->invalid);
 }
 
+static const char pygpgme_key_can_encrypt_doc[] =
+    "True if the key (i.e. one of its subkeys) can be used for encryption.";
+
 static PyObject *
 pygpgme_key_get_can_encrypt(PyGpgmeKey *self)
 {
     return PyBool_FromLong(self->key->can_encrypt);
 }
+
+static const char pygpgme_key_can_sign_doc[] =
+    "True if the key (i.e. one of its subkeys) can be used to create signatures.";
 
 static PyObject *
 pygpgme_key_get_can_sign(PyGpgmeKey *self)
@@ -456,11 +478,23 @@ pygpgme_key_get_can_sign(PyGpgmeKey *self)
     return PyBool_FromLong(self->key->can_sign);
 }
 
+static const char pygpgme_key_can_certify_doc[] =
+    "True if the key (i.e. one of its subkeys) can be used to create key\n"
+    "certificates.";
+
 static PyObject *
 pygpgme_key_get_can_certify(PyGpgmeKey *self)
 {
     return PyBool_FromLong(self->key->can_certify);
 }
+
+static const char pygpgme_key_secret_doc[] =
+    "True if the key is a secret key.\n"
+    "\n"
+    "Note that this will always be true even if the corresponding subkey\n"
+    "flag may be false (offline/stub keys). This is only set if a listing\n"
+    "of secret keys has been requested or if :data:`KeylistMode.WITH_SECRET`\n"
+    "is active.\n";
 
 static PyObject *
 pygpgme_key_get_secret(PyGpgmeKey *self)
@@ -468,17 +502,27 @@ pygpgme_key_get_secret(PyGpgmeKey *self)
     return PyBool_FromLong(self->key->secret);
 }
 
+static const char pygpgme_key_can_authenticate_doc[] =
+    "True if the key (i.e. one of its subkeys) can be used for authentication.";
+
 static PyObject *
 pygpgme_key_get_can_authenticate(PyGpgmeKey *self)
 {
     return PyBool_FromLong(self->key->can_authenticate);
 }
 
+static const char pygpgme_key_protocol_doc[] =
+    "The protocol supported by this key. See the :class:`Protocol` constants.";
+
 static PyObject *
 pygpgme_key_get_protocol(PyGpgmeKey *self)
 {
     return pygpgme_enum_value_new(PyGpgmeProtocol_Type, self->key->protocol);
 }
+
+static const char pygpgme_key_issuer_serial_doc[] =
+    "If :attr:`Key.protocol` is :data:`Protocol.CMS` then this is the\n"
+    "issuer serial.";
 
 static PyObject *
 pygpgme_key_get_issuer_serial(PyGpgmeKey *self)
@@ -492,6 +536,10 @@ pygpgme_key_get_issuer_serial(PyGpgmeKey *self)
         Py_RETURN_NONE;
 }
 
+static const char pygpgme_key_issuer_name_doc[] =
+    "If :attr:`Key.protocol` is :data:`Protocol.CMS` then this is the\n"
+    "issuer name.";
+
 static PyObject *
 pygpgme_key_get_issuer_name(PyGpgmeKey *self)
 {
@@ -502,6 +550,10 @@ pygpgme_key_get_issuer_name(PyGpgmeKey *self)
     else
         Py_RETURN_NONE;
 }
+
+static const char pygpgme_key_chain_id_doc[] =
+    "If :attr:`Key.protocol` is :data:`Protocol.CMS` then this is the\n"
+    "chain ID, which can be used to built the certificate chain.";
 
 static PyObject *
 pygpgme_key_get_chain_id(PyGpgmeKey *self)
@@ -514,11 +566,20 @@ pygpgme_key_get_chain_id(PyGpgmeKey *self)
         Py_RETURN_NONE;
 }
 
+static const char pygpgme_key_owner_trust_doc[] =
+    "If :attr:`Key.protocol` is :data:`Protocol.OpenPGP` then this is\n"
+    "the owner trust.";
+
 static PyObject *
 pygpgme_key_get_owner_trust(PyGpgmeKey *self)
 {
     return pygpgme_enum_value_new(PyGpgmeValidity_Type, self->key->owner_trust);
 }
+
+static const char pygpgme_key_subkeys_doc[] =
+    "List of the key's subkeys as instances of :class:`Subkey`.\n"
+    "\n"
+    "The first subkey in the list is the primary key and usually available.\n";
 
 static PyObject *
 pygpgme_key_get_subkeys(PyGpgmeKey *self)
@@ -546,6 +607,11 @@ pygpgme_key_get_subkeys(PyGpgmeKey *self)
     return ret;
 }
 
+static const char pygpgme_key_uids_doc[] =
+    "List of the key's user IDs as instances of :class:`UserId`.\n"
+    "\n"
+    "The first user ID in the list is the main (or primary) user ID.\n";
+
 static PyObject *
 pygpgme_key_get_uids(PyGpgmeKey *self)
 {
@@ -572,6 +638,11 @@ pygpgme_key_get_uids(PyGpgmeKey *self)
     return ret;
 }
 
+static const char pygpgme_key_keylist_mode_doc[] =
+    "The keylist mode that was active when the key was retrieved.\n"
+    "\n"
+    "See :attr:`Context.keylist_mode`.\n";
+
 static PyObject *
 pygpgme_key_get_keylist_mode(PyGpgmeKey *self)
 {
@@ -579,23 +650,40 @@ pygpgme_key_get_keylist_mode(PyGpgmeKey *self)
 }
 
 static PyGetSetDef pygpgme_key_getsets[] = {
-    { "revoked", (getter)pygpgme_key_get_revoked },
-    { "expired", (getter)pygpgme_key_get_expired },
-    { "disabled", (getter)pygpgme_key_get_disabled },
-    { "invalid", (getter)pygpgme_key_get_invalid },
-    { "can_encrypt", (getter)pygpgme_key_get_can_encrypt },
-    { "can_sign", (getter)pygpgme_key_get_can_sign },
-    { "can_certify", (getter)pygpgme_key_get_can_certify },
-    { "secret", (getter)pygpgme_key_get_secret },
-    { "can_authenticate", (getter)pygpgme_key_get_can_authenticate },
-    { "protocol", (getter)pygpgme_key_get_protocol },
-    { "issuer_serial", (getter)pygpgme_key_get_issuer_serial },
-    { "issuer_name", (getter)pygpgme_key_get_issuer_name },
-    { "chain_id", (getter)pygpgme_key_get_chain_id },
-    { "owner_trust", (getter)pygpgme_key_get_owner_trust },
-    { "subkeys", (getter)pygpgme_key_get_subkeys },
-    { "uids", (getter)pygpgme_key_get_uids },
-    { "keylist_mode", (getter)pygpgme_key_get_keylist_mode },
+    { "revoked", (getter)pygpgme_key_get_revoked, NULL,
+      pygpgme_key_revoked_doc },
+    { "expired", (getter)pygpgme_key_get_expired, NULL,
+      pygpgme_key_expired_doc },
+    { "disabled", (getter)pygpgme_key_get_disabled, NULL,
+      pygpgme_key_disabled_doc },
+    { "invalid", (getter)pygpgme_key_get_invalid, NULL,
+      pygpgme_key_invalid_doc },
+    { "can_encrypt", (getter)pygpgme_key_get_can_encrypt, NULL,
+      pygpgme_key_can_encrypt_doc },
+    { "can_sign", (getter)pygpgme_key_get_can_sign, NULL,
+      pygpgme_key_can_sign_doc },
+    { "can_certify", (getter)pygpgme_key_get_can_certify, NULL,
+      pygpgme_key_can_certify_doc },
+    { "secret", (getter)pygpgme_key_get_secret, NULL,
+      pygpgme_key_secret_doc },
+    { "can_authenticate", (getter)pygpgme_key_get_can_authenticate, NULL,
+      pygpgme_key_can_authenticate_doc },
+    { "protocol", (getter)pygpgme_key_get_protocol, NULL,
+      pygpgme_key_protocol_doc },
+    { "issuer_serial", (getter)pygpgme_key_get_issuer_serial, NULL,
+      pygpgme_key_issuer_serial_doc },
+    { "issuer_name", (getter)pygpgme_key_get_issuer_name, NULL,
+      pygpgme_key_issuer_name_doc },
+    { "chain_id", (getter)pygpgme_key_get_chain_id, NULL,
+      pygpgme_key_chain_id_doc },
+    { "owner_trust", (getter)pygpgme_key_get_owner_trust, NULL,
+      pygpgme_key_owner_trust_doc },
+    { "subkeys", (getter)pygpgme_key_get_subkeys, NULL,
+      pygpgme_key_subkeys_doc },
+    { "uids", (getter)pygpgme_key_get_uids, NULL,
+      pygpgme_key_uids_doc },
+    { "keylist_mode", (getter)pygpgme_key_get_keylist_mode, NULL,
+      pygpgme_key_keylist_mode_doc },
     { NULL, (getter)0, (setter)0 }
 };
 

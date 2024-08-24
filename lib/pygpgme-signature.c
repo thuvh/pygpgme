@@ -43,6 +43,12 @@ static PyMemberDef pygpgme_newsig_members[] = {
     { NULL, 0, 0, 0}
 };
 
+static const char pygpgme_newsig_doc[] =
+    "Data for newly created signatures.\n"
+    "\n"
+    "Instances of this class are usually obtained as the result value of\n"
+    ":meth:`Context.sign` or :meth:`Context.encrypt_sign`.\n";
+
 PyTypeObject PyGpgmeNewSignature_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "gpgme.NewSignature",
@@ -51,6 +57,7 @@ PyTypeObject PyGpgmeNewSignature_Type = {
     .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_newsig_dealloc,
     .tp_members = pygpgme_newsig_members,
+    .tp_doc = pygpgme_newsig_doc,
 };
 
 PyObject *
@@ -107,23 +114,82 @@ pygpgme_sig_dealloc(PyGpgmeSignature *self)
     PyObject_Del(self);
 }
 
+static const char pygpgme_sig_summary_doc[] =
+    "A bit array encoded as an integer containing general information about\n"
+    "about the signature.\n"
+    "\n"
+    "Combine this value with one of the :class:`Sigsum` constants using\n"
+    "bitwise AND.\n";
+
+static const char pygpgme_sig_fpr_doc[] =
+    "Fingerprint string";
+
+static const char pygpgme_sig_status_doc[] =
+    "If an error occurred during verification (for example because the\n"
+    "signature is not valid) then this attribute contains a corresponding\n"
+    ":class:`GpgmeError` instance. Otherwise it is ``None``.\n";
+
+static const char pygpgme_sig_notations_doc[] =
+    "A list of notation data represented by :class:`SigNotation` objects.";
+
+static const char pygpgme_sig_timestamp_doc[] =
+    "Creation timestamp of the signature.";
+
+static const char pygpgme_sig_exp_timestamp_doc[] =
+    "Expiration timestamp of the signature, or 0 if the signature does\n"
+    "not expire.";
+
+static const char pygpgme_sig_wrong_key_usage_doc[] =
+    "True if the key was not used according to its policy.";
+
+static const char pygpgme_sig_validity_doc[] =
+    "Validity of the signature. See :attr:`Signature.validity_reason`.";
+
+static const char pygpgme_sig_validity_reason_doc[] =
+    "If a signature is not valid this may provide a reason why. See\n"
+    ":attr:`Signature.validity`.";
+
+static const char pygpgme_sig_pubkey_algo_doc[] =
+    "The public key algorithm of the signature, as a :class:`PubkeyAlgo`\n"
+    "constant.";
+
+static const char pygpgme_sig_hash_algo_doc[] =
+    "The hash algorithm of the signature, as a :class:`HashAlgo` constant.";
+
 static PyMemberDef pygpgme_sig_members[] = {
-    { "summary", T_OBJECT, offsetof(PyGpgmeSignature, summary), READONLY},
-    { "fpr", T_OBJECT, offsetof(PyGpgmeSignature, fpr), READONLY},
-    { "status", T_OBJECT, offsetof(PyGpgmeSignature, status), READONLY},
-    { "notations", T_OBJECT, offsetof(PyGpgmeSignature, notations), READONLY},
-    { "timestamp", T_OBJECT, offsetof(PyGpgmeSignature, timestamp), READONLY},
+    { "summary", T_OBJECT, offsetof(PyGpgmeSignature, summary), READONLY,
+      pygpgme_sig_summary_doc },
+    { "fpr", T_OBJECT, offsetof(PyGpgmeSignature, fpr), READONLY,
+      pygpgme_sig_fpr_doc },
+    { "status", T_OBJECT, offsetof(PyGpgmeSignature, status), READONLY,
+      pygpgme_sig_status_doc },
+    { "notations", T_OBJECT, offsetof(PyGpgmeSignature, notations), READONLY,
+      pygpgme_sig_notations_doc },
+    { "timestamp", T_OBJECT, offsetof(PyGpgmeSignature, timestamp), READONLY,
+      pygpgme_sig_timestamp_doc },
     { "exp_timestamp", T_OBJECT,
-      offsetof(PyGpgmeSignature, exp_timestamp), READONLY},
+      offsetof(PyGpgmeSignature, exp_timestamp), READONLY,
+      pygpgme_sig_exp_timestamp_doc },
     { "wrong_key_usage", T_OBJECT,
-      offsetof(PyGpgmeSignature, wrong_key_usage), READONLY},
-    { "validity", T_OBJECT, offsetof(PyGpgmeSignature, validity), READONLY},
+      offsetof(PyGpgmeSignature, wrong_key_usage), READONLY,
+      pygpgme_sig_wrong_key_usage_doc },
+    { "validity", T_OBJECT, offsetof(PyGpgmeSignature, validity), READONLY,
+      pygpgme_sig_validity_doc },
     { "validity_reason", T_OBJECT,
-      offsetof(PyGpgmeSignature, validity_reason), READONLY},
-    { "pubkey_algo", T_OBJECT, offsetof(PyGpgmeSignature, pubkey_algo), READONLY},
-    { "hash_algo", T_OBJECT, offsetof(PyGpgmeSignature, hash_algo), READONLY},
-    { NULL, 0, 0, 0}
+      offsetof(PyGpgmeSignature, validity_reason), READONLY,
+      pygpgme_sig_validity_reason_doc },
+    { "pubkey_algo", T_OBJECT, offsetof(PyGpgmeSignature, pubkey_algo), READONLY,
+      pygpgme_sig_pubkey_algo_doc },
+    { "hash_algo", T_OBJECT, offsetof(PyGpgmeSignature, hash_algo), READONLY,
+      pygpgme_sig_hash_algo_doc },
+    { NULL, 0, 0, 0 },
 };
+
+static const char pygpgme_sig_doc[] =
+    "Signature verification data.\n"
+    "\n"
+    "Instances of this class are usually obtained as the return value of\n"
+    ":meth:`Context.verify` or :meth:`Context.decrypt_verify`.\n";
 
 PyTypeObject PyGpgmeSignature_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -133,6 +199,7 @@ PyTypeObject PyGpgmeSignature_Type = {
     .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_sig_dealloc,
     .tp_members = pygpgme_sig_members,
+    .tp_doc = pygpgme_sig_doc,
 };
 
 PyObject *

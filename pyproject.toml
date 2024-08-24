@@ -28,6 +28,13 @@ dependencies = [
 
 dynamic = ["version"]
 
+[project.optional-dependencies]
+
+docs = [
+    'Sphinx',
+    'sphinx-rtd-theme',
+]
+
 [project.urls]
 Repository = "https://github.com/jhenstridge/pygpgme"
 
