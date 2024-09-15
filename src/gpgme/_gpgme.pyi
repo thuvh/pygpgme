@@ -420,6 +420,7 @@ class ErrSource(enum.IntEnum):
     KLEO: int
     G13: int
     ASSUAN: int
+    TPM2D: int
     TLS: int
     TKD: int
     ANY: int

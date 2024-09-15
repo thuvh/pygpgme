@@ -411,7 +411,7 @@ pygpgme_add_constants (PyObject *mod)
     CONST(KLEO);
     CONST(G13);
     CONST(ASSUAN);
-#if GPGME_VERSION_NUMBER >= VER(1, 42, 0)
+#if GPG_ERROR_VERSION_NUMBER >= VER(1, 42, 0)
     CONST(TPM2D);
 #endif
     CONST(TLS);
