@@ -88,7 +88,7 @@ PyInit__gpgme(void)
 
     pygpgme_add_constants(mod);
 
-    gpgme_version = gpgme_check_version(NULL);
+    gpgme_version = gpgme_check_version("1.13.0");
     if (gpgme_version == NULL) {
         PyErr_SetString(PyExc_ImportError, "Unable to initialize gpgme.");
         Py_DECREF(mod);

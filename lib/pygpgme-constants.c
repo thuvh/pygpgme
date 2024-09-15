@@ -179,9 +179,7 @@ pygpgme_add_constants (PyObject *mod)
     CONST(WITH_TOFU);
     CONST(EPHEMERAL);
     CONST(VALIDATE);
-#if GPGME_VERSION_NUMBER >= VER(1, 11, 0)
     CONST(LOCATE);
-#endif
 #if GPGME_VERSION_NUMBER >= VER(1, 14, 0)
     CONST(WITH_KEYGRIP);
 #endif
@@ -354,9 +352,7 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SYMMETRIC);
     CONST(THROW_KEYIDS);
     CONST(WRAP);
-#if GPGME_VERSION_NUMBER >= VER(1, 11, 0)
     CONST(WANT_ADDRESS);
-#endif
     PyGpgmeEncryptFlags_Type = make_enum(mod, "IntFlag", "EncryptFlags", values);
     Py_DECREF(values);
 
