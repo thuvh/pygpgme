@@ -63,7 +63,6 @@ PyTypeObject PyGpgmeGenkeyResult_Type = {
     "gpgme.GenkeyResult",
     sizeof(PyGpgmeGenkeyResult),
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_genkey_result_dealloc,
     .tp_members = pygpgme_genkey_result_members,
     .tp_doc = pygpgme_genkey_result_doc,

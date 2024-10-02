@@ -1,7 +1,8 @@
 import enum
 from typing import (
-    BinaryIO, Callable, Iterator, Literal, Optional, Sequence, Union)
+    BinaryIO, Callable, Iterator, Literal, Optional, Sequence, Union, final)
 
+@final
 class Context:
     def __init__(self) -> None: ...
     def get_engine_info(self) -> Sequence[EngineInfo]: ...
@@ -25,7 +26,7 @@ class Context:
                keydata: BinaryIO, export_mode: ExportMode | Literal[0] = 0, /) -> None: ...
     def genkey(self, params: Optional[str], pubkey: Optional[BinaryIO] = None,
                seckey: Optional[BinaryIO] = None, /) -> GenkeyResult: ...
-    def delete(self, key: Key, allow_secret: Delete | bool | Literal[0] = 0, /) -> None: ...
+    def delete(self, key: Key, flags: Delete | bool | Literal[0] = 0, /) -> None: ...
     def edit(self, key: Key, callback: Callable[[Status, Optional[str], int], None],
              out: BinaryIO, /) -> None: ...
     def card_edit(self, key: Key, callback: Callable[[Status, Optional[str], int], None],
@@ -45,6 +46,7 @@ class Context:
     sig_notations: Sequence[SigNotation]
     sender: Optional[str]
 
+@final
 class EngineInfo:
     protocol: Protocol
     file_name: Optional[str]
@@ -52,6 +54,7 @@ class EngineInfo:
     req_version: Optional[str]
     home_dir: Optional[str]
 
+@final
 class Key:
     revoked: bool
     expired: bool
@@ -71,6 +74,7 @@ class Key:
     uids: Sequence[UserId]
     keylist_mode: KeylistMode | Literal[0]
 
+@final
 class Subkey:
     revoked: bool
     expired: bool
@@ -88,6 +92,7 @@ class Subkey:
     timestamp: int
     expires: int
 
+@final
 class UserId:
     revoked: bool
     invalid: bool
@@ -98,6 +103,7 @@ class UserId:
     comment: Optional[str]
     signatures: Sequence[KeySig]
 
+@final
 class KeySig:
     revoked: bool
     expired: bool
@@ -114,6 +120,7 @@ class KeySig:
     comment: Optional[str]
     sig_class: int
 
+@final
 class NewSignature:
     type: SigMode
     pubkey_algo: PubkeyAlgo
@@ -122,6 +129,7 @@ class NewSignature:
     fpr: Optional[str]
     sig_class: int
 
+@final
 class Signature:
     summary: Sigsum | Literal[0]
     fpr: Optional[str]
@@ -135,6 +143,7 @@ class Signature:
     pubkey_algo: PubkeyAlgo
     hash_algo: HashAlgo
 
+@final
 class SigNotation:
     def __init__(self, name: Optional[str], value: str | bytes, flags: SigNotationFlags = SigNotationFlags.HUMAN_READABLE) -> None: ...
     name: Optional[str]
@@ -143,6 +152,7 @@ class SigNotation:
     human_readable: bool
     critical: bool
 
+@final
 class ImportResult:
     considered: int
     no_user_id: int
@@ -160,11 +170,13 @@ class ImportResult:
     not_imported: int
     imports: Sequence[tuple[Optional[str], Optional[GpgmeError], Import]]
 
+@final
 class GenkeyResult:
     primary: bool
     sub: bool
     fpr: str
 
+@final
 class KeyIter:
     def __iter__(self) -> KeyIter: ...
     def __next__(self) -> Key: ...

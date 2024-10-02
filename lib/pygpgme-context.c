@@ -1618,7 +1618,7 @@ pygpgme_edit_cb(void *user_data, gpgme_status_code_t status,
 }
 
 static const char pygpgme_context_edit_doc[] =
-    "edit($self, key, callaback, out, /)\n"
+    "edit($self, key, callback, out, /)\n"
     "--\n\n";
 
 static PyObject *
@@ -1651,7 +1651,7 @@ pygpgme_context_edit(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_card_edit_doc[] =
-    "card_edit($self, key, callaback, out, /)\n"
+    "card_edit($self, key, callback, out, /)\n"
     "--\n\n";
 
 static PyObject *
@@ -1684,12 +1684,12 @@ pygpgme_context_card_edit(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_keylist_doc[] =
-    "keylist($self, query=None, secret=False, /)\n"
+    "keylist($self, pattern=None, secret=False, /)\n"
     "--\n\n"
     "Searches for keys matching the given pattern(s).\n"
     "\n"
     "Args:\n"
-    "  query(str | list[str] | None): If ``None`` or not supplied, the\n"
+    "  pattern(str | list[str] | None): If ``None`` or not supplied, the\n"
     "    :class:`KeyIter` fetches all available keys. If a string, it\n"
     "    fetches keys matching the given pattern (such as a name or email\n"
     "    address). If a sequence of strings, it fetches keys matching at\n"

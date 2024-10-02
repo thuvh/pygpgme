@@ -46,7 +46,7 @@ PyInit__gpgme(void)
         Py_SET_TYPE(&type, &PyType_Type);    \
     if (!type.tp_alloc)                      \
         type.tp_alloc = PyType_GenericAlloc; \
-    if (!type.tp_new)                        \
+    if (!type.tp_new && type.tp_init)        \
         type.tp_new = PyType_GenericNew;     \
     if (PyType_Ready(&type) < 0)             \
         return NULL

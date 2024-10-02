@@ -77,7 +77,6 @@ PyTypeObject PyGpgmeKeyIter_Type = {
     "gpgme.KeyIter",
     sizeof(PyGpgmeKeyIter),
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_keyiter_dealloc,
     .tp_iter = (getiterfunc)pygpgme_keyiter_iter,
     .tp_iternext = (iternextfunc)pygpgme_keyiter_next,

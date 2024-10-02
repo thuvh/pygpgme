@@ -71,7 +71,6 @@ PyTypeObject PyGpgmeImportResult_Type = {
     "gpgme.Import",
     sizeof(PyGpgmeImportResult),
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_init = pygpgme_no_constructor,
     .tp_dealloc = (destructor)pygpgme_import_dealloc,
     .tp_members = pygpgme_import_members,
 };
