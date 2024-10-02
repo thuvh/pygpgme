@@ -33,6 +33,7 @@ PyObject *PyGpgmeStatus_Type;
 PyObject *PyGpgmeEncryptFlags_Type;
 PyObject *PyGpgmeSigsum_Type;
 PyObject *PyGpgmeImport_Type;
+PyObject *PyGpgmeDelete_Type;
 PyObject *PyGpgmeErrSource_Type;
 PyObject *PyGpgmeErrCode_Type;
 
@@ -385,6 +386,15 @@ pygpgme_add_constants (PyObject *mod)
     CONST(SUBKEY);
     CONST(SECRET);
     PyGpgmeImport_Type = make_enum(mod, "IntFlag", "Import", values);
+    Py_DECREF(values);
+
+    /* delete flags */
+    values = PyDict_New();
+#undef CONST
+#define CONST(name) add_enum_value(values, #name, GPGME_DELETE_##name)
+    CONST(ALLOW_SECRET);
+    CONST(FORCE);
+    PyGpgmeDelete_Type = make_enum(mod, "IntFlag", "Delete", values);
     Py_DECREF(values);
 
     /* gpg_err_source_t */

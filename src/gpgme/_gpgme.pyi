@@ -25,7 +25,7 @@ class Context:
                keydata: BinaryIO, export_mode: ExportMode | Literal[0] = 0, /) -> None: ...
     def genkey(self, params: Optional[str], pubkey: Optional[BinaryIO] = None,
                seckey: Optional[BinaryIO] = None, /) -> GenkeyResult: ...
-    def delete(self, key: Key, allow_secret: bool = False, /) -> None: ...
+    def delete(self, key: Key, allow_secret: Delete | bool | Literal[0] = 0, /) -> None: ...
     def edit(self, key: Key, callback: Callable[[Status, Optional[str], int], None],
              out: BinaryIO, /) -> None: ...
     def card_edit(self, key: Key, callback: Callable[[Status, Optional[str], int], None],
@@ -402,6 +402,10 @@ class Import(enum.IntFlag):
     SIG: int
     SUBKEY: int
     SECRET: int
+
+class Delete(enum.IntFlag):
+    ALLOW_SECRET: int
+    FORCE: int
 
 class ErrSource(enum.IntEnum):
     UNKNOWN: int

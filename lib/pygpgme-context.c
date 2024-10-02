@@ -1576,21 +1576,21 @@ pygpgme_context_genkey(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_delete_doc[] =
-    "delete($self, key, allow_secret=False, /)\n"
+    "delete($self, key, flags=0, /)\n"
     "--\n\n";
 
 static PyObject *
 pygpgme_context_delete(PyGpgmeContext *self, PyObject *args)
 {
     PyGpgmeKey *key;
-    int allow_secret = 0;
+    unsigned int flags = 0;
     gpgme_error_t err;
 
-    if (!PyArg_ParseTuple(args, "O!|i", &PyGpgmeKey_Type, &key, &allow_secret))
+    if (!PyArg_ParseTuple(args, "O!|I", &PyGpgmeKey_Type, &key, &flags))
         return NULL;
 
     Py_BEGIN_ALLOW_THREADS;
-    err = gpgme_op_delete(self->ctx, key->key, allow_secret);
+    err = gpgme_op_delete_ext(self->ctx, key->key, flags);
     Py_END_ALLOW_THREADS;
 
     if (pygpgme_check_error(err))

@@ -31,20 +31,27 @@ class DeleteTestCase(GpgHomeTestCase):
         ctx.delete(key)
 
         # check that it is deleted
-        self.assertRaises(gpgme.GpgmeError, ctx.get_key,
-                          '93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
+        with self.assertRaises(gpgme.GpgmeError):
+            ctx.get_key('93C2240D6B8AA10AB28F701D2CF46B7FC97E6B0F')
 
     def test_delete_public_key_with_secret_key(self) -> None:
         ctx = gpgme.Context()
         # key1
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-        self.assertRaises(gpgme.GpgmeError, ctx.delete, key)
+        with self.assertRaises(gpgme.GpgmeError):
+            ctx.delete(key)
 
     def test_delete_secret_key(self) -> None:
         ctx = gpgme.Context()
-        # key1
+        # key2
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
-        ctx.delete(key, True)
+        ctx.delete(key, gpgme.Delete.ALLOW_SECRET | gpgme.Delete.FORCE)
+        # check that it is deleted
+        with self.assertRaises(gpgme.GpgmeError):
+            ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+    def test_delete_secret_force(self) -> None:
+        pass
 
     def test_delete_non_existant(self) -> None:
         ctx = gpgme.Context()
@@ -60,3 +67,9 @@ class DeleteTestCase(GpgHomeTestCase):
             self.assertEqual(exc.args[1], gpgme.ErrCode.NO_PUBKEY)
         else:
             self.fail('gpgme.GpgmeError was not raised')
+
+    def test_constants(self) -> None:
+        # Old releases used a boolean for the second argument to
+        # delete. Check that the boolean constants match the same flag
+        # values:
+        self.assertEqual(True, gpgme.Delete.ALLOW_SECRET)

@@ -156,6 +156,7 @@ extern HIDDEN PyObject *PyGpgmeStatus_Type;
 extern HIDDEN PyObject *PyGpgmeEncryptFlags_Type;
 extern HIDDEN PyObject *PyGpgmeSigsum_Type;
 extern HIDDEN PyObject *PyGpgmeImport_Type;
+extern HIDDEN PyObject *PyGpgmeDelete_Type;
 extern HIDDEN PyObject *PyGpgmeErrSource_Type;
 extern HIDDEN PyObject *PyGpgmeErrCode_Type;
 

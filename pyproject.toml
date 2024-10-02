@@ -49,7 +49,7 @@ version = {attr = "gpgme.__version__"}
 gpgme = ["*.pyi", "py.typed"]
 
 [tool.mypy]
-exclude = ["setup.py", "build", "dist"]
+exclude = ["setup.py", "build", "dist", "docs/source/conf.py"]
 explicit_package_bases = true
 mypy_path = "src"
 
