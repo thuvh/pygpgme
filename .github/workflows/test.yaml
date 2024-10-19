@@ -21,6 +21,51 @@ jobs:
           compression-level: 0
           retention-days: 3
 
+  coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libgpgme-dev lcov
+          pip install setuptools coverage
+      - name: Build pygpgme
+        run: |
+          CFLAGS=--coverage python setup.py build_ext -i
+      - name: Generate coverage data
+        run: |
+          set -x
+          echo 'branch_coverage = 1' > ~/.lcovrc
+          mkdir lcov
+          lcov --capture -d . --initial -o lcov/initial.lcov
+          PYTHONPATH=src coverage run --branch -m unittest discover -v -t . tests
+          lcov --capture -d . -o lcov/extension.lcov
+          coverage lcov -o lcov/python.lcov
+      - name: Combine and filter coverage data
+        run: |
+          lcov --add-tracefile lcov/initial.lcov \
+               --add-tracefile lcov/extension.lcov \
+               --add-tracefile lcov/python.lcov \
+               -o lcov/combined.lcov
+          lcov -r lcov/combined.lcov '/usr/include/*' -o lcov/combined.lcov
+          lcov -r lcov/combined.lcov '/opt/*' -o lcov/combined.lcov
+      - name: Generate coverage report
+        run: |
+          genhtml lcov/combined.lcov -o coverage
+      - name: Coverage summary
+        run: |
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          lcov --summary lcov/combined.lcov | grep -v '^Reading tracefile' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ./coverage
+          retention-days: 3
+
   test-docs:
     runs-on: ubuntu-latest
     steps:
