@@ -52,3 +52,12 @@ class ExportTestCase(GpgHomeTestCase):
 
         self.assertTrue(keydata.getvalue().startswith(
             b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))
+
+    def test_export_keys(self) -> None:
+        ctx = gpgme.Context()
+        ctx.armor = True
+        key = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
+        keydata = BytesIO()
+        ctx.export_keys([key], keydata)
+        self.assertTrue(keydata.getvalue().startswith(
+            b'-----BEGIN PGP PUBLIC KEY BLOCK-----\n'))

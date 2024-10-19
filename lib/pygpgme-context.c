@@ -1492,6 +1492,61 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static const char pygpgme_context_export_keys_doc[] =
+    "export_keys($self, keys, mode, keydata, /)\n"
+    "--\n\n"
+    "Export the given list of keys.\n";
+
+static PyObject *
+pygpgme_context_export_keys(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_keys, *py_keydata, *seq = NULL, *ret = NULL;
+    gpgme_key_t *keys = NULL;
+    int i, length, export_mode = 0;
+    gpgme_data_t keydata = NULL;
+    gpgme_error_t err = GPG_ERR_NO_ERROR;
+
+    if (!PyArg_ParseTuple(args, "OO|i", &py_keys, &py_keydata, &export_mode))
+        return NULL;
+
+    seq = PySequence_Fast(py_keys, "keys must be a sequence of keys");
+    if (!seq)
+        goto out;
+
+    length = PySequence_Fast_GET_SIZE(seq);
+    keys = PyMem_Calloc(length+1, sizeof(gpgme_key_t));
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(seq, i);
+
+        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "keys must be a sequence of key objects");
+            goto out;
+        }
+        keys[i] = ((PyGpgmeKey *)item)->key;
+    }
+
+    if (pygpgme_data_new(&keydata, py_keydata))
+        goto out;
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_export_keys(self->ctx, keys, export_mode, keydata);
+    Py_END_ALLOW_THREADS;
+
+    if (pygpgme_check_error(err))
+        goto out;
+    Py_INCREF(Py_None);
+    ret = Py_None;
+
+out:
+    if (keydata != NULL)
+        gpgme_data_release(keydata);
+    PyMem_Free(keys);
+    Py_XDECREF(seq);
+
+    return ret;
+}
+
 static const char pygpgme_context_genkey_doc[] =
     "genkey($self, params, pubkey=None, seckey=None, /)\n"
     "--\n\n"
@@ -1761,6 +1816,8 @@ static PyMethodDef pygpgme_context_methods[] = {
       pygpgme_context_import_doc },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS,
       pygpgme_context_export_doc },
+    { "export_keys", (PyCFunction)pygpgme_context_export_keys, METH_VARARGS,
+      pygpgme_context_export_keys_doc },
     { "genkey", (PyCFunction)pygpgme_context_genkey, METH_VARARGS,
       pygpgme_context_genkey_doc },
     { "delete", (PyCFunction)pygpgme_context_delete, METH_VARARGS,
