@@ -164,3 +164,13 @@ class ImportTestCase(GpgHomeTestCase):
                          ('E79A842DA34A1CA383F64A1546BB55F0885C65A4', None, 0))
         # can we get the public key?
         key = ctx.get_key('E79A842DA34A1CA383F64A1546BB55F0885C65A4')
+
+    def test_import_keys(self) -> None:
+        ctx = gpgme.Context()
+        with self.keyfile('signonly.pub') as fp:
+            result = ctx.import_(fp)
+        self.assertEqual(result.imported, 1)
+
+        key = ctx.get_key('15E7CE9BF1771A4ABC550B31F540A569CB935A42')
+        result = ctx.import_keys([key])
+        self.assertTrue(isinstance(result, gpgme.ImportResult))

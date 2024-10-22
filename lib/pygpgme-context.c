@@ -1352,12 +1352,71 @@ pygpgme_context_import(PyGpgmeContext *self, PyObject *args)
 
         if (result != NULL) {
             PyObject_SetAttrString(err_value, "result", result);
-            Py_DECREF(result);
         }
     end:
+        Py_XDECREF(result);
         PyErr_Restore(err_type, err_value, err_traceback);
         return NULL;
     }
+    return result;
+}
+
+static const char pygpgme_context_import_keys_doc[] =
+    "import_keys($self, keys, /)\n"
+    "--\n\n";
+
+static PyObject *
+pygpgme_context_import_keys(PyGpgmeContext *self, PyObject *args)
+{
+    PyObject *py_keys, *seq = NULL, *result = NULL;
+    gpgme_key_t *keys = NULL;
+    int i, length;
+    gpgme_error_t err = GPG_ERR_NO_ERROR;
+
+    if (!PyArg_ParseTuple(args, "O", &py_keys))
+        return NULL;
+
+    seq = PySequence_Fast(py_keys, "keys must be a sequence of keys");
+    if (!seq)
+        goto out;
+
+    length = PySequence_Fast_GET_SIZE(seq);
+    keys = PyMem_Calloc(length+1, sizeof(gpgme_key_t));
+    for (i = 0; i < length; i++) {
+        PyObject *item = PySequence_Fast_GET_ITEM(seq, i);
+
+        if (!PyObject_TypeCheck(item, &PyGpgmeKey_Type)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "keys must be a sequence of key objects");
+            goto out;
+        }
+        keys[i] = ((PyGpgmeKey *)item)->key;
+    }
+
+    Py_BEGIN_ALLOW_THREADS;
+    err = gpgme_op_import_keys(self->ctx, keys);
+    Py_END_ALLOW_THREADS;
+
+    result = pygpgme_import_result(self->ctx);
+    if (pygpgme_check_error(err)) {
+        PyObject *err_type, *err_value, *err_traceback;
+
+        PyErr_Fetch(&err_type, &err_value, &err_traceback);
+        PyErr_NormalizeException(&err_type, &err_value, &err_traceback);
+
+        if (PyErr_GivenExceptionMatches(err_type, pygpgme_error) &&
+            result != NULL) {
+            PyObject_SetAttrString(err_value, "result", result);
+        }
+        Py_XDECREF(result);
+        result = NULL;
+        PyErr_Restore(err_type, err_value, err_traceback);
+    }
+
+out:
+    PyMem_Free(keys);
+    Py_XDECREF(seq);
+
     return result;
 }
 
@@ -1493,7 +1552,7 @@ pygpgme_context_export(PyGpgmeContext *self, PyObject *args)
 }
 
 static const char pygpgme_context_export_keys_doc[] =
-    "export_keys($self, keys, mode, keydata, /)\n"
+    "export_keys($self, keys, keydata, export_mode=0, /)\n"
     "--\n\n"
     "Export the given list of keys.\n";
 
@@ -1814,6 +1873,8 @@ static PyMethodDef pygpgme_context_methods[] = {
       pygpgme_context_verify_doc },
     { "import_", (PyCFunction)pygpgme_context_import, METH_VARARGS,
       pygpgme_context_import_doc },
+    { "import_keys", (PyCFunction)pygpgme_context_import_keys, METH_VARARGS,
+      pygpgme_context_import_keys_doc },
     { "export", (PyCFunction)pygpgme_context_export, METH_VARARGS,
       pygpgme_context_export_doc },
     { "export_keys", (PyCFunction)pygpgme_context_export_keys, METH_VARARGS,

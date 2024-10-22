@@ -40,6 +40,7 @@ class GpgHomeTestCase(unittest.TestCase):
         os.environ['GNUPGHOME'] = self._gpghome
         with open(os.path.join(self._gpghome, 'gpg.conf'), 'w') as fp:
             fp.write('pinentry-mode loopback\n')
+            fp.write('keyserver hkp://keyserver.invalid\n')
         with open(os.path.join(self._gpghome, 'gpg-agent.conf'), 'w') as fp:
             fp.write('allow-loopback-pinentry\n')
         subprocess.check_call(['gpg-connect-agent', '/bye'],
