@@ -34,3 +34,11 @@ autodoc_default_options = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
+
+html_context = {
+    'display_github': True,
+    'github_user': 'jhenstridge',
+    'github_repo': 'pygpgme',
+    'github_version': 'main',
+    'conf_py_path': '/docs/source/',
+}
