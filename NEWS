@@ -1,3 +1,16 @@
+pygpgme-0.5: 2024-11-23
+
+ * Require libgpgme >= 1.13.0.
+ * Fix Python 3.9 compatibility. If using Python 3.9,
+   typing_extensions is a dependency.
+ * Add support for creating signature notations (Till Maas).
+ * Add the Context.get_engine_info() method (Tobias Mueller).
+ * Add Context.delete(), Context.export_keys() and
+   Context.import_keys() methods.
+ * Integrate the Sphinx docs from the github.com/rshk/gpgme repo
+   (Samuele Santi, Torf, H. Park).
+ * Move the API docs into method docstrings.
+
 pygpgme-0.4: 2024-08-07
 
  * Modernise build system of the project and drop Python 2 support. We
