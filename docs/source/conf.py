@@ -6,11 +6,15 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
+
+import gpgme
+
+
 project = 'PyGPGME'
 copyright = '2024, PyGPGME contributors'
 author = 'PyGPGME contributors'
 
-import gpgme
 release = gpgme.__version__
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +43,6 @@ html_context = {
     'display_github': True,
     'github_user': 'jhenstridge',
     'github_repo': 'pygpgme',
-    'github_version': 'main',
+    'github_version': os.environ.get('READTHEDOCS_GIT_IDENTIFIER', os.environ.get('GITHUB_REF', 'main')),
     'conf_py_path': '/docs/source/',
 }
